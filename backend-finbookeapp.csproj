@@ -1,10 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>backend_finbookeapp</RootNamespace>
+    <UserSecretsId>66631bc9-1452-4b8a-b080-e064f9ef9b0b</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

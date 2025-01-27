@@ -5,16 +5,27 @@
 # project in this repository (only for development)                   #
 #######################################################################
 
+proof_success() {
+    if [ $? -ne 0 ]; then
+        echo $1
+        exit 1
+    fi
+}
+
 option1="start"
 option2="access"
 option3="stop"
 
+# Access necessary secrets for the database
+secrets=$(dotnet user-secrets list --json | sed '1d;$d')
+user=$(echo $secrets | python3 -c "import sys, json; print(json.loads(sys.stdin.read())['Database:Username'])")
+proof_success "ERROR: Fix the provided error"
+password=$(echo $secrets | python3 -c "import sys, json; print(json.loads(sys.stdin.read())['Database:Password'])")
+proof_success "ERROR: Fix the provided error"
+
 # Proof if docker is installed on current machine
 docker &> /dev/null
-if [ $? -ne 0 ]; then
-    echo "ERROR: docker is missing. Please install docker before trying again."
-    exit 1
-fi
+proof_success "ERROR: docker is missing. Please install docker before trying again."
 
 # Proof if arguments are available
 if [ "$1" == "" ]; then
@@ -28,7 +39,7 @@ fi
 
 # Starting container
 if [ "$1" == "start" ]; then
-    output=$(docker run --name mongodb -p 9997:27017 -d mongodb/mongodb-community-server:latest 2>&1)
+    output=$(docker run --name mongodb -p 9997:27017 -d -e MONGO_INITDB_ROOT_USERNAME=$user -e MONGO_INITDB_ROOT_PASSWORD=$password mongodb/mongodb-community-server:latest 2>&1)
     code=$?
     if [ $code -eq 125 ]; then
         echo "ERROR: Container is already running on on localhost:9997"
@@ -61,6 +72,8 @@ if [ "$1" == "access" ]; then
         echo "ERROR: Missing running container"
         exit 1
     fi
+    echo "To get access to the database use the following command:"
+    echo "mongosh --username [username] --password [password]"
     docker exec -it $container_id /bin/bash
     exit 0
 fi
