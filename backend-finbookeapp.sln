@@ -3,6 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{4eb4b3fc-2889-4eb1-97ed-1e276b336c29}") = "backend-finbookeapp", "backend-finbookeapp.csproj", "{2670ab70-dd4b-4079-a73d-d454d461ed6c}"
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "backend-finbookeapp.UnitTests", "backend-finbookeapp.UnitTests\backend-finbookeapp.UnitTests.csproj", "{3A92A5DC-BE31-4B95-879E-C5FEBDB63A0B}"
 EndProject
 Global
@@ -18,5 +19,9 @@ Global
 		{3A92A5DC-BE31-4B95-879E-C5FEBDB63A0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A92A5DC-BE31-4B95-879E-C5FEBDB63A0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A92A5DC-BE31-4B95-879E-C5FEBDB63A0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2670ab70-dd4b-4079-a73d-d454d461ed6c}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2670ab70-dd4b-4079-a73d-d454d461ed6c}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2670ab70-dd4b-4079-a73d-d454d461ed6c}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2670ab70-dd4b-4079-a73d-d454d461ed6c}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
