@@ -23,7 +23,13 @@ echo "##########################################################################
 echo "\t\t\t\033[1mStarting to lint the current code files\033[0m"
 echo "\n#########################################################################################\n\n"
 
+staged=$(git diff --name-only | wc -l)
 dotnet csharpier .
+changed=$(git diff --name-only | wc -l)
+if [ $staged -ne $changed ]; then
+    echo "\033[0;31mFiles have been modified by csharpier. Please stage them again before committing"
+    exit 1
+fi
 echo "\n"
 
 echo "#########################################################################################\n"

@@ -5,7 +5,7 @@ namespace FinBookeAPI.AppConfig;
 public static class SettingsExtension
 {
     /// <summary>
-    /// This method adds the following configuration classes to the dependency injector: 
+    /// This method adds the following configuration classes to the dependency injector:
     /// <list type="bullet">
     ///     <item><c><see cref="AuthDatabaseSettings"/></c></item>
     ///     <item><c><see cref="FinancialDataDtabaseSettings"/></c></item>
@@ -25,7 +25,9 @@ public static class SettingsExtension
             configuration.GetSection(AuthDatabaseSettings.SectionName)
         );
         // Add financial data database informations
-        services.Configure<FinancialDataDtabaseSettings>(configuration.GetSection(FinancialDataDtabaseSettings.SectionName));
+        services.Configure<FinancialDataDtabaseSettings>(
+            configuration.GetSection(FinancialDataDtabaseSettings.SectionName)
+        );
         // Add JWT token settings
         services.Configure<JwTSettings>(configuration.GetSection(JwTSettings.SectionName));
         return services;
