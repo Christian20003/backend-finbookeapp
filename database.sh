@@ -18,9 +18,9 @@ option3="stop"
 
 # Access necessary secrets for the database
 secrets=$(dotnet user-secrets list --json | sed '1d;$d')
-user=$(echo $secrets | python3 -c "import sys, json; print(json.loads(sys.stdin.read())['Database:Username'])")
+user=$(echo $secrets | python3 -c "import sys, json; print(json.loads(sys.stdin.read())['AuthDatabase:Username'])")
 proof_success "ERROR: Fix the provided error"
-password=$(echo $secrets | python3 -c "import sys, json; print(json.loads(sys.stdin.read())['Database:Password'])")
+password=$(echo $secrets | python3 -c "import sys, json; print(json.loads(sys.stdin.read())['AuthDatabase:Password'])")
 proof_success "ERROR: Fix the provided error"
 
 # Proof if docker is installed on current machine
@@ -39,10 +39,10 @@ fi
 
 # Starting container
 if [ "$1" == "start" ]; then
-    output=$(docker run --name mongodb -p 9997:27017 -d -e MONGO_INITDB_ROOT_USERNAME=$user -e MONGO_INITDB_ROOT_PASSWORD=$password mongodb/mongodb-community-server:latest 2>&1)
+    output=$(docker run --name mongodb -p 27017:27017 -d -e MONGO_INITDB_ROOT_USERNAME=$user -e MONGO_INITDB_ROOT_PASSWORD=$password mongodb/mongodb-community-server:latest 2>&1)
     code=$?
     if [ $code -eq 125 ]; then
-        echo "ERROR: Container is already running on on localhost:9997"
+        echo "ERROR: Container is already running on on localhost:27017"
         exit 1
     fi
     if [ $code -ne 0 ]; then
@@ -50,7 +50,7 @@ if [ "$1" == "start" ]; then
         echo $output
         exit 1
     fi
-    echo "Container is running and listening on localhost:9997"
+    echo "Container is running and listening on localhost:27017"
     exit 0
 fi
 
