@@ -10,6 +10,7 @@ builder.Services.AddSwagger();
 builder.Services.AddLogger(builder.Configuration);
 builder.Services.AddDbContext<AuthDbContext>();
 builder.Services.AddDbContext<DataDbContext>();
+builder.Services.AddSecurity(builder.Configuration);
 
 var app = builder.Build();
 
@@ -20,6 +21,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
