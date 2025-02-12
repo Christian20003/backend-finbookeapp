@@ -22,7 +22,7 @@ public static class SecurityExtension
     {
         // Add an identity system
         services
-            .AddIdentityCore<DbUser>()
+            .AddIdentityCore<UserDatabase>()
             .AddSignInManager()
             .AddEntityFrameworkStores<AuthDbContext>()
             .AddDefaultTokenProviders();

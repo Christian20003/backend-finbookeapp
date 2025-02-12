@@ -11,7 +11,7 @@ namespace FinBookeAPI.AppConfig;
 public class AuthDbContext(
     DbContextOptions<AuthDbContext> options,
     IOptions<AuthDatabaseSettings> _settings
-) : IdentityDbContext<DbUser>(options)
+) : IdentityDbContext<UserDatabase>(options)
 {
     //public DbSet<DbUser> Test { get; init; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
