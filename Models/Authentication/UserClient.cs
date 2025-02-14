@@ -20,5 +20,5 @@ public class UserClient
     public string ImagePath { get; set; } = "";
 
     [Required]
-    public Session Session { get; set; } = new Session("", 0);
+    public Session Session { get; set; } = new Session();
 }

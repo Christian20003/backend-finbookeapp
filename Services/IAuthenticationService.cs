@@ -1,17 +1,16 @@
 using FinBookeAPI.Models.Authentication;
-using FinBookeAPI.Models.Configuration;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
 
 namespace FinBookeAPI.Services;
 
 public interface IAuthenticationService
 {
     /// <summary>
-    /// This method implements the login procedure for this application with JWT.
+    /// This method implements the login for this application.
     /// </summary>
     /// <param name="data">Object which contains the login data received from the client.</param>
+    /// <returns>A client object which contains all relevant information which can be sent to the client.</returns>
+    /// <exception cref="AuthenticationException">If the login proccess fails</exception>
     public Task<UserClient> Login(UserLogin data);
 
     public Task<UserClient> Register(UserRegister data, UserManager<UserDatabase> userManager);

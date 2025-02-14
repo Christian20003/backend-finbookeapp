@@ -62,6 +62,13 @@ public class Token
         Expires = expires;
     }
 
+    public Token()
+    {
+        Value = "";
+        Expires = 0;
+        _settings = Options.Create(new JwTSettings());
+    }
+
     public string GetSubject()
     {
         var tokenHandler = new JwtSecurityTokenHandler();

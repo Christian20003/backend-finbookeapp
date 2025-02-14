@@ -13,7 +13,8 @@ public class AuthDbContext(
     IOptions<AuthDatabaseSettings> _settings
 ) : IdentityDbContext<UserDatabase>(options)
 {
-    //public DbSet<DbUser> Test { get; init; }
+    public DbSet<RefreshToken> RefreshToken { get; init; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
@@ -25,6 +26,6 @@ public class AuthDbContext(
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        //builder.Entity<DbUser>().ToCollection("random");
+        builder.Entity<RefreshToken>().ToCollection("authentication");
     }
 }
