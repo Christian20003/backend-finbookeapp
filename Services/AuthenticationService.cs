@@ -62,7 +62,7 @@ public class AuthenticationService(
         }
 
         // Proof if refresh token exist and create a new one if not
-        var refreshToken = await _database.RefreshToken.FirstAsync(doc =>
+        var refreshToken = await _database.RefreshToken.FirstOrDefaultAsync(doc =>
             doc.UserId == databaseUser.Id
         );
         if (refreshToken == null)

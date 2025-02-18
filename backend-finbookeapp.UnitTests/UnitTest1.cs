@@ -1,4 +1,4 @@
-namespace backend_finbookeapp.UnitTests;
+namespace FinbooKeAPI.UnitTests;
 
 using Xunit;
 
