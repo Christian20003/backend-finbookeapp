@@ -7,7 +7,7 @@ namespace FinBookeAPI.UnitTests.Mocks;
 
 public static class AuthDbContextMock
 {
-    public static AuthDbContext GetDbMock()
+    /* public static AuthDbContext GetDbMock()
     {
         var options = new DbContextOptionsBuilder<AuthDbContext>().Options;
         var config = new AuthDatabaseSettings
@@ -19,5 +19,5 @@ public static class AuthDbContextMock
         var context = new AuthDbContext(options, settings);
         //A.CallTo(() => context.RefreshToken).Returns(A.Fake<DbSet<RefreshToken>>());
         return context;
-    }
+    } */
 }

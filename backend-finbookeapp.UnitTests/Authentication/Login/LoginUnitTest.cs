@@ -1,16 +1,16 @@
 namespace FinBookeAPI.UnitTests.Authentication.Login;
 
 using System.Linq.Expressions;
-using FakeItEasy;
 using FinBookeAPI.AppConfig;
 using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
+using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services;
-using FinBookeAPI.UnitTests.Mocks;
-using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -18,25 +18,16 @@ using Xunit;
 
 public class LoginUnitTests
 {
-    private readonly UserManager<UserDatabase> UserManager = A.Fake<UserManager<UserDatabase>>();
-    private readonly SignInManager<UserDatabase> SignInManager = A.Fake<
-        SignInManager<UserDatabase>
-    >();
-    private readonly Mock<AuthDbContext> AuthDbContext = new(
-        new DbContextOptionsBuilder<AuthDbContext>().Options,
-        Mock.Of<IOptions<AuthDatabaseSettings>>()
-    );
-
-    //A.Fake<AuthDbContext>(o => o.WithArgumentsForConstructor([new DbContextOptionsBuilder<AuthDbContext>().Options, A.Fake<IOptions<AuthDatabaseSettings>>()]));
-    //AuthDbContextMock.GetDbMock();
-    private readonly IOptions<JwTSettings> JwtSettings = A.Fake<IOptions<JwTSettings>>();
-    private readonly IDataProtectionProvider DataProtectionProvider =
-        A.Fake<IDataProtectionProvider>();
-    private readonly Mock<IDataProtector> DataProtector = new();
-    private readonly ILogger<AuthenticationService> Logger = A.Fake<
-        ILogger<AuthenticationService>
-    >();
+    // DEPENDENCIES
+    private readonly Mock<UserManager<UserDatabase>> UserManager;
+    private readonly Mock<SignInManager<UserDatabase>> SignInManager;
+    private readonly Mock<AuthDbContext> AuthDbContext;
+    private readonly Mock<IOptions<JwTSettings>> JwtSettings = new();
+    private readonly Mock<IDataProtection> DataProtection = new();
+    private readonly Mock<ILogger<AuthenticationService>> Logger = new();
     private readonly AuthenticationService Service;
+
+    // DUMMY DATA
     private readonly UserLogin Data = new()
     {
         Email = "max.mustermann@gmail.com",
@@ -46,22 +37,71 @@ public class LoginUnitTests
     {
         Id = "2dcafda5-3d7f-4dcc-a420-2f0bd498ae88",
         UserName = "Mustermann",
+        Email = "max.mustermann@gmail.com",
         PasswordHash = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
     };
+    private readonly RefreshToken Token = new()
+    {
+        Id = "b8d48c7c-791e-4bed-9c63-f24e2b79341b",
+        Token = "7dlLr68EpJllZlSSqzSN1lc2WjosQYorgHtwhnjXlNM3LOutam38YLb2WvOMMkJW",
+        UserId = "2dcafda5-3d7f-4dcc-a420-2f0bd498ae88",
+        ExpiresAt = DateTime.UtcNow.AddHours(5),
+    };
+    private readonly JwTSettings Settings = new()
+    {
+        Audience = "",
+        Issuer = "",
+        Secret = "Por73MjWFc7s5ind78k4AcXEAEtxs0x1k6dZvDHoIUqGzwRDTyUubnGrCeDyZiy1",
+    };
+
+    // TESTS
 
     // BEFORE EACH
     public LoginUnitTests()
     {
-        //DataProtector.Setup(x => x.Protect(Data.Email)).Returns(Data.Email);
-        A.CallTo(() => DataProtectionProvider.CreateProtector("user-data"))
-            .Returns(DataProtector.Object);
+        UserManager = new Mock<UserManager<UserDatabase>>(
+            Mock.Of<IUserStore<UserDatabase>>(),
+            Mock.Of<IOptions<IdentityOptions>>(),
+            Mock.Of<IPasswordHasher<UserDatabase>>(),
+            FakeItEasy.A.Fake<IEnumerable<IUserValidator<UserDatabase>>>(),
+            FakeItEasy.A.Fake<IEnumerable<IPasswordValidator<UserDatabase>>>(),
+            Mock.Of<ILookupNormalizer>(),
+            Mock.Of<IdentityErrorDescriber>(),
+            Mock.Of<IServiceProvider>(),
+            Mock.Of<ILogger<UserManager<UserDatabase>>>()
+        );
+
+        SignInManager = new Mock<SignInManager<UserDatabase>>(
+            UserManager.Object,
+            Mock.Of<IHttpContextAccessor>(),
+            Mock.Of<IUserClaimsPrincipalFactory<UserDatabase>>(),
+            Mock.Of<IOptions<IdentityOptions>>(),
+            Mock.Of<ILogger<SignInManager<UserDatabase>>>(),
+            Mock.Of<Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider>(),
+            Mock.Of<IUserConfirmation<UserDatabase>>()
+        );
+
+        AuthDbContext = new Mock<AuthDbContext>(
+            new DbContextOptionsBuilder<AuthDbContext>().Options,
+            new Mock<IOptions<AuthDatabaseSettings>>().Object
+        );
+
+        DataProtection.Setup(obj => obj.Protect(Data.Email)).Returns(Data.Email);
+        DataProtection.Setup(obj => obj.Unprotect(User.Email)).Returns(User.Email);
+        DataProtection.Setup(obj => obj.Unprotect(User.UserName)).Returns(User.UserName);
+
+        UserManager.Setup(obj => obj.UpdateAsync(User)).ReturnsAsync(IdentityResult.Success);
+        AuthDbContext.Setup(obj => obj.AddRefreshToken(Token)).ReturnsAsync(Token);
+
+        JwtSettings.Setup(obj => obj.Value).Returns(Settings);
+
         Service = new AuthenticationService(
-            UserManager,
-            SignInManager,
+            UserManager.Object,
+            SignInManager.Object,
             AuthDbContext.Object,
-            JwtSettings,
-            DataProtectionProvider,
-            Logger
+            JwtSettings.Object,
+            DataProtection.Object,
+            Logger.Object
         );
     }
 
@@ -69,7 +109,7 @@ public class LoginUnitTests
     public async Task ReceiveInvalidEmailProperty()
     {
         UserDatabase? returnUser = null;
-        A.CallTo(() => UserManager.FindByEmailAsync("")).Returns(Task.FromResult(returnUser));
+        UserManager.Setup(obj => obj.FindByEmailAsync(Data.Email)).ReturnsAsync(returnUser);
 
         await Assert.ThrowsAsync<AuthenticationException>(() => Service.Login(Data));
     }
@@ -77,10 +117,16 @@ public class LoginUnitTests
     [Fact]
     public async Task ReceiveInvalidPasswordProperty()
     {
-        A.CallTo(() => UserManager.FindByEmailAsync(""))
-            .Returns(Task.FromResult<UserDatabase?>(User));
-        A.CallTo(() => SignInManager.CheckPasswordSignInAsync(User, Data.Password, true))
-            .Returns(Task.FromResult(SignInResult.Failed));
+        UserManager.Setup(obj => obj.FindByEmailAsync(Data.Email)).ReturnsAsync(User);
+        SignInManager
+            .Setup(obj =>
+                obj.CheckPasswordSignInAsync(
+                    It.IsAny<UserDatabase>(),
+                    It.IsAny<string>(),
+                    It.IsAny<bool>()
+                )
+            )
+            .ReturnsAsync(SignInResult.Failed);
 
         await Assert.ThrowsAsync<AuthenticationException>(() => Service.Login(Data));
     }
@@ -90,10 +136,16 @@ public class LoginUnitTests
     {
         UserDatabase returnUser = User;
         returnUser.UserName = null;
-        A.CallTo(() => UserManager.FindByEmailAsync(""))
-            .Returns(Task.FromResult<UserDatabase?>(returnUser));
-        A.CallTo(() => SignInManager.CheckPasswordSignInAsync(User, Data.Password, true))
-            .Returns(Task.FromResult(SignInResult.Success));
+        UserManager.Setup(obj => obj.FindByEmailAsync(Data.Email)).ReturnsAsync(User);
+        SignInManager
+            .Setup(obj =>
+                obj.CheckPasswordSignInAsync(
+                    It.IsAny<UserDatabase>(),
+                    It.IsAny<string>(),
+                    It.IsAny<bool>()
+                )
+            )
+            .ReturnsAsync(SignInResult.Success);
 
         await Assert.ThrowsAsync<AuthenticationException>(() => Service.Login(Data));
     }
@@ -103,24 +155,29 @@ public class LoginUnitTests
     {
         UserDatabase returnUser = User;
         returnUser.Email = null;
-        A.CallTo(() => UserManager.FindByEmailAsync(""))
-            .Returns(Task.FromResult<UserDatabase?>(returnUser));
-        A.CallTo(() => SignInManager.CheckPasswordSignInAsync(User, Data.Password, true))
-            .Returns(Task.FromResult(SignInResult.Success));
+        UserManager.Setup(obj => obj.FindByEmailAsync(Data.Email)).ReturnsAsync(User);
+        SignInManager
+            .Setup(obj => obj.CheckPasswordSignInAsync(User, Data.Password, true))
+            .ReturnsAsync(SignInResult.Success);
 
         await Assert.ThrowsAsync<AuthenticationException>(() => Service.Login(Data));
     }
 
-    /* [Fact]
+    [Fact]
     public async Task CreateAndAddNewRefreshToken()
     {
         RefreshToken? token = null;
-        A.CallTo(() => UserManager.FindByEmailAsync("")).Returns(Task.FromResult<UserDatabase?>(User));
-        A.CallTo(() => SignInManager.CheckPasswordSignInAsync(User, Data.Password, true)).Returns(Task.FromResult(SignInResult.Success));
-        //A.CallTo(() => AuthDbContext.RefreshToken.FirstOrDefaultAsync(A<Expression<Func<RefreshToken, bool>>>.Ignored, A<CancellationToken>.Ignored)).Returns(Task.FromResult(token));
-        AuthDbContext.Setup(x => x.RefreshToken.FirstOrDefaultAsync(It.IsAny<CancellationToken>())).Returns(Task.FromResult(token));
+        UserManager.Setup(obj => obj.FindByEmailAsync(Data.Email)).ReturnsAsync(User);
+        SignInManager
+            .Setup(obj => obj.CheckPasswordSignInAsync(User, Data.Password, true))
+            .ReturnsAsync(SignInResult.Success);
+        AuthDbContext
+            .Setup(x => x.FindRefreshToken(It.IsAny<Expression<Func<RefreshToken, bool>>>()))
+            .Returns(Task.FromResult(token));
 
-        A.CallTo(() => UserManager.UpdateAsync(A<UserDatabase>.That.IsInstanceOf(typeof(UserDatabase)))).MustHaveHappened();
-        //A.CallTo(() => AuthDbContext.RefreshToken.AddAsync(A<RefreshToken>.That.IsInstanceOf(typeof(RefreshToken)), A<CancellationToken>.Ignored)).MustHaveHappened();
-    } */
+        await Service.Login(Data);
+
+        UserManager.Verify(obj => obj.UpdateAsync(User), Times.Once());
+        AuthDbContext.Verify(obj => obj.AddRefreshToken(It.IsAny<RefreshToken>()), Times.Once());
+    }
 }

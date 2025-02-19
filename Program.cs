@@ -1,4 +1,5 @@
 using FinBookeAPI.AppConfig;
+using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +14,8 @@ builder.Services.AddDbContext<AuthDbContext>();
 builder.Services.AddDbContext<DataDbContext>();
 builder.Services.AddSecurity(builder.Configuration);
 
-builder.Services.AddSingleton<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IDataProtection, DataProtection>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 var app = builder.Build();
 

@@ -1,7 +1,9 @@
+using System.Linq.Expressions;
 using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MongoDB.EntityFrameworkCore.Extensions;
@@ -27,5 +29,18 @@ public class AuthDbContext(
     {
         base.OnModelCreating(builder);
         builder.Entity<RefreshToken>().ToCollection("authentication");
+    }
+
+    public virtual Task<RefreshToken?> FindRefreshToken(
+        Expression<Func<RefreshToken, bool>> predicate
+    )
+    {
+        return RefreshToken.FirstOrDefaultAsync(predicate);
+    }
+
+    public virtual async Task<RefreshToken> AddRefreshToken(RefreshToken token)
+    {
+        var result = await RefreshToken.AddAsync(token);
+        return result.Entity;
     }
 }

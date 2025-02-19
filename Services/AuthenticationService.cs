@@ -4,6 +4,7 @@ using FinBookeAPI.AppConfig;
 using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
+using FinBookeAPI.Models.Wrapper;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -16,7 +17,7 @@ public class AuthenticationService(
     SignInManager<UserDatabase> signInManager,
     AuthDbContext database,
     IOptions<JwTSettings> settings,
-    IDataProtectionProvider protector,
+    IDataProtection protection,
     ILogger<AuthenticationService> logger
 ) : IAuthenticationService
 {
@@ -24,7 +25,7 @@ public class AuthenticationService(
     private readonly SignInManager<UserDatabase> _signInManager = signInManager;
     private readonly AuthDbContext _database = database;
     private readonly IOptions<JwTSettings> _settings = settings;
-    private readonly IDataProtector _protector = protector.CreateProtector("user-data");
+    private readonly IDataProtection _protector = protection;
     private readonly ILogger<AuthenticationService> _logger = logger;
 
     public async Task<UserClient> Login(UserLogin data)
@@ -38,13 +39,16 @@ public class AuthenticationService(
         // Proof if password is valid
 
         _logger.LogDebug("Check correctness of password from {user}", data.Email);
-        var _ =
-            await _signInManager.CheckPasswordSignInAsync(
-                databaseUser,
-                data.Password,
-                lockoutOnFailure: true
-            )
-            ?? throw new AuthenticationException("Password not correct", ErrorCodes.INVALID_ENTRY);
+
+        var check = await _signInManager.CheckPasswordSignInAsync(
+            databaseUser,
+            data.Password,
+            lockoutOnFailure: true
+        );
+        if (check == SignInResult.Failed)
+        {
+            throw new AuthenticationException("Password not correct", ErrorCodes.INVALID_ENTRY);
+        }
 
         _logger.LogDebug("Check existence of name and email from {Id}", databaseUser.Id);
         // Proof if attributes of user exist
@@ -62,9 +66,7 @@ public class AuthenticationService(
         }
 
         // Proof if refresh token exist and create a new one if not
-        var refreshToken = await _database.RefreshToken.FirstOrDefaultAsync(doc =>
-            doc.UserId == databaseUser.Id
-        );
+        var refreshToken = await _database.FindRefreshToken(doc => doc.UserId == databaseUser.Id);
         if (refreshToken == null)
         {
             refreshToken = new RefreshToken
@@ -80,7 +82,7 @@ public class AuthenticationService(
             await _userManager.UpdateAsync(databaseUser);
             // Hash token for security
             using SHA256 algo = SHA256.Create();
-            await _database.RefreshToken.AddAsync(
+            await _database.AddRefreshToken(
                 new RefreshToken
                 {
                     Id = refreshToken.Id,
