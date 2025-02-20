@@ -10,7 +10,6 @@ using FinBookeAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -22,9 +21,9 @@ public class LoginUnitTests
     private readonly Mock<UserManager<UserDatabase>> UserManager;
     private readonly Mock<SignInManager<UserDatabase>> SignInManager;
     private readonly Mock<AuthDbContext> AuthDbContext;
-    private readonly Mock<IOptions<JwTSettings>> JwtSettings = new();
-    private readonly Mock<IDataProtection> DataProtection = new();
-    private readonly Mock<ILogger<AuthenticationService>> Logger = new();
+    private readonly Mock<IOptions<JwTSettings>> JwtSettings;
+    private readonly Mock<IDataProtection> DataProtection;
+    private readonly Mock<ILogger<AuthenticationService>> Logger;
     private readonly AuthenticationService Service;
 
     // DUMMY DATA
@@ -49,8 +48,6 @@ public class LoginUnitTests
     };
     private readonly JwTSettings Settings = new()
     {
-        Audience = "",
-        Issuer = "",
         Secret = "Por73MjWFc7s5ind78k4AcXEAEtxs0x1k6dZvDHoIUqGzwRDTyUubnGrCeDyZiy1",
     };
 
@@ -59,6 +56,7 @@ public class LoginUnitTests
     // BEFORE EACH
     public LoginUnitTests()
     {
+        // Initialize dependencies
         UserManager = new Mock<UserManager<UserDatabase>>(
             Mock.Of<IUserStore<UserDatabase>>(),
             Mock.Of<IOptions<IdentityOptions>>(),
@@ -86,15 +84,22 @@ public class LoginUnitTests
             new Mock<IOptions<AuthDatabaseSettings>>().Object
         );
 
+        JwtSettings = new Mock<IOptions<JwTSettings>>();
+        DataProtection = new Mock<IDataProtection>();
+        Logger = new Mock<ILogger<AuthenticationService>>();
+
+        // DataProtection object should do nothing
         DataProtection.Setup(obj => obj.Protect(Data.Email)).Returns(Data.Email);
         DataProtection.Setup(obj => obj.Unprotect(User.Email)).Returns(User.Email);
         DataProtection.Setup(obj => obj.Unprotect(User.UserName)).Returns(User.UserName);
 
+        // Mocking database activities
         UserManager.Setup(obj => obj.UpdateAsync(User)).ReturnsAsync(IdentityResult.Success);
         AuthDbContext.Setup(obj => obj.AddRefreshToken(Token)).ReturnsAsync(Token);
 
         JwtSettings.Setup(obj => obj.Value).Returns(Settings);
 
+        // Initialize test object
         Service = new AuthenticationService(
             UserManager.Object,
             SignInManager.Object,

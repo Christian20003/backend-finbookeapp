@@ -5,10 +5,8 @@ using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Models.Wrapper;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver.Linq;
 
 namespace FinBookeAPI.Services;
 
