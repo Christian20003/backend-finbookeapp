@@ -126,9 +126,36 @@ public class AuthenticationService(
         return builder.ToString();
     }
 
-    public Task<UserClient> Register(UserRegister data)
+    public async Task<UserClient> Register(UserRegister data)
     {
+
+        _logger.LogDebug("User Registrated, check email, username and co" + data);
+        //        var email = _protector.Protect(data.Email);
+        var isValid = await CheckUserInDb(data);
+
+        if (!isValid)
+        {
+            throw new AuthenticationException("User alread exist", ErrorCodes.INVALID_ENTRY);
+        }
+
+        var newUser = new UserDatabase
+        {
+            UserName = data.Name,
+            Email = data.Email,
+        };
+        // Proof if password is valid
+
         throw new NotImplementedException();
+    }
+
+    private async Task<bool> CheckUserInDb(UserRegister newUser)
+    {
+
+
+        var test1 = await _userManager.FindByNameAsync(newUser.Email);
+        var test2 = await _userManager.FindByNameAsync(newUser.Name);
+
+        return test1 == null && test2 == null;
     }
 
     public void SecurityCode(string email)
