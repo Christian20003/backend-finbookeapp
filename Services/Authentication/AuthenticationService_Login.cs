@@ -1,31 +1,14 @@
 using System.Security.Cryptography;
 using System.Text;
-using FinBookeAPI.AppConfig;
 using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
-using FinBookeAPI.Models.Wrapper;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
 
-namespace FinBookeAPI.Services;
+namespace FinBookeAPI.Services.Authentication;
 
-public class AuthenticationService(
-    UserManager<UserDatabase> userManager,
-    SignInManager<UserDatabase> signInManager,
-    AuthDbContext database,
-    IOptions<JwTSettings> settings,
-    IDataProtection protection,
-    ILogger<AuthenticationService> logger
-) : IAuthenticationService
+public partial class AuthenticationService : IAuthenticationService
 {
-    private readonly UserManager<UserDatabase> _userManager = userManager;
-    private readonly SignInManager<UserDatabase> _signInManager = signInManager;
-    private readonly AuthDbContext _database = database;
-    private readonly IOptions<JwTSettings> _settings = settings;
-    private readonly IDataProtection _protector = protection;
-    private readonly ILogger<AuthenticationService> _logger = logger;
-
     public async Task<UserClient> Login(UserLogin data)
     {
         _logger.LogDebug("Check existence of {user}", data.Email);
@@ -122,30 +105,5 @@ public class AuthenticationService(
             builder.Append(elem.ToString("x2"));
         }
         return builder.ToString();
-    }
-
-    public Task<UserClient> Register(UserRegister data)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void SecurityCode(string email)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void ResetPassword(string email, string code)
-    {
-        throw new NotImplementedException();
-    }
-
-    public UserClient GenerateToken(UserClient data)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Logout(UserClient data)
-    {
-        throw new NotImplementedException();
     }
 }

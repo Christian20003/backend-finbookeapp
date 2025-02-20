@@ -6,7 +6,7 @@ using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Models.Wrapper;
-using FinBookeAPI.Services;
+using FinBookeAPI.Services.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
