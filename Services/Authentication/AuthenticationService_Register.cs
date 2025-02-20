@@ -27,34 +27,7 @@ public partial class AuthenticationService : IAuthenticationService
 
         // Proof if refresh token exist and create a new one if not
         var refreshToken = databaseUser != null ? await _database.FindRefreshToken(doc => doc.UserId == databaseUser.Id) : null;
-        if (refreshToken == null)
-        {
-            refreshToken = new RefreshToken
-            {
-                Id = new Guid().ToString(),
-                UserId = databaseUser!.Id,
-                Token = RefreshToken.GenerateToken(),
-                ExpiresAt = DateTime.UtcNow.AddDays(1),
-                CreatedAt = DateTime.UtcNow,
-            };
-            _logger.LogDebug("Generate new refresh token: {token}", refreshToken.Token);
-            databaseUser.RefreshTokenId = refreshToken.Id;
-            await _userManager.UpdateAsync(databaseUser);
-            // Hash token for security
-            using System.Security.Cryptography.SHA256 algo = System.Security.Cryptography.SHA256.Create();
-            await _database.AddRefreshToken(
-                new RefreshToken
-                {
-                    Id = refreshToken.Id,
-                    UserId = refreshToken.UserId,
-                    Token = GetHash(algo, refreshToken.Token),
-                    ExpiresAt = refreshToken.ExpiresAt,
-                    CreatedAt = refreshToken.CreatedAt,
-                }
-            );
-            await _database.SaveChangesAsync();
-        }
-
+        refreshToken ??= await CreateRefreshToken(databaseUser);
 
         _logger.LogDebug("Create user object to be sent to the user");
         // Generate new token and user object
