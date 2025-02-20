@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
 using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
@@ -48,33 +46,7 @@ public partial class AuthenticationService : IAuthenticationService
 
         // Proof if refresh token exist and create a new one if not
         var refreshToken = await _database.FindRefreshToken(doc => doc.UserId == databaseUser.Id);
-        if (refreshToken == null)
-        {
-            refreshToken = new RefreshToken
-            {
-                Id = new Guid().ToString(),
-                UserId = databaseUser.Id,
-                Token = RefreshToken.GenerateToken(),
-                ExpiresAt = DateTime.UtcNow.AddDays(1),
-                CreatedAt = DateTime.UtcNow,
-            };
-            _logger.LogDebug("Generate new refresh token: {token}", refreshToken.Token);
-            databaseUser.RefreshTokenId = refreshToken.Id;
-            await _userManager.UpdateAsync(databaseUser);
-            // Hash token for security
-            using SHA256 algo = SHA256.Create();
-            await _database.AddRefreshToken(
-                new RefreshToken
-                {
-                    Id = refreshToken.Id,
-                    UserId = refreshToken.UserId,
-                    Token = GetHash(algo, refreshToken.Token),
-                    ExpiresAt = refreshToken.ExpiresAt,
-                    CreatedAt = refreshToken.CreatedAt,
-                }
-            );
-            await _database.SaveChangesAsync();
-        }
+        refreshToken ??= await CreateRefreshToken(databaseUser);
 
         _logger.LogDebug("Create user object to be sent to the user");
         // Generate new token and user object
@@ -94,16 +66,5 @@ public partial class AuthenticationService : IAuthenticationService
             ImagePath = databaseUser.ImagePath,
             Session = new Session { Token = token, RefreshToken = refreshToken },
         };
-    }
-
-    private static string GetHash(HashAlgorithm algorithm, string input)
-    {
-        var hash = algorithm.ComputeHash(Encoding.UTF8.GetBytes(input));
-        var builder = new StringBuilder();
-        foreach (var elem in hash)
-        {
-            builder.Append(elem.ToString("x2"));
-        }
-        return builder.ToString();
     }
 }
