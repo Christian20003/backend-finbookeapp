@@ -13,13 +13,38 @@ public interface IAuthenticationService
     /// <exception cref="AuthenticationException">If the login proccess fails</exception>
     public Task<UserClient> Login(UserLogin data);
 
-    public Task<UserClient> Register(UserRegister data, UserManager<UserDatabase> userManager);
+    /*
+        1. Does email or username already exist
+    */
+    public Task<UserClient> Register(UserRegister data);
 
-    public Task Logout();
+    /*
+        1. Check if email exist
+        2. Generate random code (6-digits)
+        3. Send to client to provided email
+    */
+    public void SecurityCode(string email);
 
-    public Task SecurityCode(string email);
+    /*
+        1. Check if email exist
+        2. Check if code exist
+        3. Check if code is valid
+        4. Generate random new password
+        5. Send to client to provided email
+    */
+    public void ResetPassword(string email, string code);
 
-    public Task ResetPassword(string email, string code, UserManager<UserDatabase> userManager);
+    /*
+        1. Check if user exist
+        2. Check if refresh token is valid
+        3. Generate new random JWT token
+        4. Send back to client
+    */
+    public UserClient GenerateToken(UserClient data);
 
-    public Token GenerateToken();
+    /*
+        1. Check if user exist
+        2. Delete refresh token
+    */
+    public void Logout(UserClient data);
 }

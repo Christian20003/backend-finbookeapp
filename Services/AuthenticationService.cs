@@ -115,31 +115,6 @@ public class AuthenticationService(
         };
     }
 
-    public Task Logout()
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<UserClient> Register(UserRegister data, UserManager<UserDatabase> userManager)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task ResetPassword(string email, string code, UserManager<UserDatabase> userManager)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task SecurityCode(string email)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Token GenerateToken()
-    {
-        throw new NotImplementedException();
-    }
-
     private static string GetHash(HashAlgorithm algorithm, string input)
     {
         var hash = algorithm.ComputeHash(Encoding.UTF8.GetBytes(input));
@@ -149,5 +124,30 @@ public class AuthenticationService(
             builder.Append(elem.ToString("x2"));
         }
         return builder.ToString();
+    }
+
+    public Task<UserClient> Register(UserRegister data)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SecurityCode(string email)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ResetPassword(string email, string code)
+    {
+        throw new NotImplementedException();
+    }
+
+    public UserClient GenerateToken(UserClient data)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Logout(UserClient data)
+    {
+        throw new NotImplementedException();
     }
 }
