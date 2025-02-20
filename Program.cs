@@ -1,6 +1,7 @@
 using FinBookeAPI.AppConfig;
 using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services;
+using FinBookeAPI.Services.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
