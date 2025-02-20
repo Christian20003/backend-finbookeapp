@@ -95,7 +95,9 @@ public class LoginUnitTests
 
         // Mocking database activities
         UserManager.Setup(obj => obj.UpdateAsync(User)).ReturnsAsync(IdentityResult.Success);
-        AuthDbContext.Setup(obj => obj.AddRefreshToken(Token)).ReturnsAsync(Token);
+        AuthDbContext
+            .Setup(obj => obj.AddRefreshToken(It.IsAny<RefreshToken>()))
+            .ReturnsAsync(Token);
 
         JwtSettings.Setup(obj => obj.Value).Returns(Settings);
 
