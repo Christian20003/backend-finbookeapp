@@ -1,4 +1,4 @@
-namespace FinBookeAPI.UnitTests.Authentication.Login;
+namespace FinBookeAPI.Tests.Authentication.Login;
 
 using System.Linq.Expressions;
 using FinBookeAPI.AppConfig;
