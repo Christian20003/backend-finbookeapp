@@ -27,7 +27,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// If any database operation fail.
     /// </exception>
-    private async Task<RefreshToken> CreateRefreshToken(UserDatabase user)
+    private async Task<IRefreshToken> CreateRefreshToken(IUserDatabase user)
     {
         // Generate new token
         var refreshToken = new RefreshToken

@@ -3,7 +3,6 @@ using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MongoDB.EntityFrameworkCore.Extensions;
@@ -15,7 +14,7 @@ public class AuthDbContext(
     IOptions<AuthDatabaseSettings> _settings
 ) : IdentityDbContext<UserDatabase>(options)
 {
-    public DbSet<RefreshToken> RefreshToken { get; init; }
+    public DbSet<IRefreshToken> RefreshToken { get; init; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -44,8 +43,8 @@ public class AuthDbContext(
     /// <exception cref="OperationCanceledException">
     /// If the requested search operation has been cancelled.
     /// </exception>
-    public virtual Task<RefreshToken?> FindRefreshToken(
-        Expression<Func<RefreshToken, bool>> predicate
+    public virtual Task<IRefreshToken?> FindRefreshToken(
+        Expression<Func<IRefreshToken, bool>> predicate
     )
     {
         return RefreshToken.FirstOrDefaultAsync(predicate);
@@ -63,7 +62,7 @@ public class AuthDbContext(
     /// <exception cref="OperationCanceledException">
     /// If the requested add operation has been cancelled.
     /// </exception>
-    public virtual async Task<RefreshToken> AddRefreshToken(RefreshToken token)
+    public virtual async Task<IRefreshToken> AddRefreshToken(IRefreshToken token)
     {
         var result = await RefreshToken.AddAsync(token);
         return result.Entity;

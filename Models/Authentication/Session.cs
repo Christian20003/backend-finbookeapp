@@ -6,5 +6,5 @@ namespace FinBookeAPI.Models.Authentication;
 public class Session()
 {
     public Token Token { get; set; } = new Token();
-    public RefreshToken RefreshToken { get; set; } = new RefreshToken();
+    public IRefreshToken RefreshToken { get; set; } = new RefreshToken();
 }

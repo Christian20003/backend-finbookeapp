@@ -18,9 +18,9 @@ public class Token
     // The time after this token expires
     public long Expires { get; }
 
-    private readonly IOptions<JwTSettings> _settings;
+    private readonly IOptions<IJwtSettings> _settings;
 
-    public Token(string userName, IOptions<JwTSettings> settings)
+    public Token(string userName, IOptions<IJwtSettings> settings)
     {
         _settings = settings;
         // Proof if configuration is available

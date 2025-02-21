@@ -5,7 +5,7 @@ namespace FinBookeAPI.Models.Authentication;
 /// <summary>
 /// This class models the login data received from a client.
 /// </summary>
-public class UserLogin
+public class UserLogin : IUserLogin
 {
     [Required]
     [EmailAddress]

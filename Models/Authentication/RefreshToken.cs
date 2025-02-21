@@ -7,24 +7,20 @@ namespace FinBookeAPI.Models.Authentication;
 /// This class models a refresh token used as authenticator if a client is allowed to
 /// refresh its corresponding JWT.
 /// </summary>
-public class RefreshToken
+public class RefreshToken : IRefreshToken
 {
     [Required]
     public string Id { get; set; } = "";
 
-    // The refresh token as string
     [Required]
     public string Token { get; set; } = "";
 
-    // The id of the user which this token corresponds to
     [Required]
     public string UserId { get; set; } = "";
 
-    // Date when this token expires
     [Required]
     public DateTime ExpiresAt { get; set; }
 
-    // Date when this token was created
     [Required]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

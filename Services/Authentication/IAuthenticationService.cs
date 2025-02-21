@@ -11,7 +11,7 @@ public interface IAuthenticationService
     /// <param name="data">Object which contains the login data received from the client.</param>
     /// <returns>A client object which contains all relevant information which can be sent to the client.</returns>
     /// <exception cref="AuthenticationException">If the login proccess fails</exception>
-    public Task<UserClient> Login(UserLogin data);
+    public Task<UserClient> Login(IUserLogin data);
 
     /*
         1. Does email or username already exist

@@ -5,11 +5,11 @@ namespace FinBookeAPI.Tests.Authentication.Mocks;
 
 public static class MockUserLogin
 {
-    public static Mock<UserLogin> GetMock()
+    public static Mock<IUserLogin> GetMock()
     {
-        var obj = new Mock<UserLogin>();
-        obj.SetupProperty(o => o.Email, "max.mustermann@gmail.com");
-        obj.SetupProperty(o => o.Password, "12345");
+        var obj = new Mock<IUserLogin>();
+        obj.SetupProperty(o => o.Email, TestData.Email);
+        obj.SetupProperty(o => o.Password, TestData.Password);
         return obj;
     }
 }

@@ -7,7 +7,7 @@ namespace FinBookeAPI.Services.Authentication;
 
 public partial class AuthenticationService : IAuthenticationService
 {
-    public async Task<UserClient> Login(UserLogin data)
+    public async Task<UserClient> Login(IUserLogin data)
     {
         // Proof if account exist
         _logger.LogDebug("Check existence of {user}", data.Email);
@@ -71,7 +71,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// If not any user account could be found or the found instance has an empty username or email property.
     /// </exception>
-    private async Task<UserDatabase> CheckUserAccount(string email)
+    private async Task<IUserDatabase> CheckUserAccount(string email)
     {
         var user = await _userManager.FindByEmailAsync(email);
         // Proof if user exist
@@ -115,7 +115,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// If the password is not valid or the user is not authorized to login.
     /// </exception>
-    private async Task CheckPassword(UserDatabase user, string password)
+    private async Task CheckPassword(IUserDatabase user, string password)
     {
         var check = await _signInManager.CheckPasswordSignInAsync(
             user,
