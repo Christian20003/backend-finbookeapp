@@ -6,4 +6,6 @@ public enum ErrorCodes
     INVALID_ENTRY,
     UPDATE_FAILED,
     INSERT_FAILED,
+    OPERATION_CANCELED,
+    UNAUTHORIZED,
 }
