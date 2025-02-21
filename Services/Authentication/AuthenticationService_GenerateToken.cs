@@ -43,19 +43,8 @@ public partial class AuthenticationService : IAuthenticationService
         try
         {
             // Update user object in database
-            var update = await _userManager.UpdateAsync(user);
-            if (!update.Succeeded)
-            {
-                _logger.LogError(
-                    LogEvents.FAILED_UPDATE,
-                    "Refresh token could not be updated for user - {user}",
-                    user.Id
-                );
-                throw new AuthenticationException(
-                    "Failed update of user",
-                    ErrorCodes.UPDATE_FAILED
-                );
-            }
+            await UpdateUser(user);
+
             // Add new token to database
             // Hash token for security
             using SHA256 algo = SHA256.Create();

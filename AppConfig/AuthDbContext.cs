@@ -67,4 +67,21 @@ public class AuthDbContext(
         var result = await RefreshToken.AddAsync(token);
         return result.Entity;
     }
+
+    /// <summary>
+    /// This method removes an existing refresh token from the database.
+    /// </summary>
+    /// <param name="id">
+    /// The id of the token which should be removed
+    /// </param>
+    /// <exception cref="NullReferenceException">
+    /// If the provided id does not reference to an existing token
+    /// </exception>
+    public virtual async Task RemoveRefreshToken(string id)
+    {
+        var token =
+            await FindRefreshToken(token => token.Id == id)
+            ?? throw new NullReferenceException("Refresh token does not exist");
+        RefreshToken.Remove(token);
+    }
 }

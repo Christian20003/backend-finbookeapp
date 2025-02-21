@@ -5,7 +5,8 @@ namespace FinBookeAPI.Models.Configuration;
 /// </summary>
 public class LogEvents
 {
-    public const int MISSING_PROPERTY = 1000;
+    public const int MISSING_OBJECT = 1000;
+    public const int MISSING_PROPERTY = 1001;
 
     public const int SUCCESSFUL_LOGIN = 2000;
 

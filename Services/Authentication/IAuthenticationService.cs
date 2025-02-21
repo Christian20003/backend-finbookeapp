@@ -1,16 +1,21 @@
 using FinBookeAPI.Models.Authentication;
-using Microsoft.AspNetCore.Identity;
 
-namespace FinBookeAPI.Services;
+namespace FinBookeAPI.Services.Authentication;
 
 public interface IAuthenticationService
 {
     /// <summary>
     /// This method implements the login for this application.
     /// </summary>
-    /// <param name="data">Object which contains the login data received from the client.</param>
-    /// <returns>A client object which contains all relevant information which can be sent to the client.</returns>
-    /// <exception cref="AuthenticationException">If the login proccess fails</exception>
+    /// <param name="data">
+    /// Object which contains the login data received from the client.
+    /// </param>
+    /// <returns>
+    /// A client object which contains all relevant information which can be sent to the client.
+    /// </returns>
+    /// <exception cref="AuthenticationException">
+    /// If the login proccess fails
+    /// </exception>
     public Task<UserClient> Login(IUserLogin data);
 
     /*
@@ -42,9 +47,14 @@ public interface IAuthenticationService
     */
     public UserClient GenerateToken(UserClient data);
 
-    /*
-        1. Check if user exist
-        2. Delete refresh token
-    */
-    public void Logout(UserClient data);
+    /// <summary>
+    /// This method handles the logout procedure.
+    /// </summary>
+    /// <param name="email">
+    /// The email of the user which should be logged out.
+    /// </param>
+    /// <exception cref="AuthenticationException">
+    /// If the logout proccess fails.
+    /// </exception>
+    public Task Logout(string email);
 }
