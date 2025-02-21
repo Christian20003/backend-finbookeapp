@@ -50,10 +50,25 @@ public class LoginUnitTests
         Settings = MockJwtSettings.GetMock();
         Data = MockUserLogin.GetMock();
 
-        // Mocking irrelevant methods
+        // Mocking methods that have in most cases the same output
         UserManager
             .Setup(obj => obj.UpdateAsync(It.IsAny<IUserDatabase>()))
             .ReturnsAsync(IdentityResult.Success);
+        UserManager
+            .Setup(obj => obj.FindByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(User.Object);
+        SignInManager
+            .Setup(obj =>
+                obj.CheckPasswordSignInAsync(
+                    It.IsAny<IUserDatabase>(),
+                    It.IsAny<string>(),
+                    It.IsAny<bool>()
+                )
+            )
+            .ReturnsAsync(SignInResult.Success);
+        AuthDbContext
+            .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<IRefreshToken, bool>>>()))
+            .ReturnsAsync(Token.Object);
         AuthDbContext
             .Setup(obj => obj.AddRefreshToken(It.IsAny<IRefreshToken>()))
             .ReturnsAsync(Token.Object);
@@ -81,9 +96,6 @@ public class LoginUnitTests
     [Fact]
     public async Task ReceiveInvalidPasswordProperty()
     {
-        UserManager
-            .Setup(obj => obj.FindByEmailAsync(It.IsAny<string>()))
-            .ReturnsAsync(User.Object);
         SignInManager
             .Setup(obj =>
                 obj.CheckPasswordSignInAsync(
@@ -98,21 +110,25 @@ public class LoginUnitTests
     }
 
     [Fact]
-    public async Task DatabaseStoreInvalidUserName()
+    public async Task UserIsLockedOutForFurtherRequests()
     {
-        User.SetupProperty(obj => obj.UserName, null);
-        UserManager
-            .Setup(obj => obj.FindByEmailAsync(It.IsAny<string>()))
-            .ReturnsAsync(User.Object);
         SignInManager
             .Setup(obj =>
                 obj.CheckPasswordSignInAsync(
-                    It.IsAny<UserDatabase>(),
+                    It.IsAny<IUserDatabase>(),
                     It.IsAny<string>(),
                     It.IsAny<bool>()
                 )
             )
-            .ReturnsAsync(SignInResult.Success);
+            .ReturnsAsync(SignInResult.LockedOut);
+
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Login(Data.Object));
+    }
+
+    [Fact]
+    public async Task DatabaseStoreInvalidUserName()
+    {
+        User.SetupProperty(obj => obj.UserName, null);
 
         await Assert.ThrowsAsync<AuthenticationException>(() => Service.Login(Data.Object));
     }
@@ -121,37 +137,13 @@ public class LoginUnitTests
     public async Task DatabaseStoreInvalidEmail()
     {
         User.SetupProperty(obj => obj.Email, null);
-        UserManager
-            .Setup(obj => obj.FindByEmailAsync(It.IsAny<string>()))
-            .ReturnsAsync(User.Object);
-        SignInManager
-            .Setup(obj =>
-                obj.CheckPasswordSignInAsync(
-                    It.IsAny<UserDatabase>(),
-                    It.IsAny<string>(),
-                    It.IsAny<bool>()
-                )
-            )
-            .ReturnsAsync(SignInResult.Success);
 
         await Assert.ThrowsAsync<AuthenticationException>(() => Service.Login(Data.Object));
     }
 
     [Fact]
-    public async Task CreateAndAddNewRefreshToken()
+    public async Task GenerateNewRefreshToken()
     {
-        UserManager
-            .Setup(obj => obj.FindByEmailAsync(It.IsAny<string>()))
-            .ReturnsAsync(User.Object);
-        SignInManager
-            .Setup(obj =>
-                obj.CheckPasswordSignInAsync(
-                    It.IsAny<UserDatabase>(),
-                    It.IsAny<string>(),
-                    It.IsAny<bool>()
-                )
-            )
-            .ReturnsAsync(SignInResult.Success);
         AuthDbContext
             .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<IRefreshToken, bool>>>()))
             .ReturnsAsync(() => null);
@@ -160,5 +152,34 @@ public class LoginUnitTests
 
         UserManager.Verify(obj => obj.UpdateAsync(It.IsAny<IUserDatabase>()), Times.Once());
         AuthDbContext.Verify(obj => obj.AddRefreshToken(It.IsAny<IRefreshToken>()), Times.Once());
+    }
+
+    [Fact]
+    public async Task UseExistingRefreshToken()
+    {
+        var result = await Service.Login(Data.Object);
+
+        UserManager.Verify(obj => obj.UpdateAsync(It.IsAny<IUserDatabase>()), Times.Never());
+        AuthDbContext.Verify(obj => obj.AddRefreshToken(It.IsAny<IRefreshToken>()), Times.Never());
+        Assert.Equal(Token.Object.Token, result.Session.RefreshToken.Token);
+    }
+
+    [Fact]
+    public async Task GenerateNewJWTToken()
+    {
+        var result = await Service.Login(Data.Object);
+
+        Assert.NotNull(result.Session.Token);
+        Assert.NotEqual("", result.Session.Token.Value);
+    }
+
+    [Fact]
+    public async Task SuccessfulLogin()
+    {
+        var result = await Service.Login(Data.Object);
+
+        Assert.Equal(User.Object.Id, result.Id);
+        Assert.Equal(User.Object.UserName, result.Name);
+        Assert.Equal(User.Object.Email, result.Email);
     }
 }
