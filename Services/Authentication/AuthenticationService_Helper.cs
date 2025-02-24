@@ -52,6 +52,56 @@ public partial class AuthenticationService : IAuthenticationService
     }
 
     /// <summary>
+    /// This method proofs if the user has provided a valid refresh token which has been
+    /// assigned to his account.
+    /// </summary>
+    /// <param name="token">
+    /// The refresh token received from the user.
+    /// </param>
+    /// <param name="user">
+    /// The user account from the database
+    /// </param>
+    /// <exception cref="AuthenticationException">
+    /// If the user does not have any refresh tokens or the refresh token is invalid. It can
+    /// also happen if the database cancel any of its operations.
+    /// </exception>
+    private async Task CheckRefreshToken(IRefreshToken token, UserDatabase user)
+    {
+        try
+        {
+            var storedToken = await _database.FindRefreshToken(obj =>
+                obj.Id == user.RefreshTokenId
+            );
+            if (storedToken == null)
+            {
+                _logger.LogInformation(LogEvents.MISSING_OBJECT, "Refresh token not found");
+                throw new AuthenticationException(
+                    "Refresh token not found",
+                    ErrorCodes.ENTRY_NOT_FOUND
+                );
+            }
+            token.HashValue();
+            if (storedToken.Token != token.Token)
+            {
+                _logger.LogWarning(
+                    LogEvents.UNAUTHORIZED,
+                    "Invalid refresh token provided for logout"
+                );
+                throw new AuthenticationException("Invalid refresh token", ErrorCodes.UNAUTHORIZED);
+            }
+        }
+        catch (OperationCanceledException exception)
+        {
+            _logger.LogError(LogEvents.FAILED_OPERATION, "Database operation has been canceled");
+            throw new AuthenticationException(
+                "Database operation has been canceled",
+                ErrorCodes.OPERATION_CANCELED,
+                exception
+            );
+        }
+    }
+
+    /// <summary>
     /// This method updates a user account in the database.
     /// </summary>
     /// <param name="user">

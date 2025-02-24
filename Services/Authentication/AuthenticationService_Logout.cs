@@ -11,6 +11,7 @@ public partial class AuthenticationService : IAuthenticationService
     {
         _logger.LogDebug("Proof existence of user account: {user}", request.Email);
         var user = await CheckUserAccount(_protector.Protect(request.Email));
+        await CheckRefreshToken(request.Token, user);
         try
         {
             _logger.LogDebug("Remove refresh token if it exist: {user}", request.Email);

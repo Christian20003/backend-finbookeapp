@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography;
+using System.Text;
 using FinBookeAPI.Models.Authentication.Interfaces;
 
 namespace FinBookeAPI.Models.Authentication;
@@ -35,5 +36,16 @@ public class RefreshToken : IRefreshToken
         using var generator = RandomNumberGenerator.Create();
         generator.GetBytes(randomNumber);
         return Convert.ToBase64String(randomNumber);
+    }
+
+    public void HashValue()
+    {
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(Token));
+        var builder = new StringBuilder();
+        foreach (var elem in hash)
+        {
+            builder.Append(elem.ToString("x2"));
+        }
+        Token = builder.ToString();
     }
 }

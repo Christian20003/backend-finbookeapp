@@ -47,18 +47,8 @@ public partial class AuthenticationService : IAuthenticationService
             await UpdateUser(user);
 
             // Add new token to database
-            // Hash token for security
-            using SHA256 algo = SHA256.Create();
-            var creation = await _database.AddRefreshToken(
-                new RefreshToken
-                {
-                    Id = refreshToken.Id,
-                    UserId = refreshToken.UserId,
-                    Token = GetHash(algo, refreshToken.Token),
-                    ExpiresAt = refreshToken.ExpiresAt,
-                    CreatedAt = refreshToken.CreatedAt,
-                }
-            );
+            refreshToken.HashValue();
+            var creation = await _database.AddRefreshToken(refreshToken);
             if (creation == null)
             {
                 _logger.LogError(
@@ -91,16 +81,5 @@ public partial class AuthenticationService : IAuthenticationService
                 exception
             );
         }
-    }
-
-    private static string GetHash(HashAlgorithm algorithm, string input)
-    {
-        var hash = algorithm.ComputeHash(Encoding.UTF8.GetBytes(input));
-        var builder = new StringBuilder();
-        foreach (var elem in hash)
-        {
-            builder.Append(elem.ToString("x2"));
-        }
-        return builder.ToString();
     }
 }

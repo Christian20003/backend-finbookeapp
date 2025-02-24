@@ -16,4 +16,9 @@ public interface IRefreshToken
 
     // Date when this token was created
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// This method hashes it's token value.
+    /// </summary>
+    public void HashValue();
 }
