@@ -4,17 +4,14 @@ using FinBookeAPI.Models.Authentication.Interfaces;
 namespace FinBookeAPI.Models.Authentication;
 
 /// <summary>
-/// This class models the registration data received from a client
+/// This class models a reset password request with all necessary information.
 /// </summary>
-public class UserRegister : IUserRegister
+public class UserResetRequest : IUserResetRequest
 {
     [Required]
     [EmailAddress]
     public string Email { get; set; } = "";
 
     [Required]
-    public string Name { get; set; } = "";
-
-    [Required]
-    public string Password { get; set; } = "";
+    public string? Code { get; set; } = null;
 }

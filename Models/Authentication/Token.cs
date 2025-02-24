@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -10,7 +11,7 @@ namespace FinBookeAPI.Models.Authentication;
 /// <summary>
 /// This class models a security token for authentication.
 /// </summary>
-public class Token
+public class Token : IToken
 {
     // The token value
     public string Value { get; }

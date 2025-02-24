@@ -7,18 +7,16 @@ namespace FinBookeAPI.Tests.Authentication.Mocks;
 
 public static class MockSignInManager
 {
-    public static Mock<SignInManager<IUserDatabase>> GetMock(
-        Mock<UserManager<IUserDatabase>> manager
-    )
+    public static Mock<SignInManager<UserDatabase>> GetMock(Mock<UserManager<UserDatabase>> manager)
     {
-        var obj = new Mock<SignInManager<IUserDatabase>>(
+        var obj = new Mock<SignInManager<UserDatabase>>(
             manager.Object,
             Mock.Of<IHttpContextAccessor>(),
-            Mock.Of<IUserClaimsPrincipalFactory<IUserDatabase>>(),
+            Mock.Of<IUserClaimsPrincipalFactory<UserDatabase>>(),
             Mock.Of<IOptions<IdentityOptions>>(),
-            Mock.Of<ILogger<SignInManager<IUserDatabase>>>(),
+            Mock.Of<ILogger<SignInManager<UserDatabase>>>(),
             Mock.Of<Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider>(),
-            Mock.Of<IUserConfirmation<IUserDatabase>>()
+            Mock.Of<IUserConfirmation<UserDatabase>>()
         );
         return obj;
     }

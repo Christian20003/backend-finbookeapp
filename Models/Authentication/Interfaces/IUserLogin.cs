@@ -1,4 +1,4 @@
-namespace FinBookeAPI.Models.Authentication;
+namespace FinBookeAPI.Models.Authentication.Interfaces;
 
 public interface IUserLogin
 {

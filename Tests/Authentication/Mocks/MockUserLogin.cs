@@ -1,4 +1,4 @@
-using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Authentication.Interfaces;
 using Moq;
 
 namespace FinBookeAPI.Tests.Authentication.Mocks;

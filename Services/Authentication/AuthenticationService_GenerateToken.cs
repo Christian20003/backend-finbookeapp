@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,7 @@ namespace FinBookeAPI.Services.Authentication;
 
 public partial class AuthenticationService : IAuthenticationService
 {
-    public UserClient GenerateToken(UserClient data)
+    public Task<IUserClient> GenerateToken(IUserTokenRequest request)
     {
         throw new NotImplementedException();
     }
@@ -27,7 +28,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// If any database operation fail.
     /// </exception>
-    private async Task<IRefreshToken> CreateRefreshToken(IUserDatabase user)
+    private async Task<IRefreshToken> CreateRefreshToken(UserDatabase user)
     {
         // Generate new token
         var refreshToken = new RefreshToken

@@ -1,4 +1,5 @@
 using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 
@@ -18,7 +19,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// If not any user account could be found or the found instance has an empty username or email property.
     /// </exception>
-    private async Task<IUserDatabase> CheckUserAccount(string email)
+    private async Task<UserDatabase> CheckUserAccount(string email)
     {
         var user = await _userManager.FindByEmailAsync(email);
         // Proof if user exist
@@ -59,7 +60,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// If the update fails.
     /// </exception>
-    private async Task UpdateUser(IUserDatabase user)
+    private async Task UpdateUser(UserDatabase user)
     {
         var update = await _userManager.UpdateAsync(user);
         if (!update.Succeeded)

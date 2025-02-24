@@ -7,18 +7,18 @@ namespace FinBookeAPI.Tests.Authentication.Mocks;
 
 public static class MockUserManager
 {
-    public static Mock<UserManager<IUserDatabase>> GetMock()
+    public static Mock<UserManager<UserDatabase>> GetMock()
     {
-        var obj = new Mock<UserManager<IUserDatabase>>(
-            Mock.Of<IUserStore<IUserDatabase>>(),
+        var obj = new Mock<UserManager<UserDatabase>>(
+            Mock.Of<IUserStore<UserDatabase>>(),
             Mock.Of<IOptions<IdentityOptions>>(),
-            Mock.Of<IPasswordHasher<IUserDatabase>>(),
-            FakeItEasy.A.Fake<IEnumerable<IUserValidator<IUserDatabase>>>(),
-            FakeItEasy.A.Fake<IEnumerable<IPasswordValidator<IUserDatabase>>>(),
+            Mock.Of<IPasswordHasher<UserDatabase>>(),
+            FakeItEasy.A.Fake<IEnumerable<IUserValidator<UserDatabase>>>(),
+            FakeItEasy.A.Fake<IEnumerable<IPasswordValidator<UserDatabase>>>(),
             Mock.Of<ILookupNormalizer>(),
             Mock.Of<IdentityErrorDescriber>(),
             Mock.Of<IServiceProvider>(),
-            Mock.Of<ILogger<UserManager<IUserDatabase>>>()
+            Mock.Of<ILogger<UserManager<UserDatabase>>>()
         );
         return obj;
     }

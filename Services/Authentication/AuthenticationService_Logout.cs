@@ -1,3 +1,4 @@
+using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
@@ -6,15 +7,15 @@ namespace FinBookeAPI.Services.Authentication;
 
 public partial class AuthenticationService : IAuthenticationService
 {
-    public async Task Logout(string email)
+    public async Task Logout(IUserTokenRequest request)
     {
-        _logger.LogDebug("Proof existence of user account: {user}", email);
-        var user = await CheckUserAccount(_protector.Protect(email));
+        _logger.LogDebug("Proof existence of user account: {user}", request.Email);
+        var user = await CheckUserAccount(_protector.Protect(request.Email));
         try
         {
-            _logger.LogDebug("Remove refresh token if it exist: {user}", email);
+            _logger.LogDebug("Remove refresh token if it exist: {user}", request.Email);
             await _database.RemoveRefreshToken(user.RefreshTokenId);
-            _logger.LogDebug("Update user account in database: {user}", email);
+            _logger.LogDebug("Update user account in database: {user}", request.Email);
             user.RefreshTokenId = "";
             await UpdateUser(user);
             await _database.SaveChangesAsync();

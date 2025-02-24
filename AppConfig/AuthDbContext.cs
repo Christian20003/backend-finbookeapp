@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -77,11 +78,12 @@ public class AuthDbContext(
     /// <exception cref="NullReferenceException">
     /// If the provided id does not reference to an existing token
     /// </exception>
-    public virtual async Task RemoveRefreshToken(string id)
+    public virtual async Task<IRefreshToken> RemoveRefreshToken(string id)
     {
         var token =
             await FindRefreshToken(token => token.Id == id)
             ?? throw new NullReferenceException("Refresh token does not exist");
-        RefreshToken.Remove(token);
+        var result = RefreshToken.Remove(token);
+        return result.Entity;
     }
 }

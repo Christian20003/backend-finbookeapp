@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using FinBookeAPI.Models.Authentication.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
 namespace FinBookeAPI.Models.Authentication;

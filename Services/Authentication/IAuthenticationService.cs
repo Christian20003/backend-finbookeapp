@@ -1,4 +1,5 @@
 using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Authentication.Interfaces;
 
 namespace FinBookeAPI.Services.Authentication;
 
@@ -16,19 +17,19 @@ public interface IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// If the login proccess fails
     /// </exception>
-    public Task<UserClient> Login(IUserLogin data);
+    public Task<IUserClient> Login(IUserLogin data);
 
     /*
         1. Does email or username already exist
     */
-    public Task<UserClient> Register(UserRegister data);
+    public Task<IUserClient> Register(IUserRegister data);
 
     /*
         1. Check if email exist
         2. Generate random code (6-digits)
         3. Send to client to provided email
     */
-    public void SecurityCode(string email);
+    public Task SecurityCode(IUserResetRequest request);
 
     /*
         1. Check if email exist
@@ -37,7 +38,7 @@ public interface IAuthenticationService
         4. Generate random new password
         5. Send to client to provided email
     */
-    public void ResetPassword(string email, string code);
+    public Task ResetPassword(IUserResetRequest request);
 
     /*
         1. Check if user exist
@@ -45,7 +46,7 @@ public interface IAuthenticationService
         3. Generate new random JWT token
         4. Send back to client
     */
-    public UserClient GenerateToken(UserClient data);
+    public Task<IUserClient> GenerateToken(IUserTokenRequest request);
 
     /// <summary>
     /// This method handles the logout procedure.
@@ -56,5 +57,5 @@ public interface IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// If the logout proccess fails.
     /// </exception>
-    public Task Logout(string email);
+    public Task Logout(IUserTokenRequest request);
 }

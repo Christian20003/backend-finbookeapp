@@ -1,8 +1,9 @@
-namespace FinBookeAPI.Tests.Authentication.Login;
+namespace FinBookeAPI.Tests.Authentication;
 
 using System.Linq.Expressions;
 using FinBookeAPI.AppConfig;
 using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Models.Wrapper;
@@ -17,8 +18,8 @@ using Xunit;
 public class LoginUnitTests
 {
     // DEPENDENCIES
-    private readonly Mock<UserManager<IUserDatabase>> UserManager;
-    private readonly Mock<SignInManager<IUserDatabase>> SignInManager;
+    private readonly Mock<UserManager<UserDatabase>> UserManager;
+    private readonly Mock<SignInManager<UserDatabase>> SignInManager;
     private readonly Mock<AuthDbContext> AuthDbContext;
     private readonly Mock<IOptions<IJwtSettings>> JwtSettings;
     private readonly Mock<IDataProtection> DataProtection;
@@ -27,7 +28,7 @@ public class LoginUnitTests
 
     // DATA
     private readonly Mock<IUserLogin> Data;
-    private readonly Mock<IUserDatabase> User;
+    private readonly UserDatabase User;
     private readonly Mock<IRefreshToken> Token;
     private readonly Mock<IJwtSettings> Settings;
 
@@ -52,15 +53,13 @@ public class LoginUnitTests
 
         // Mocking methods that have in most cases the same output
         UserManager
-            .Setup(obj => obj.UpdateAsync(It.IsAny<IUserDatabase>()))
+            .Setup(obj => obj.UpdateAsync(It.IsAny<UserDatabase>()))
             .ReturnsAsync(IdentityResult.Success);
-        UserManager
-            .Setup(obj => obj.FindByEmailAsync(It.IsAny<string>()))
-            .ReturnsAsync(User.Object);
+        UserManager.Setup(obj => obj.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(User);
         SignInManager
             .Setup(obj =>
                 obj.CheckPasswordSignInAsync(
-                    It.IsAny<IUserDatabase>(),
+                    It.IsAny<UserDatabase>(),
                     It.IsAny<string>(),
                     It.IsAny<bool>()
                 )
@@ -99,7 +98,7 @@ public class LoginUnitTests
         SignInManager
             .Setup(obj =>
                 obj.CheckPasswordSignInAsync(
-                    It.IsAny<IUserDatabase>(),
+                    It.IsAny<UserDatabase>(),
                     It.IsAny<string>(),
                     It.IsAny<bool>()
                 )
@@ -115,7 +114,7 @@ public class LoginUnitTests
         SignInManager
             .Setup(obj =>
                 obj.CheckPasswordSignInAsync(
-                    It.IsAny<IUserDatabase>(),
+                    It.IsAny<UserDatabase>(),
                     It.IsAny<string>(),
                     It.IsAny<bool>()
                 )
@@ -128,7 +127,8 @@ public class LoginUnitTests
     [Fact]
     public async Task DatabaseStoreInvalidUserName()
     {
-        User.SetupProperty(obj => obj.UserName, null);
+        //User.SetupProperty(obj => obj.UserName, null);
+        User.UserName = null;
 
         await Assert.ThrowsAsync<AuthenticationException>(() => Service.Login(Data.Object));
     }
@@ -136,7 +136,8 @@ public class LoginUnitTests
     [Fact]
     public async Task DatabaseStoreInvalidEmail()
     {
-        User.SetupProperty(obj => obj.Email, null);
+        //User.SetupProperty(obj => obj.Email, null);
+        User.Email = null;
 
         await Assert.ThrowsAsync<AuthenticationException>(() => Service.Login(Data.Object));
     }
@@ -150,7 +151,7 @@ public class LoginUnitTests
 
         await Service.Login(Data.Object);
 
-        UserManager.Verify(obj => obj.UpdateAsync(It.IsAny<IUserDatabase>()), Times.Once());
+        UserManager.Verify(obj => obj.UpdateAsync(It.IsAny<UserDatabase>()), Times.Once());
         AuthDbContext.Verify(obj => obj.AddRefreshToken(It.IsAny<IRefreshToken>()), Times.Once());
     }
 
@@ -159,7 +160,7 @@ public class LoginUnitTests
     {
         var result = await Service.Login(Data.Object);
 
-        UserManager.Verify(obj => obj.UpdateAsync(It.IsAny<IUserDatabase>()), Times.Never());
+        UserManager.Verify(obj => obj.UpdateAsync(It.IsAny<UserDatabase>()), Times.Never());
         AuthDbContext.Verify(obj => obj.AddRefreshToken(It.IsAny<IRefreshToken>()), Times.Never());
         Assert.Equal(Token.Object.Token, result.Session.RefreshToken.Token);
     }
@@ -178,8 +179,8 @@ public class LoginUnitTests
     {
         var result = await Service.Login(Data.Object);
 
-        Assert.Equal(User.Object.Id, result.Id);
-        Assert.Equal(User.Object.UserName, result.Name);
-        Assert.Equal(User.Object.Email, result.Email);
+        Assert.Equal(User.Id, result.Id);
+        Assert.Equal(User.UserName, result.Name);
+        Assert.Equal(User.Email, result.Email);
     }
 }

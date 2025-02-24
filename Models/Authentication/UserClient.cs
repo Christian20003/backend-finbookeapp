@@ -1,11 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using FinBookeAPI.Models.Authentication.Interfaces;
 
 namespace FinBookeAPI.Models.Authentication;
 
 /// <summary>
 /// This class represents a user object sent to the client.
 /// </summary>
-public class UserClient
+public class UserClient : IUserClient
 {
     [Required]
     public string Id { get; set; } = "";
@@ -20,5 +21,5 @@ public class UserClient
     public string ImagePath { get; set; } = "";
 
     [Required]
-    public Session Session { get; set; } = new Session();
+    public Interfaces.ISession Session { get; set; } = new Session();
 }

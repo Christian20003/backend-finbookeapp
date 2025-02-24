@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using FinBookeAPI.Models.Authentication.Interfaces;
 
 namespace FinBookeAPI.Models.Authentication;
 

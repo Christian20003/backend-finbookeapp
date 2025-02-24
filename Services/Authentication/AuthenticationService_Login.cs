@@ -1,4 +1,5 @@
 using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 using Microsoft.AspNetCore.Identity;
@@ -7,7 +8,7 @@ namespace FinBookeAPI.Services.Authentication;
 
 public partial class AuthenticationService : IAuthenticationService
 {
-    public async Task<UserClient> Login(IUserLogin data)
+    public async Task<IUserClient> Login(IUserLogin data)
     {
         // Proof if account exist
         _logger.LogDebug("Check existence of {user}", data.Email);
@@ -71,7 +72,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// If the password is not valid or the user is not authorized to login.
     /// </exception>
-    private async Task CheckPassword(IUserDatabase user, string password)
+    private async Task CheckPassword(UserDatabase user, string password)
     {
         var check = await _signInManager.CheckPasswordSignInAsync(
             user,
