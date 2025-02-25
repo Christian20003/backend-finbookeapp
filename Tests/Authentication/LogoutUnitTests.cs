@@ -1,6 +1,9 @@
+using System.Linq.Expressions;
 using FinBookeAPI.AppConfig;
 using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
+using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services.Authentication;
 using FinBookeAPI.Tests.Authentication.Mocks;
@@ -23,6 +26,8 @@ public class LogoutUnitTests
 
     // DATA
     private readonly UserDatabase User;
+    private readonly Mock<IUserTokenRequest> request;
+    private readonly Mock<IRefreshToken> Token;
 
     public LogoutUnitTests()
     {
@@ -36,21 +41,20 @@ public class LogoutUnitTests
 
         // Initialize important data objects
         User = MockUserDatabase.GetMock();
+        Token = MockRefreshToken.GetMock();
+        request = MockIUserTokenRequest.GetMock();
 
         // Mocking methods that have in most cases the same output
-        /* UserManager
-            .Setup(obj => obj.UpdateAsync(It.IsAny<IUserDatabase>()))
-            .ReturnsAsync(IdentityResult.Success);
         UserManager
-            .Setup(obj => obj.FindByEmailAsync(It.IsAny<string>()))
-            .ReturnsAsync(User.Object);
+            .Setup(obj => obj.UpdateAsync(It.IsAny<UserDatabase>()))
+            .ReturnsAsync(IdentityResult.Success);
+        UserManager.Setup(obj => obj.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(User);
         AuthDbContext
             .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<IRefreshToken, bool>>>()))
             .ReturnsAsync(Token.Object);
         AuthDbContext
-            .Setup(obj => obj.AddRefreshToken(It.IsAny<IRefreshToken>()))
+            .Setup(obj => obj.RemoveRefreshToken(It.IsAny<string>()))
             .ReturnsAsync(Token.Object);
-        JwtSettings.Setup(obj => obj.Value).Returns(Settings.Object); */
 
         // Initialize test object
         Service = new AuthenticationService(
@@ -61,5 +65,66 @@ public class LogoutUnitTests
             DataProtection.Object,
             Logger.Object
         );
+    }
+
+    [Fact]
+    public async Task User_Account_Not_Found()
+    {
+        UserManager.Setup(obj => obj.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(() => null);
+
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Logout(request.Object));
+    }
+
+    [Fact]
+    public async Task User_Has_Invalid_Username()
+    {
+        User.UserName = null;
+
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Logout(request.Object));
+    }
+
+    [Fact]
+    public async Task User_Has_Invalid_Email()
+    {
+        User.Email = null;
+
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Logout(request.Object));
+    }
+
+    [Fact]
+    public async Task Refresh_Token_Not_Found_In_CheckRefreshToken()
+    {
+        AuthDbContext
+            .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<IRefreshToken, bool>>>()))
+            .ReturnsAsync(() => null);
+
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Logout(request.Object));
+    }
+
+    [Fact]
+    public async Task Refresh_Token_Is_Invalid()
+    {
+        Token.SetupProperty(obj => obj.Token, "abcde");
+
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Logout(request.Object));
+    }
+
+    [Fact]
+    public async Task Refresh_Token_Not_Found_In_RemoveRefreshToken()
+    {
+        AuthDbContext
+            .Setup(obj => obj.RemoveRefreshToken(It.IsAny<string>()))
+            .Throws<NullReferenceException>();
+
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Logout(request.Object));
+    }
+
+    [Fact]
+    public async Task Successful_logout()
+    {
+        await Service.Logout(request.Object);
+
+        UserManager.Verify(obj => obj.UpdateAsync(It.IsAny<UserDatabase>()), Times.Once());
+        Assert.Equal("", User.RefreshTokenId);
     }
 }

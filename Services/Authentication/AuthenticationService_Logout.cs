@@ -23,8 +23,11 @@ public partial class AuthenticationService : IAuthenticationService
         }
         catch (NullReferenceException)
         {
-            _logger.LogInformation(LogEvents.MISSING_OBJECT, "Refresh token is already deleted");
-            return;
+            _logger.LogInformation(LogEvents.MISSING_OBJECT, "Refresh token not found");
+            throw new AuthenticationException(
+                "Refresh token not found",
+                ErrorCodes.ENTRY_NOT_FOUND
+            );
         }
         catch (Exception exception)
             when (exception is OperationCanceledException
