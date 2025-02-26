@@ -8,7 +8,8 @@ public class LogEvents
     public const int MISSING_OBJECT = 1000;
     public const int MISSING_PROPERTY = 1001;
 
-    public const int SUCCESSFUL_LOGIN = 2000;
+    public const int SUCCESSFUL_OPERATION = 2000;
+    public const int SUCCESSFUL_LOGIN = 2001;
 
     public const int FAILED_OPERATION = 4000;
     public const int FAILED_UPDATE = 4001;

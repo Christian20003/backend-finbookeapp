@@ -11,4 +11,5 @@ public enum ErrorCodes
     INSERT_FAILED,
     OPERATION_CANCELED,
     UNAUTHORIZED,
+    SERVER_ERROR,
 }

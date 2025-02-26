@@ -1,4 +1,3 @@
-using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Authentication.Interfaces;
 
 namespace FinBookeAPI.Services.Authentication;
@@ -24,11 +23,16 @@ public interface IAuthenticationService
     */
     public Task<IUserClient> Register(IUserRegister data);
 
-    /*
-        1. Check if email exist
-        2. Generate random code (6-digits)
-        3. Send to client to provided email
-    */
+    /// <summary>
+    /// This method sends a new generated security code to the provided email through an
+    /// SMTP-Server and stores the result as well in the authentication database.
+    /// </summary>
+    /// <param name="request">
+    /// An object that contains all necessary information to sent an email.
+    /// </param>
+    /// <exception cref="AuthenticationException">
+    /// If the security code generation proccess fails.
+    /// </exception>
     public Task SecurityCode(IUserResetRequest request);
 
     /*

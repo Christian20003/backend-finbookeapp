@@ -16,6 +16,12 @@ public class UserDatabase : IdentityUser, IUserDatabase
     [Required(ErrorMessage = "Refresh token id is required")]
     public string RefreshTokenId { get; set; } = "";
 
+    [Required(ErrorMessage = "Security code is required")]
+    public string SecurityCode { get; set; } = "";
+
+    [Required(ErrorMessage = "Create-date of security code is required")]
+    public DateTime? SecurityCodeCreatedAt { get; set; } = null;
+
     [Required(ErrorMessage = "IsRevoked bool is required")]
     public bool IsRevoked { get; set; } = false;
 
