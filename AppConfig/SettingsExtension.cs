@@ -8,7 +8,7 @@ public static class SettingsExtension
     /// This method adds the following configuration classes to the dependency injector:
     /// <list type="bullet">
     ///     <item><c><see cref="AuthDatabaseSettings"/></c></item>
-    ///     <item><c><see cref="FinancialDataDtabaseSettings"/></c></item>
+    ///     <item><c><see cref="FinancialDataDatabaseSettings"/></c></item>
     ///     <item><c><see cref="JwTSettings"/></c></item>
     /// </list>
     /// </summary>
@@ -30,6 +30,8 @@ public static class SettingsExtension
         );
         // Add JWT token settings
         services.Configure<JwTSettings>(configuration.GetSection(JwTSettings.SectionName));
+
+        services.Configure<SmtpServer>(configuration.GetSection(SmtpServer.SectionName));
         return services;
     }
 }

@@ -49,7 +49,9 @@ public interface IAuthenticationService
     public Task<IUserClient> GenerateToken(IUserTokenRequest request);
 
     /// <summary>
-    /// This method handles the logout procedure.
+    /// This method executes a logout request. The user will be logout if
+    /// the received refresh token is valid and corresponds to the provided
+    /// user account.
     /// </summary>
     /// <param name="email">
     /// The email of the user which should be logged out.

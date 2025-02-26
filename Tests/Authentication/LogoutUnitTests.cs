@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 using FinBookeAPI.AppConfig;
 using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Authentication.Interfaces;
-using FinBookeAPI.Models.Configuration;
+using FinBookeAPI.Models.Configuration.Interfaces;
 using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services.Authentication;

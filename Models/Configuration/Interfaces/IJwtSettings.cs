@@ -1,4 +1,4 @@
-namespace FinBookeAPI.Models.Configuration;
+namespace FinBookeAPI.Models.Configuration.Interfaces;
 
 public interface IJwtSettings
 {

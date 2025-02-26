@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
+using FinBookeAPI.Models.Configuration.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 

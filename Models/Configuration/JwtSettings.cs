@@ -1,3 +1,5 @@
+using FinBookeAPI.Models.Configuration.Interfaces;
+
 namespace FinBookeAPI.Models.Configuration;
 
 /// <summary>

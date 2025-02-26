@@ -1,6 +1,6 @@
 using FinBookeAPI.AppConfig;
 using FinBookeAPI.Models.Authentication;
-using FinBookeAPI.Models.Configuration;
+using FinBookeAPI.Models.Configuration.Interfaces;
 using FinBookeAPI.Models.Wrapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;

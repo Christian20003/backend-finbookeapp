@@ -1,10 +1,8 @@
-namespace FinBookeAPI.Tests.Authentication;
-
 using System.Linq.Expressions;
 using FinBookeAPI.AppConfig;
 using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Authentication.Interfaces;
-using FinBookeAPI.Models.Configuration;
+using FinBookeAPI.Models.Configuration.Interfaces;
 using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services.Authentication;
@@ -14,6 +12,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
+
+namespace FinBookeAPI.Tests.Authentication;
 
 public class LoginUnitTests
 {
