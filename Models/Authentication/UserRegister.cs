@@ -8,13 +8,13 @@ namespace FinBookeAPI.Models.Authentication;
 /// </summary>
 public class UserRegister : IUserRegister
 {
-    [Required]
-    [EmailAddress]
+    [Required(ErrorMessage = "Email is required")]
+    [EmailAddress(ErrorMessage = "Provided email address is invalid")]
     public string Email { get; set; } = "";
 
-    [Required]
+    [Required(ErrorMessage = "Username is required")]
     public string Name { get; set; } = "";
 
-    [Required]
+    [Required(ErrorMessage = "Password is required")]
     public string Password { get; set; } = "";
 }

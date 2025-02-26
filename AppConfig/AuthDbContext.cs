@@ -10,13 +10,32 @@ using MongoDB.EntityFrameworkCore.Extensions;
 
 namespace FinBookeAPI.AppConfig;
 
+/// <summary>
+/// This class models the context for the authentication database.
+/// </summary>
+/// <param name="options">
+/// The options to be used by a DbContext.
+/// </param>
+/// <param name="_settings">
+/// The settings including all necessary information from the <c>appsettings.json</c> file.
+/// </param>
 public class AuthDbContext(
     DbContextOptions<AuthDbContext> options,
     IOptions<AuthDatabaseSettings> _settings
 ) : IdentityDbContext<UserDatabase>(options)
 {
+    /// <summary>
+    /// This object represents the table that stores all refresh tokens.
+    /// </summary>
     public DbSet<IRefreshToken> RefreshToken { get; init; }
 
+    /// <summary>
+    /// This function configures the authentication database by reading all specified configurations
+    /// in the <c>appsettings.json</c> file.
+    /// </summary>
+    /// <param name="optionsBuilder">
+    /// API to configure the DbContext for EF-Core.
+    /// </param>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
@@ -25,6 +44,12 @@ public class AuthDbContext(
         optionsBuilder.UseMongoDB(mongoClient, database.DatabaseName);
     }
 
+    /// <summary>
+    /// This function creates all specified tables / collections in the database.
+    /// </summary>
+    /// <param name="builder">
+    ///  API to model the shape of all entities in this database.
+    /// </param>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -73,10 +98,13 @@ public class AuthDbContext(
     /// This method removes an existing refresh token from the database.
     /// </summary>
     /// <param name="id">
-    /// The id of the token which should be removed
+    /// The id of the token which should be removed.
     /// </param>
     /// <exception cref="NullReferenceException">
-    /// If the provided id does not reference to an existing token
+    /// If the provided id does not reference to an existing token.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    /// If the requested operation has been cancelled.
     /// </exception>
     public virtual async Task<IRefreshToken> RemoveRefreshToken(string id)
     {

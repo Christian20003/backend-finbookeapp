@@ -15,7 +15,7 @@ public interface IAuthenticationService
     /// A client object which contains all relevant information which can be sent to the client.
     /// </returns>
     /// <exception cref="AuthenticationException">
-    /// If the login proccess fails
+    /// If the login proccess fails.
     /// </exception>
     public Task<IUserClient> Login(IUserLogin data);
 
@@ -49,7 +49,7 @@ public interface IAuthenticationService
     public Task<IUserClient> GenerateToken(IUserTokenRequest request);
 
     /// <summary>
-    /// This method executes a logout request. The user will be logout if
+    /// This method executes a logout request. The user will be logged out if
     /// the received refresh token is valid and corresponds to the provided
     /// user account.
     /// </summary>

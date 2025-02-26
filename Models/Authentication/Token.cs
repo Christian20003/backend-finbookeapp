@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -10,21 +11,19 @@ using Microsoft.IdentityModel.Tokens;
 namespace FinBookeAPI.Models.Authentication;
 
 /// <summary>
-/// This class models a security token for authentication.
+/// This class models a security token for authentication (JWT).
 /// </summary>
 public class Token : IToken
 {
-    // The token value
-    public string Value { get; }
+    [Required(ErrorMessage = "Token values is required")]
+    [MinLength(20, ErrorMessage = "The token value should have at least 20 characters")]
+    public string Value { get; set; } = "";
 
-    // The time after this token expires
-    public long Expires { get; }
+    [Required(ErrorMessage = "Expire time is required")]
+    public long Expires { get; set; }
 
-    private readonly IOptions<IJwtSettings> _settings;
-
-    public Token(string userName, IOptions<IJwtSettings> settings)
+    public void GenerateTokenValue(IOptions<IJwtSettings> settings, string identity)
     {
-        _settings = settings;
         // Proof if configuration is available
         var config = settings.Value;
         if (config.Audience == null || config.Issuer == null || config.Secret == null)
@@ -43,7 +42,7 @@ public class Token : IToken
         var tokenHandler = new JwtSecurityTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity([new Claim(ClaimTypes.Name, userName)]),
+            Subject = new ClaimsIdentity([new Claim(ClaimTypes.Name, identity)]),
             Expires = expires,
             Issuer = config.Issuer,
             Audience = config.Audience,
@@ -55,29 +54,5 @@ public class Token : IToken
         // Generate token
         var token = tokenHandler.CreateToken(tokenDescriptor);
         Value = tokenHandler.WriteToken(token);
-    }
-
-    public Token(string token, long expires, IOptions<JwTSettings> settings)
-    {
-        _settings = settings;
-        Value = token;
-        Expires = expires;
-    }
-
-    public Token()
-    {
-        Value = "";
-        Expires = 0;
-        _settings = Options.Create(new JwTSettings());
-    }
-
-    public string GetSubject()
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        if (tokenHandler.ReadToken(Value) is not JwtSecurityToken token)
-        {
-            throw new ApplicationException("Invalid JWT token");
-        }
-        return token.Claims.First(claim => claim.Type == ClaimTypes.Name).Value;
     }
 }

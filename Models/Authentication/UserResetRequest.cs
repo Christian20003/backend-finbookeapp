@@ -8,10 +8,10 @@ namespace FinBookeAPI.Models.Authentication;
 /// </summary>
 public class UserResetRequest : IUserResetRequest
 {
-    [Required]
-    [EmailAddress]
+    [Required(ErrorMessage = "Email is required")]
+    [EmailAddress(ErrorMessage = "Provided email address is invalid")]
     public string Email { get; set; } = "";
 
-    [Required]
+    [Required(ErrorMessage = "Security-code is required")]
     public string? Code { get; set; } = null;
 }

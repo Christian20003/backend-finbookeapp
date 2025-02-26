@@ -2,6 +2,9 @@ using FinBookeAPI.Models.Configuration.Interfaces;
 
 namespace FinBookeAPI.Models.Configuration;
 
+/// <summary>
+/// This class models the SMTP-Server settings to be able of sending mails.
+/// </summary>
 public class SmtpServer : ISmtpServer
 {
     /// <summary>

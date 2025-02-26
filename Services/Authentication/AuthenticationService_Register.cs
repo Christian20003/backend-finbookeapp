@@ -29,7 +29,8 @@ public partial class AuthenticationService : IAuthenticationService
         _logger.LogDebug("Create user object to be sent to the user");
         // Generate new token and user object
         var name = _protector.Unprotect(databaseUser.UserName);
-        var token = new Token(name, _settings);
+        var token = new Token();
+        token.GenerateTokenValue(_settings, name);
 
         _logger.LogInformation(
             LogEvents.SUCCESSFUL_LOGIN,

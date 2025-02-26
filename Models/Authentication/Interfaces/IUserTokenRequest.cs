@@ -2,9 +2,13 @@ namespace FinBookeAPI.Models.Authentication.Interfaces;
 
 public interface IUserTokenRequest
 {
-    // The email of the user
+    /// <summary>
+    /// The email of the user.
+    /// </summary>
     public string Email { get; set; }
 
-    // The refresh token to authenticate
+    /// <summary>
+    /// The refresh token to authenticate.
+    /// </summary>
     public IRefreshToken Token { get; set; }
 }

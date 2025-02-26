@@ -10,18 +10,18 @@ namespace FinBookeAPI.Models.Authentication;
 public class UserDatabase : IdentityUser, IUserDatabase
 {
     // Properties name, email and password are already implemented in base class
-    [Required]
+    [Required(ErrorMessage = "ImagePath is required")]
     public string ImagePath { get; set; } = "";
 
-    [Required]
+    [Required(ErrorMessage = "Refresh token id is required")]
     public string RefreshTokenId { get; set; } = "";
 
-    [Required]
+    [Required(ErrorMessage = "IsRevoked bool is required")]
     public bool IsRevoked { get; set; } = false;
 
-    [Required]
+    [Required(ErrorMessage = "Create-Date is required")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    [Required]
+    [Required(ErrorMessage = "Revoked-Date is required")]
     public DateTime RevokedAt { get; set; }
 }

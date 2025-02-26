@@ -2,18 +2,28 @@ namespace FinBookeAPI.Models.Authentication.Interfaces;
 
 public interface IUserClient
 {
-    // The id of the user
+    /// <summary>
+    /// The id of the user.
+    /// </summary>
     public string Id { get; set; }
 
-    // The name of the user
+    /// <summary>
+    /// The name of the user.
+    /// </summary>
     public string Name { get; set; }
 
-    // The email address of the user
+    /// <summary>
+    /// The email address of the user.
+    /// </summary>
     public string Email { get; set; }
 
-    // The path to a profil image
+    /// <summary>
+    /// The path to a profil image.
+    /// </summary>
     public string ImagePath { get; set; }
 
-    // A session object storing authentication tokens
+    /// <summary>
+    /// A session object storing authentication tokens.
+    /// </summary>
     public ISession Session { get; set; }
 }

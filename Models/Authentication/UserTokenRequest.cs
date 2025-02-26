@@ -9,10 +9,10 @@ namespace FinBookeAPI.Models.Authentication;
 /// </summary>
 public class UserTokenRequest : IUserTokenRequest
 {
-    [Required]
-    [EmailAddress]
+    [Required(ErrorMessage = "Email is required")]
+    [EmailAddress(ErrorMessage = "Provided email address is invalid")]
     public string Email { get; set; } = "";
 
-    [Required]
+    [Required(ErrorMessage = "Refresh token is required")]
     public IRefreshToken Token { get; set; } = new RefreshToken();
 }

@@ -8,18 +8,18 @@ namespace FinBookeAPI.Models.Authentication;
 /// </summary>
 public class UserClient : IUserClient
 {
-    [Required]
+    [Required(ErrorMessage = "User id is required")]
     public string Id { get; set; } = "";
 
-    [Required]
+    [Required(ErrorMessage = "Username is required")]
     public string Name { get; set; } = "";
 
-    [Required]
-    [EmailAddress]
+    [Required(ErrorMessage = "Email is required")]
+    [EmailAddress(ErrorMessage = "Provided email address is invalid")]
     public string Email { get; set; } = "";
 
     public string ImagePath { get; set; } = "";
 
-    [Required]
+    [Required(ErrorMessage = "Session object is required")]
     public Interfaces.ISession Session { get; set; } = new Session();
 }

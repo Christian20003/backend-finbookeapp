@@ -1,5 +1,8 @@
 namespace FinBookeAPI.Models.Exceptions;
 
+/// <summary>
+/// This enumeration includes all possible exception cases.
+/// </summary>
 public enum ErrorCodes
 {
     ENTRY_NOT_FOUND,

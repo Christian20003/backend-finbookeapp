@@ -2,23 +2,39 @@ namespace FinBookeAPI.Models.Authentication.Interfaces;
 
 public interface IRefreshToken
 {
-    // Id of the token
+    /// <summary>
+    /// The id of the token.
+    /// </summary>
     public string Id { get; set; }
 
-    // The refresh token as string
+    /// <summary>
+    /// The refresh token as string.
+    /// </summary>
     public string Token { get; set; }
 
-    // The id of the user which this token corresponds to
+    /// <summary>
+    /// The id of the user which this token corresponds to.
+    /// </summary>
     public string UserId { get; set; }
 
-    // Date when this token expires
+    /// <summary>
+    /// The date when this token expires.
+    /// </summary>
     public DateTime ExpiresAt { get; set; }
 
-    // Date when this token was created
+    /// <summary>
+    /// The date when this token was created.
+    /// </summary>
     public DateTime CreatedAt { get; set; }
 
     /// <summary>
-    /// This method hashes it's token value.
+    /// This method generates a random string with multiple characters which
+    /// will be used as token value.
+    /// </summary>
+    public void GenerateTokenValue();
+
+    /// <summary>
+    /// This method hashes the value of this token.
     /// </summary>
     public void HashValue();
 }

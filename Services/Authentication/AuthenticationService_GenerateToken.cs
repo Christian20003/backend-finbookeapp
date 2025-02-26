@@ -35,10 +35,11 @@ public partial class AuthenticationService : IAuthenticationService
         {
             Id = new Guid().ToString(),
             UserId = user.Id,
-            Token = RefreshToken.GenerateToken(),
+            Token = "",
             ExpiresAt = DateTime.UtcNow.AddDays(1),
             CreatedAt = DateTime.UtcNow,
         };
+        refreshToken.GenerateTokenValue();
         _logger.LogDebug("Generate new refresh token: {token}", refreshToken.Token);
         user.RefreshTokenId = refreshToken.Id;
         try

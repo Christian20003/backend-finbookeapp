@@ -8,10 +8,8 @@ using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services.Authentication;
 using FinBookeAPI.Tests.Authentication.Mocks;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using Xunit;
 
 namespace FinBookeAPI.Tests.Authentication;
 
@@ -22,6 +20,7 @@ public class LoginUnitTests
     private readonly Mock<SignInManager<UserDatabase>> SignInManager;
     private readonly Mock<AuthDbContext> AuthDbContext;
     private readonly Mock<IOptions<IJwtSettings>> JwtSettings;
+    private readonly Mock<IOptions<ISmtpServer>> SmtpServer;
     private readonly Mock<IDataProtection> DataProtection;
     private readonly Mock<ILogger<AuthenticationService>> Logger;
     private readonly AuthenticationService Service;
@@ -43,6 +42,7 @@ public class LoginUnitTests
         AuthDbContext = MockAuthDbContext.GetMock();
         DataProtection = MockDataProtection.GetMock();
         JwtSettings = new Mock<IOptions<IJwtSettings>>();
+        SmtpServer = new Mock<IOptions<ISmtpServer>>();
         Logger = new Mock<ILogger<AuthenticationService>>();
 
         // Initialize important data objects
@@ -79,6 +79,7 @@ public class LoginUnitTests
             SignInManager.Object,
             AuthDbContext.Object,
             JwtSettings.Object,
+            SmtpServer.Object,
             DataProtection.Object,
             Logger.Object
         );

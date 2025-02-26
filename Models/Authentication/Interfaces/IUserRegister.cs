@@ -2,12 +2,18 @@ namespace FinBookeAPI.Models.Authentication.Interfaces;
 
 public interface IUserRegister
 {
-    // The email address of the user
+    /// <summary>
+    /// The email address of the register request.
+    /// </summary>
     public string Email { get; set; }
 
-    // The name of the user
+    /// <summary>
+    /// The user name of the register request.
+    /// </summary>
     public string Name { get; set; }
 
-    // The password of the user
+    /// <summary>
+    /// The password of the register request.
+    /// </summary>
     public string Password { get; set; }
 }

@@ -2,9 +2,13 @@ namespace FinBookeAPI.Models.Authentication.Interfaces;
 
 public interface IUserResetRequest
 {
-    // The email of the user
+    /// <summary>
+    /// The email of the reset password request.
+    /// </summary>
     public string Email { get; set; }
 
-    // The provided code to authenticate for password reset
+    /// <summary>
+    /// The generated code to authenticate for password reset.
+    /// </summary>
     public string? Code { get; set; }
 }

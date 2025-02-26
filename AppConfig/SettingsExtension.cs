@@ -10,6 +10,7 @@ public static class SettingsExtension
     ///     <item><c><see cref="AuthDatabaseSettings"/></c></item>
     ///     <item><c><see cref="FinancialDataDatabaseSettings"/></c></item>
     ///     <item><c><see cref="JwTSettings"/></c></item>
+    ///     <item><c><see cref="SmtpServer"/></c></item>
     /// </list>
     /// </summary>
     /// <param name="services">Specifies the contract for a collection of service descriptors.</param>
@@ -31,6 +32,7 @@ public static class SettingsExtension
         // Add JWT token settings
         services.Configure<JwTSettings>(configuration.GetSection(JwTSettings.SectionName));
 
+        // Add SMTP-Server settings
         services.Configure<SmtpServer>(configuration.GetSection(SmtpServer.SectionName));
         return services;
     }

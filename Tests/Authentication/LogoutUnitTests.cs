@@ -20,6 +20,7 @@ public class LogoutUnitTests
     private readonly Mock<SignInManager<UserDatabase>> SignInManager;
     private readonly Mock<AuthDbContext> AuthDbContext;
     private readonly Mock<IOptions<IJwtSettings>> JwtSettings;
+    private readonly Mock<IOptions<ISmtpServer>> SmtpServer;
     private readonly Mock<IDataProtection> DataProtection;
     private readonly Mock<ILogger<AuthenticationService>> Logger;
     private readonly AuthenticationService Service;
@@ -37,6 +38,7 @@ public class LogoutUnitTests
         AuthDbContext = MockAuthDbContext.GetMock();
         DataProtection = MockDataProtection.GetMock();
         JwtSettings = new Mock<IOptions<IJwtSettings>>();
+        SmtpServer = new Mock<IOptions<ISmtpServer>>();
         Logger = new Mock<ILogger<AuthenticationService>>();
 
         // Initialize important data objects
@@ -62,6 +64,7 @@ public class LogoutUnitTests
             SignInManager.Object,
             AuthDbContext.Object,
             JwtSettings.Object,
+            SmtpServer.Object,
             DataProtection.Object,
             Logger.Object
         );

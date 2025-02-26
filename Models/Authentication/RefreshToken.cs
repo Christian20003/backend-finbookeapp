@@ -11,31 +11,28 @@ namespace FinBookeAPI.Models.Authentication;
 /// </summary>
 public class RefreshToken : IRefreshToken
 {
-    [Required]
+    [Required(ErrorMessage = "Token id is required")]
     public string Id { get; set; } = "";
 
-    [Required]
+    [Required(ErrorMessage = "Token value is required")]
+    [MinLength(20, ErrorMessage = "The token value should have at least 20 characters")]
     public string Token { get; set; } = "";
 
-    [Required]
+    [Required(ErrorMessage = "User id is required")]
     public string UserId { get; set; } = "";
 
-    [Required]
+    [Required(ErrorMessage = "Expire-Date is required")]
     public DateTime ExpiresAt { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "Create-Date is required")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    /// <summary>
-    /// This method generates a random string token by using the <c>RandomNumberGenerator</c>.
-    /// </summary>
-    /// <returns>The generated token as string.</returns>
-    public static string GenerateToken()
+    public void GenerateTokenValue()
     {
         var randomNumber = new byte[64];
         using var generator = RandomNumberGenerator.Create();
         generator.GetBytes(randomNumber);
-        return Convert.ToBase64String(randomNumber);
+        Token = Convert.ToBase64String(randomNumber);
     }
 
     public void HashValue()

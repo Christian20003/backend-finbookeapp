@@ -2,30 +2,48 @@ namespace FinBookeAPI.Models.Authentication.Interfaces;
 
 public interface IUserDatabase
 {
-    // Ths id of the user
+    /// <summary>
+    /// Ths id of the user.
+    /// </summary>
     public string Id { get; set; }
 
-    // Name of the user
+    /// <summary>
+    /// The name of the user.
+    /// </summary>
     public string? UserName { get; set; }
 
-    // Email of the user
+    /// <summary>
+    /// The email address of the user.
+    /// </summary>
     public string? Email { get; set; }
 
-    // Hash of the password
+    /// <summary>
+    /// The hash of the password.
+    /// </summary>
     public string? PasswordHash { get; set; }
 
-    // This string store the path to the profile image
+    /// <summary>
+    /// The path to the profile image.
+    /// </summary>
     public string ImagePath { get; set; }
 
-    // Id from the refresh token (only available if logged in)
+    /// <summary>
+    /// The id of the refresh token (only available if logged in).
+    /// </summary>
     public string RefreshTokenId { get; set; }
 
-    // If the account is deactivated (delete request)
+    /// <summary>
+    /// If the account is deactivated (delete request).
+    /// </summary>
     public bool IsRevoked { get; set; }
 
-    // Date when this account was created
+    /// <summary>
+    /// The date when this account was created.
+    /// </summary>
     public DateTime CreatedAt { get; set; }
 
-    // Date when this account was deactivated
+    /// <summary>
+    /// The date when this account was deactivated.
+    /// </summary>
     public DateTime RevokedAt { get; set; }
 }

@@ -5,11 +5,27 @@ using MongoDB.Driver;
 
 namespace FinBookeAPI.AppConfig;
 
+/// <summary>
+/// This class models the context for the financial data database.
+/// </summary>
+/// <param name="options">
+/// The options to be used by a DbContext.
+/// </param>
+/// <param name="_settings">
+/// The settings including all necessary information from the <c>appsettings.json</c> file.
+/// </param>
 public class DataDbContext(
     DbContextOptions<DataDbContext> options,
     IOptions<FinancialDataDtabaseSettings> _settings
 ) : DbContext(options)
 {
+    /// <summary>
+    /// This function configures the database storing financial data by reading all specified configurations
+    /// in the <c>appsettings.json</c> file.
+    /// </summary>
+    /// <param name="optionsBuilder">
+    /// API to configure the DbContext for EF-Core.
+    /// </param>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);

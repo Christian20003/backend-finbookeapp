@@ -12,6 +12,7 @@ public partial class AuthenticationService(
     SignInManager<UserDatabase> signInManager,
     AuthDbContext database,
     IOptions<IJwtSettings> settings,
+    IOptions<ISmtpServer> mailServer,
     IDataProtection protection,
     ILogger<AuthenticationService> logger
 ) : IAuthenticationService
@@ -20,6 +21,7 @@ public partial class AuthenticationService(
     private readonly SignInManager<UserDatabase> _signInManager = signInManager;
     private readonly AuthDbContext _database = database;
     private readonly IOptions<IJwtSettings> _settings = settings;
+    private readonly IOptions<ISmtpServer> _mailServer = mailServer;
     private readonly IDataProtection _protector = protection;
     private readonly ILogger<AuthenticationService> _logger = logger;
 }
