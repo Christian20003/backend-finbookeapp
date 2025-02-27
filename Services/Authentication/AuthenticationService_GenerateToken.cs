@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
 using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
@@ -10,9 +8,20 @@ namespace FinBookeAPI.Services.Authentication;
 
 public partial class AuthenticationService : IAuthenticationService
 {
-    public Task<IUserClient> GenerateToken(IUserTokenRequest request)
+    public async Task<IUserClient> GenerateToken(IUserTokenRequest request)
     {
-        throw new NotImplementedException();
+        var user = await CheckUserAccount(_protector.Protect(request.Email));
+        await CheckRefreshToken(request.Token, user);
+        var token = new Token();
+        token.GenerateTokenValue(_settings, user.UserName ?? "");
+        return new UserClient
+        {
+            Id = user.Id,
+            Name = _protector.Unprotect(user.UserName ?? ""),
+            Email = _protector.Unprotect(user.Email ?? ""),
+            ImagePath = user.ImagePath,
+            Session = new Session { Token = token, RefreshToken = request.Token },
+        };
     }
 
     /// <summary>

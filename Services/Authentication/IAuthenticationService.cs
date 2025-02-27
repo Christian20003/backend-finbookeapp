@@ -47,12 +47,19 @@ public interface IAuthenticationService
     /// </exception>
     public Task ResetPassword(IUserResetRequest request);
 
-    /*
-        1. Check if user exist
-        2. Check if refresh token is valid
-        3. Generate new random JWT token
-        4. Send back to client
-    */
+    /// <summary>
+    /// This method allows the user to get a new JWT. This operation only succeeds if the
+    /// provided refresh token is valid.
+    /// </summary>
+    /// <param name="request">
+    /// An object to verify the user.
+    /// </param>
+    /// <returns>
+    /// A client object which contains all relevant information which can be sent to the client.
+    /// </returns>
+    /// <exception cref="AuthenticationException">
+    /// If the generation of a new JWT fails.
+    /// </exception>
     public Task<IUserClient> GenerateToken(IUserTokenRequest request);
 
     /// <summary>

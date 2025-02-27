@@ -93,6 +93,14 @@ public partial class AuthenticationService : IAuthenticationService
                 );
                 throw new AuthenticationException("Invalid refresh token", ErrorCodes.UNAUTHORIZED);
             }
+            /* if (storedToken.ExpiresAt.Ticks < DateTime.UtcNow.Ticks)
+            {
+                _logger.LogWarning(LogEvents.UNAUTHORIZED, "Refresh token has expired");
+                throw new AuthenticationException(
+                    "Refresh token has expired",
+                    ErrorCodes.UNAUTHORIZED
+                );
+            } */
         }
         catch (OperationCanceledException exception)
         {
