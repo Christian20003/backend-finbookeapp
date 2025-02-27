@@ -59,7 +59,7 @@ public partial class AuthenticationService : IAuthenticationService
 
         if (!isValid)
         {
-            throw new AuthenticationException("User alread exist", ErrorCodes.INVALID_ENTRY);
+            throw new AuthenticationException("User alread exist", ErrorCodes.UNEXPECTED_STRUCTURE);
         }
     }
 }

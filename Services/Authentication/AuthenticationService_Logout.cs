@@ -40,7 +40,7 @@ public partial class AuthenticationService : IAuthenticationService
             );
             throw new AuthenticationException(
                 "Database operation has been canceled",
-                ErrorCodes.OPERATION_CANCELED
+                ErrorCodes.DATABASE_ERROR
             );
         }
     }

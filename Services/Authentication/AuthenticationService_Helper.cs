@@ -14,8 +14,8 @@ public partial class AuthenticationService : IAuthenticationService
     /// throw an <c><see cref="AuthenticationException"/></c> if one of the following occurs:
     /// <list type="bullet">
     ///     <item>The provided email does not have a user account (<see cref="ErrorCodes"/>: <c>ENTRY_NOT_FOUND</c>).</item>
-    ///     <item>The found user account has an empty string as username property (<see cref="ErrorCodes"/>: <c>INVALID_ENTRY</c>).</item>
-    ///     <item>The found user account has an empty string as email property (<see cref="ErrorCodes"/>: <c>INVALID_ENTRY</c>).</item>
+    ///     <item>The found user account has an empty string as username property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
+    ///     <item>The found user account has an empty string as email property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
     /// </list>
     /// </summary>
     /// <param name="email">
@@ -45,7 +45,7 @@ public partial class AuthenticationService : IAuthenticationService
                 "Unexpected missing username property of user {id}",
                 user.Id
             );
-            throw new AuthenticationException("Empty username", ErrorCodes.INVALID_ENTRY);
+            throw new AuthenticationException("Empty username", ErrorCodes.UNEXPECTED_STRUCTURE);
         }
         // Proof if email property is set
         if (user.Email == null)
@@ -55,7 +55,7 @@ public partial class AuthenticationService : IAuthenticationService
                 "Unexpected missing email property of user {id}",
                 user.Id
             );
-            throw new AuthenticationException("Empty email", ErrorCodes.INVALID_ENTRY);
+            throw new AuthenticationException("Empty email", ErrorCodes.UNEXPECTED_STRUCTURE);
         }
         return user;
     }
@@ -65,9 +65,9 @@ public partial class AuthenticationService : IAuthenticationService
     /// if one of the following occurs:
     /// <list type="bullet">
     ///     <item>The provided user account does not have a refresh token (<see cref="ErrorCodes"/>: <c>ENTRY_NOT_FOUND</c>).</item>
-    ///     <item>The provided token does not correspond to the stored token (<see cref="ErrorCodes"/>: <c>UNAUTHORIZED</c>).</item>
-    ///     <item>The stored token has expired (<see cref="ErrorCodes"/>: <c>UNAUTHORIZED</c>).</item>
-    ///     <item>Necessary database operations have been canceled (<see cref="ErrorCodes"/>: <c>OPERATION_CANCELED</c>).</item>
+    ///     <item>The provided token does not correspond to the stored token (<see cref="ErrorCodes"/>: <c>ACCESS_DENIED</c>).</item>
+    ///     <item>The stored token has expired (<see cref="ErrorCodes"/>: <c>ACCESS_EXPIRED</c>).</item>
+    ///     <item>Necessary database operations have been canceled (<see cref="ErrorCodes"/>: <c>DATABASE_ERROR</c>).</item>
     /// </list>
     /// </summary>
     /// <param name="token">
@@ -102,14 +102,17 @@ public partial class AuthenticationService : IAuthenticationService
                     LogEvents.UNAUTHORIZED,
                     "Invalid refresh token provided for logout"
                 );
-                throw new AuthenticationException("Invalid refresh token", ErrorCodes.UNAUTHORIZED);
+                throw new AuthenticationException(
+                    "Invalid refresh token",
+                    ErrorCodes.ACCESS_DENIED
+                );
             }
             /* if (storedToken.ExpiresAt.Ticks < DateTime.UtcNow.Ticks)
             {
                 _logger.LogWarning(LogEvents.UNAUTHORIZED, "Refresh token has expired");
                 throw new AuthenticationException(
                     "Refresh token has expired",
-                    ErrorCodes.UNAUTHORIZED
+                    ErrorCodes.ACCESS_EXPIRED
                 );
             } */
         }
@@ -118,7 +121,7 @@ public partial class AuthenticationService : IAuthenticationService
             _logger.LogError(LogEvents.FAILED_OPERATION, "Database operation has been canceled");
             throw new AuthenticationException(
                 "Database operation has been canceled",
-                ErrorCodes.OPERATION_CANCELED,
+                ErrorCodes.DATABASE_ERROR,
                 exception
             );
         }
@@ -156,7 +159,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// This method sends the provided <c>message</c> to the defined address through an SMTP-Server. This method
     /// will throw an <c><see cref="AuthenticationException"/></c> if one of the following occurs:
     /// <list type="bullet">
-    ///     <item>The provided message could not be sent due to an SMTP-Server error (<see cref="ErrorCodes"/>: <c>SERVER_ERROR</c>).</item>
+    ///     <item>The provided message could not be sent due to an SMTP-Server error (<see cref="ErrorCodes"/>: <c>EXTERNAL_SERVICE_ERROR</c>).</item>
     /// </list>
     /// </summary>
     /// <param name="message">
@@ -191,7 +194,7 @@ public partial class AuthenticationService : IAuthenticationService
             _logger.LogError(LogEvents.FAILED_OPERATION, "SMTP-Server does not sent the email");
             throw new AuthenticationException(
                 "Mail could not be sent",
-                ErrorCodes.SERVER_ERROR,
+                ErrorCodes.EXTERNAL_SERVICE_ERROR,
                 exception
             );
         }

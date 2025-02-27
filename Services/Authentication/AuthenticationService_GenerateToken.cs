@@ -35,7 +35,7 @@ public partial class AuthenticationService : IAuthenticationService
             );
             throw new AuthenticationException(
                 "Important settings to generate JWT are missing",
-                ErrorCodes.SERVER_ERROR,
+                ErrorCodes.CONFIG_NOT_FOUND,
                 exception
             );
         }
@@ -48,7 +48,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// <list type="bullet">
     ///     <item>The corresponding user account could not be updated (<see cref="ErrorCodes"/>: <c>UPDATE_FAILED</c>).</item>
     ///     <item>The generated refresh token could not be stored (<see cref="ErrorCodes"/>: <c>INSERT_FAILED</c>).</item>
-    ///     <item>Necessary database operations have been canceled (<see cref="ErrorCodes"/>: <c>OPERATION_CANCELED</c>).</item>
+    ///     <item>Necessary database operations have been canceled (<see cref="ErrorCodes"/>: <c>DATABASE_ERROR</c>).</item>
     /// </list>
     /// </summary>
     /// <param name="user">
@@ -110,7 +110,7 @@ public partial class AuthenticationService : IAuthenticationService
             );
             throw new AuthenticationException(
                 "Database operation has been canceled",
-                ErrorCodes.OPERATION_CANCELED,
+                ErrorCodes.DATABASE_ERROR,
                 exception
             );
         }

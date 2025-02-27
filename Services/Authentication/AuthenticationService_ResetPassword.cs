@@ -27,7 +27,7 @@ public partial class AuthenticationService : IAuthenticationService
             );
             throw new AuthenticationException(
                 "Security code is not set properly",
-                ErrorCodes.INVALID_ENTRY
+                ErrorCodes.UNEXPECTED_STRUCTURE
             );
         }
         var timeWindow = user.SecurityCodeCreatedAt.Value.AddMinutes(10);
@@ -36,7 +36,7 @@ public partial class AuthenticationService : IAuthenticationService
             _logger.LogWarning(LogEvents.UNAUTHORIZED, "Lifetime of security code exceeded");
             throw new AuthenticationException(
                 "Generated security code is not valid anymore",
-                ErrorCodes.UNAUTHORIZED
+                ErrorCodes.ACCESS_EXPIRED
             );
         }
         if (user.SecurityCode != _protector.Protect(request.Code))
@@ -44,7 +44,7 @@ public partial class AuthenticationService : IAuthenticationService
             _logger.LogWarning(LogEvents.UNAUTHORIZED, "Provided security code is invalid");
             throw new AuthenticationException(
                 "Received security code is not correct",
-                ErrorCodes.UNAUTHORIZED
+                ErrorCodes.ACCESS_DENIED
             );
         }
         var options = _upperCaseLetters + _lowerCaseLetters + _digits + _specialChars;

@@ -5,11 +5,13 @@ namespace FinBookeAPI.Models.Exceptions;
 /// </summary>
 public enum ErrorCodes
 {
+    CONFIG_NOT_FOUND,
     ENTRY_NOT_FOUND,
-    INVALID_ENTRY,
+    UNEXPECTED_STRUCTURE,
     UPDATE_FAILED,
     INSERT_FAILED,
-    OPERATION_CANCELED,
-    UNAUTHORIZED,
-    SERVER_ERROR,
+    ACCESS_DENIED,
+    ACCESS_EXPIRED,
+    DATABASE_ERROR,
+    EXTERNAL_SERVICE_ERROR,
 }

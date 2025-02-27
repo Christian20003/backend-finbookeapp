@@ -52,7 +52,7 @@ public partial class AuthenticationService : IAuthenticationService
             );
             throw new AuthenticationException(
                 "Database operation has been canceled",
-                ErrorCodes.OPERATION_CANCELED,
+                ErrorCodes.DATABASE_ERROR,
                 exception
             );
         }
@@ -65,7 +65,7 @@ public partial class AuthenticationService : IAuthenticationService
             );
             throw new AuthenticationException(
                 "Important settings to generate JWT are missing",
-                ErrorCodes.SERVER_ERROR,
+                ErrorCodes.CONFIG_NOT_FOUND,
                 exception
             );
         }
@@ -75,8 +75,8 @@ public partial class AuthenticationService : IAuthenticationService
     /// This method proofs if the provided password corresponds to the user account and is valid. This method will
     /// throw an <c><see cref="AuthenticationException"/></c> if one of the following occurs:
     /// <list type="bullet">
-    ///     <item>The provided password is not correct (<see cref="ErrorCodes"/>: <c>UNAUTHORIZED</c>).</item>
-    ///     <item>The user is locked out for any authentication attempt (<see cref="ErrorCodes"/>: <c>UNAUTHORIZED</c>).</item>
+    ///     <item>The provided password is not correct (<see cref="ErrorCodes"/>: <c>ACCESS_DENIED</c>).</item>
+    ///     <item>The user is locked out for any authentication attempt (<see cref="ErrorCodes"/>: <c>ACCESS_DENIED</c>).</item>
     /// </list>
     /// </summary>
     /// <param name="user">
@@ -103,14 +103,14 @@ public partial class AuthenticationService : IAuthenticationService
                 "Provided password of user {id} is not valid",
                 user.Id
             );
-            throw new AuthenticationException("Password not correct", ErrorCodes.UNAUTHORIZED);
+            throw new AuthenticationException("Password not correct", ErrorCodes.ACCESS_DENIED);
         }
         else if (check == SignInResult.LockedOut)
         {
             _logger.LogWarning(LogEvents.UNAUTHORIZED, "Login attempt with lockout restriction");
             throw new AuthenticationException(
                 "Unauthorized login attempt",
-                ErrorCodes.UNAUTHORIZED
+                ErrorCodes.ACCESS_DENIED
             );
         }
     }
