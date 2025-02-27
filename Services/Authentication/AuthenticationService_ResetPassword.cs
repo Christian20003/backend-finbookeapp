@@ -58,15 +58,7 @@ public partial class AuthenticationService : IAuthenticationService
         }
         user.SecurityCode = null;
         user.SecurityCodeCreatedAt = null;
-        result = await _userManager.UpdateAsync(user);
-        if (!result.Succeeded)
-        {
-            _logger.LogWarning(LogEvents.FAILED_UPDATE, "User account could not be updated");
-            throw new AuthenticationException(
-                "Update user account failed",
-                ErrorCodes.UPDATE_FAILED
-            );
-        }
+        await UpdateUser(user);
         var message = new MailMessage
         {
             From = new MailAddress("noreply@finbooke.com"),

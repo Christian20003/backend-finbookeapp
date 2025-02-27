@@ -28,17 +28,6 @@ public partial class AuthenticationService : IAuthenticationService
         );
         user.SecurityCode = _protector.Protect(code);
         user.SecurityCodeCreatedAt = DateTime.UtcNow;
-        var result = await _userManager.UpdateAsync(user);
-        if (!result.Succeeded)
-        {
-            _logger.LogWarning(
-                LogEvents.FAILED_UPDATE,
-                "User account could not be updated with security code"
-            );
-            throw new AuthenticationException(
-                "Security code could not be stored in the database",
-                ErrorCodes.UPDATE_FAILED
-            );
-        }
+        await UpdateUser(user);
     }
 }

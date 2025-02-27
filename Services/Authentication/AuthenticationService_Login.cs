@@ -56,19 +56,37 @@ public partial class AuthenticationService : IAuthenticationService
                 exception
             );
         }
+        catch (ApplicationException exception)
+        {
+            _logger.LogError(
+                LogEvents.MISSING_PROPERTY,
+                exception,
+                "Important settings to generate JWT are missing"
+            );
+            throw new AuthenticationException(
+                "Important settings to generate JWT are missing",
+                ErrorCodes.SERVER_ERROR,
+                exception
+            );
+        }
     }
 
     /// <summary>
-    /// This method proof if the provided password is valid to a corresponding user account.
+    /// This method proofs if the provided password corresponds to the user account and is valid. This method will
+    /// throw an <c><see cref="AuthenticationException"/></c> if one of the following occurs:
+    /// <list type="bullet">
+    ///     <item>The provided password is not correct (<see cref="ErrorCodes"/>: <c>UNAUTHORIZED</c>).</item>
+    ///     <item>The user is locked out for any authentication attempt (<see cref="ErrorCodes"/>: <c>UNAUTHORIZED</c>).</item>
+    /// </list>
     /// </summary>
     /// <param name="user">
-    /// The account of the user.
+    /// The user account.
     /// </param>
     /// <param name="password">
-    /// The provided password.
+    /// The password received from a client.
     /// </param>
     /// <exception cref="AuthenticationException">
-    /// If the password is not valid or the user is not authorized to login.
+    /// See method description.
     /// </exception>
     private async Task CheckPassword(UserDatabase user, string password)
     {
@@ -85,7 +103,7 @@ public partial class AuthenticationService : IAuthenticationService
                 "Provided password of user {id} is not valid",
                 user.Id
             );
-            throw new AuthenticationException("Password not correct", ErrorCodes.INVALID_ENTRY);
+            throw new AuthenticationException("Password not correct", ErrorCodes.UNAUTHORIZED);
         }
         else if (check == SignInResult.LockedOut)
         {

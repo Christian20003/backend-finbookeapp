@@ -10,32 +10,55 @@ public partial class AuthenticationService : IAuthenticationService
 {
     public async Task<IUserClient> GenerateToken(IUserTokenRequest request)
     {
+        _logger.LogDebug("Generate a new JWT for {user}", request.Email);
         var user = await CheckUserAccount(_protector.Protect(request.Email));
         await CheckRefreshToken(request.Token, user);
-        var token = new Token();
-        token.GenerateTokenValue(_settings, user.UserName ?? "");
-        return new UserClient
+        try
         {
-            Id = user.Id,
-            Name = _protector.Unprotect(user.UserName ?? ""),
-            Email = _protector.Unprotect(user.Email ?? ""),
-            ImagePath = user.ImagePath,
-            Session = new Session { Token = token, RefreshToken = request.Token },
-        };
+            var token = new Token();
+            token.GenerateTokenValue(_settings, user.UserName ?? "");
+            return new UserClient
+            {
+                Id = user.Id,
+                Name = _protector.Unprotect(user.UserName ?? ""),
+                Email = _protector.Unprotect(user.Email ?? ""),
+                ImagePath = user.ImagePath,
+                Session = new Session { Token = token, RefreshToken = request.Token },
+            };
+        }
+        catch (ApplicationException exception)
+        {
+            _logger.LogError(
+                LogEvents.MISSING_PROPERTY,
+                exception,
+                "Important settings to generate JWT are missing"
+            );
+            throw new AuthenticationException(
+                "Important settings to generate JWT are missing",
+                ErrorCodes.SERVER_ERROR,
+                exception
+            );
+        }
     }
 
     /// <summary>
     /// This method creates a new <c>RefreshToken</c>. Thereby the provided <c>user</c> instance will be updated
-    /// as well as the new token added to the database (persistently stored).
+    /// as well as the new token inserted to the authentication database. This method will throw an
+    /// <c><see cref="AuthenticationException"/></c> if one of the following occurs:
+    /// <list type="bullet">
+    ///     <item>The corresponding user account could not be updated (<see cref="ErrorCodes"/>: <c>UPDATE_FAILED</c>).</item>
+    ///     <item>The generated refresh token could not be stored (<see cref="ErrorCodes"/>: <c>INSERT_FAILED</c>).</item>
+    ///     <item>Necessary database operations have been canceled (<see cref="ErrorCodes"/>: <c>OPERATION_CANCELED</c>).</item>
+    /// </list>
     /// </summary>
     /// <param name="user">
-    /// The user instance from the authentication database.
+    /// The user account from the authentication database.
     /// </param>
     /// <returns>
     /// The new created token.
     /// </returns>
     /// <exception cref="AuthenticationException">
-    /// If any database operation fail.
+    /// See method description.
     /// </exception>
     private async Task<IRefreshToken> CreateRefreshToken(UserDatabase user)
     {

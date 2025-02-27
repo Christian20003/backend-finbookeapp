@@ -10,7 +10,13 @@ namespace FinBookeAPI.Services.Authentication;
 public partial class AuthenticationService : IAuthenticationService
 {
     /// <summary>
-    /// This method proofs if any user account exist in the authentication database from the provided email.
+    /// This method proofs if any user account exist in the authentication database with the provided email address. This method will
+    /// throw an <c><see cref="AuthenticationException"/></c> if one of the following occurs:
+    /// <list type="bullet">
+    ///     <item>The provided email does not have a user account (<see cref="ErrorCodes"/>: <c>ENTRY_NOT_FOUND</c>).</item>
+    ///     <item>The found user account has an empty string as username property (<see cref="ErrorCodes"/>: <c>INVALID_ENTRY</c>).</item>
+    ///     <item>The found user account has an empty string as email property (<see cref="ErrorCodes"/>: <c>INVALID_ENTRY</c>).</item>
+    /// </list>
     /// </summary>
     /// <param name="email">
     /// The email of the user account.
@@ -19,7 +25,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// An instance of <c>UserDatabase</c> which represents a single user account.
     /// </returns>
     /// <exception cref="AuthenticationException">
-    /// If not any user account could be found or the found instance has an empty username or email property.
+    /// See method description.
     /// </exception>
     private async Task<UserDatabase> CheckUserAccount(string email)
     {
@@ -55,18 +61,23 @@ public partial class AuthenticationService : IAuthenticationService
     }
 
     /// <summary>
-    /// This method proofs if the user has provided a valid refresh token which has been
-    /// assigned to his account.
+    /// This method proofs the validity of the provided <c>token</c>. This method will throw an <c><see cref="AuthenticationException"/></c>
+    /// if one of the following occurs:
+    /// <list type="bullet">
+    ///     <item>The provided user account does not have a refresh token (<see cref="ErrorCodes"/>: <c>ENTRY_NOT_FOUND</c>).</item>
+    ///     <item>The provided token does not correspond to the stored token (<see cref="ErrorCodes"/>: <c>UNAUTHORIZED</c>).</item>
+    ///     <item>The stored token has expired (<see cref="ErrorCodes"/>: <c>UNAUTHORIZED</c>).</item>
+    ///     <item>Necessary database operations have been canceled (<see cref="ErrorCodes"/>: <c>OPERATION_CANCELED</c>).</item>
+    /// </list>
     /// </summary>
     /// <param name="token">
-    /// The refresh token received from the user.
+    /// The refresh token received from a client.
     /// </param>
     /// <param name="user">
-    /// The user account from the database
+    /// The user account from the database.
     /// </param>
     /// <exception cref="AuthenticationException">
-    /// If the user does not have any refresh tokens or the refresh token is invalid. It can
-    /// also happen if the database cancel any of its operations.
+    /// See method description.
     /// </exception>
     private async Task CheckRefreshToken(IRefreshToken token, UserDatabase user)
     {
@@ -114,13 +125,17 @@ public partial class AuthenticationService : IAuthenticationService
     }
 
     /// <summary>
-    /// This method updates a user account in the database.
+    /// This method updates a user account in the authentication database. This method will throw an <c><see cref="AuthenticationException"/></c>
+    /// if one of the following occurs:
+    /// <list type="bullet">
+    ///     <item>The provided user account could not be updated (<see cref="ErrorCodes"/>: <c>UPDATE_FAILED</c>).</item>
+    /// </list>
     /// </summary>
     /// <param name="user">
-    /// The user object with all updated properties.
+    /// The user account with updated properties.
     /// </param>
     /// <exception cref="AuthenticationException">
-    /// If the update fails.
+    /// See method description.
     /// </exception>
     private async Task UpdateUser(UserDatabase user)
     {
@@ -138,13 +153,17 @@ public partial class AuthenticationService : IAuthenticationService
     }
 
     /// <summary>
-    /// This method sends the provided message to the defined address through an SMTP-Server.
+    /// This method sends the provided <c>message</c> to the defined address through an SMTP-Server. This method
+    /// will throw an <c><see cref="AuthenticationException"/></c> if one of the following occurs:
+    /// <list type="bullet">
+    ///     <item>The provided message could not be sent due to an SMTP-Server error (<see cref="ErrorCodes"/>: <c>SERVER_ERROR</c>).</item>
+    /// </list>
     /// </summary>
     /// <param name="message">
     /// The message which should be sent.
     /// </param>
     /// <exception cref="AuthenticationException">
-    /// If the SMTP request fails and the message could not be transmitted.
+    /// See method description.
     /// </exception>
     private void SendEmail(MailMessage message)
     {
