@@ -10,13 +10,10 @@ public partial class AuthenticationService : IAuthenticationService
 {
     public async Task<IUserClient> Login(IUserLogin data)
     {
-        // Proof if account exist
-        _logger.LogDebug("Check existence of {user}", data.Email);
+        _logger.LogDebug("Login call of {user}", data.Email);
+
         var email = _protector.Protect(data.Email);
         var user = await CheckUserAccount(email);
-
-        // Proof if password is valid
-        _logger.LogDebug("Check correctness of password from {user}", data.Email);
         await CheckPassword(user, data.Password);
 
         try
@@ -75,6 +72,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// </exception>
     private async Task CheckPassword(UserDatabase user, string password)
     {
+        _logger.LogDebug("Check provided user password of {user}", user.Email);
         var check = await _signInManager.CheckPasswordSignInAsync(
             user,
             password,
@@ -83,7 +81,7 @@ public partial class AuthenticationService : IAuthenticationService
         if (check == SignInResult.Failed)
         {
             _logger.LogWarning(
-                LogEvents.FAILED_CHECK,
+                LogEvents.UNAUTHORIZED,
                 "Provided password of user {id} is not valid",
                 user.Id
             );

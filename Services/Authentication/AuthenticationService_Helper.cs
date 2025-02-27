@@ -23,6 +23,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// </exception>
     private async Task<UserDatabase> CheckUserAccount(string email)
     {
+        _logger.LogDebug("Find user account of {user}", email);
         var user = await _userManager.FindByEmailAsync(email);
         // Proof if user exist
         if (user == null)
@@ -69,6 +70,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// </exception>
     private async Task CheckRefreshToken(IRefreshToken token, UserDatabase user)
     {
+        _logger.LogDebug("Proof existence of refresh token for {user}", user.Email);
         try
         {
             var storedToken = await _database.FindRefreshToken(obj =>
@@ -114,10 +116,11 @@ public partial class AuthenticationService : IAuthenticationService
     /// </exception>
     private async Task UpdateUser(UserDatabase user)
     {
+        _logger.LogDebug("Update user account of {user}", user.Email);
         var update = await _userManager.UpdateAsync(user);
         if (!update.Succeeded)
         {
-            _logger.LogError(
+            _logger.LogWarning(
                 LogEvents.FAILED_UPDATE,
                 "Refresh token could not be updated for user - {user}",
                 user.Id
@@ -137,6 +140,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// </exception>
     private void SendEmail(MailMessage message)
     {
+        _logger.LogDebug("Send an email to {user}", message.To);
         try
         {
             var server = _mailServer.Value;
@@ -157,7 +161,7 @@ public partial class AuthenticationService : IAuthenticationService
                 || exception is SmtpFailedRecipientsException
             )
         {
-            _logger.LogError(LogEvents.FAILED_OPERATION, "SMTP-Server does not the sent email");
+            _logger.LogError(LogEvents.FAILED_OPERATION, "SMTP-Server does not sent the email");
             throw new AuthenticationException(
                 "Mail could not be sent",
                 ErrorCodes.SERVER_ERROR,

@@ -9,14 +9,13 @@ public partial class AuthenticationService : IAuthenticationService
 {
     public async Task Logout(IUserTokenRequest request)
     {
-        _logger.LogDebug("Proof existence of user account: {user}", request.Email);
+        _logger.LogDebug("Logout call of {user}", request.Email);
         var user = await CheckUserAccount(_protector.Protect(request.Email));
         await CheckRefreshToken(request.Token, user);
         try
         {
-            _logger.LogDebug("Remove refresh token if it exist: {user}", request.Email);
+            _logger.LogDebug("Remove refresh token of {user}", request.Email);
             await _database.RemoveRefreshToken(user.RefreshTokenId);
-            _logger.LogDebug("Update user account in database: {user}", request.Email);
             user.RefreshTokenId = "";
             await UpdateUser(user);
             await _database.SaveChangesAsync();
@@ -35,7 +34,7 @@ public partial class AuthenticationService : IAuthenticationService
                 || exception is DbUpdateConcurrencyException
             )
         {
-            _logger.LogError(
+            _logger.LogWarning(
                 LogEvents.FAILED_OPERATION,
                 "Deleting a refresh token has been canceled"
             );

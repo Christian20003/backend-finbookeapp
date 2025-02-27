@@ -35,13 +35,16 @@ public interface IAuthenticationService
     /// </exception>
     public Task SecurityCode(IUserResetRequest request);
 
-    /*
-        1. Check if email exist
-        2. Check if code exist
-        3. Check if code is valid
-        4. Generate random new password
-        5. Send to client to provided email
-    */
+    /// <summary>
+    /// This method resets the password of the user and sends the new random generated password
+    /// via email to the user.
+    /// </summary>
+    /// <param name="request">
+    /// An object that contains all necessary information to to reset the password.
+    /// </param>
+    /// <exception cref="AuthenticationException">
+    /// If the reset password proccess fails.
+    /// </exception>
     public Task ResetPassword(IUserResetRequest request);
 
     /*
