@@ -17,7 +17,7 @@ public class UserDatabase : IdentityUser, IUserDatabase
     public string RefreshTokenId { get; set; } = "";
 
     [Required(ErrorMessage = "Security code is required")]
-    public string SecurityCode { get; set; } = "";
+    public string? SecurityCode { get; set; } = null;
 
     [Required(ErrorMessage = "Create-date of security code is required")]
     public DateTime? SecurityCodeCreatedAt { get; set; } = null;

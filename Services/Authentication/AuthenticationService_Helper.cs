@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Mail;
 using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
@@ -122,5 +124,69 @@ public partial class AuthenticationService : IAuthenticationService
             );
             throw new AuthenticationException("Failed update of user", ErrorCodes.UPDATE_FAILED);
         }
+    }
+
+    /// <summary>
+    /// This method sends the provided message to the defined address through an SMTP-Server.
+    /// </summary>
+    /// <param name="message">
+    /// The message which should be sent.
+    /// </param>
+    /// <exception cref="AuthenticationException">
+    /// If the SMTP request fails and the message could not be transmitted.
+    /// </exception>
+    private void SendEmail(MailMessage message)
+    {
+        try
+        {
+            var server = _mailServer.Value;
+            var smtpClient = new SmtpClient
+            {
+                Host = server.Host,
+                Port = server.Port,
+                Credentials = new NetworkCredential(server.Username, server.Password),
+                EnableSsl = true,
+            };
+            smtpClient.Send(message);
+        }
+        catch (Exception exception)
+            when (exception is InvalidOperationException
+                || exception is ObjectDisposedException
+                || exception is SmtpException
+                || exception is SmtpFailedRecipientException
+                || exception is SmtpFailedRecipientsException
+            )
+        {
+            _logger.LogError(LogEvents.FAILED_OPERATION, "SMTP-Server does not the sent email");
+            throw new AuthenticationException(
+                "Mail could not be sent",
+                ErrorCodes.SERVER_ERROR,
+                exception
+            );
+        }
+    }
+
+    /// <summary>
+    /// This method generates a random string based on the characters defined in <c>options</c>.
+    /// </summary>
+    /// <param name="options">
+    /// A string of all possible characters.
+    /// </param>
+    /// <param name="length">
+    /// The length of the resulting string.
+    /// </param>
+    /// <returns>
+    /// The randomly generated string.
+    /// </returns>
+    private static string GenerateRandomString(string options, int length)
+    {
+        Random res = new();
+        var result = "";
+
+        for (int i = 0; i < length; i++)
+        {
+            result += options[res.Next(options.Length)];
+        }
+        return result;
     }
 }
