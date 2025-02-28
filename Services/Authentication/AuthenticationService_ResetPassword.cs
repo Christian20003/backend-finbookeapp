@@ -1,5 +1,5 @@
 using System.Net.Mail;
-using FinBookeAPI.Models.Authentication.Interfaces;
+using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 
@@ -12,7 +12,7 @@ public partial class AuthenticationService : IAuthenticationService
     private const string _digits = "0123456789";
     private const string _specialChars = "!§$%&/()=?{[]}";
 
-    public async Task ResetPassword(IUserResetRequest request)
+    public async Task ResetPassword(UserResetRequest request)
     {
         _logger.LogDebug(
             "Reset password call with provided security code for {user}",

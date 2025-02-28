@@ -1,6 +1,6 @@
 using FinBookeAPI.AppConfig;
 using FinBookeAPI.Models.Authentication;
-using FinBookeAPI.Models.Configuration.Interfaces;
+using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Wrapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -11,8 +11,8 @@ public partial class AuthenticationService(
     UserManager<UserDatabase> userManager,
     SignInManager<UserDatabase> signInManager,
     AuthDbContext database,
-    IOptions<IJwtSettings> settings,
-    IOptions<ISmtpServer> mailServer,
+    IOptions<JwtSettings> settings,
+    IOptions<SmtpServer> mailServer,
     IDataProtection protection,
     ILogger<AuthenticationService> logger
 ) : IAuthenticationService
@@ -20,8 +20,8 @@ public partial class AuthenticationService(
     private readonly UserManager<UserDatabase> _userManager = userManager;
     private readonly SignInManager<UserDatabase> _signInManager = signInManager;
     private readonly AuthDbContext _database = database;
-    private readonly IOptions<IJwtSettings> _settings = settings;
-    private readonly IOptions<ISmtpServer> _mailServer = mailServer;
+    private readonly IOptions<JwtSettings> _settings = settings;
+    private readonly IOptions<SmtpServer> _mailServer = mailServer;
     private readonly IDataProtection _protector = protection;
     private readonly ILogger<AuthenticationService> _logger = logger;
 }

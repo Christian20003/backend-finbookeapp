@@ -1,5 +1,4 @@
 using FinBookeAPI.Models.Authentication;
-using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 
@@ -7,7 +6,7 @@ namespace FinBookeAPI.Services.Authentication;
 
 public partial class AuthenticationService : IAuthenticationService
 {
-    public async Task<IUserClient> Register(IUserRegister data)
+    public async Task<UserClient> Register(UserRegister data)
     {
         _logger.LogDebug("User Registrated, check email, username and co" + data);
 
@@ -51,7 +50,7 @@ public partial class AuthenticationService : IAuthenticationService
         };
     }
 
-    private async void CheckUserInDb(IUserRegister newUser)
+    private async void CheckUserInDb(UserRegister newUser)
     {
         var test1 = await _userManager.FindByNameAsync(newUser.Email);
         var test2 = await _userManager.FindByNameAsync(newUser.Name);

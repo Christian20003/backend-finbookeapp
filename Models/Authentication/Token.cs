@@ -2,9 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
-using FinBookeAPI.Models.Configuration.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -13,16 +11,35 @@ namespace FinBookeAPI.Models.Authentication;
 /// <summary>
 /// This class models a security token for authentication (JWT).
 /// </summary>
-public class Token : IToken
+public class Token
 {
+    /// <summary>
+    ///  The token value.
+    /// </summary>
     [Required(ErrorMessage = "Token values is required")]
     [MinLength(20, ErrorMessage = "The token value should have at least 20 characters")]
     public string Value { get; set; } = "";
 
+    /// <summary>
+    /// The date after this token expires in milliseconds.
+    /// </summary>
     [Required(ErrorMessage = "Expire time is required")]
     public long Expires { get; set; }
 
-    public void GenerateTokenValue(IOptions<IJwtSettings> settings, string identity)
+    /// <summary>
+    /// This method generates a new token value with the provided configuration
+    /// in the settings object. If any configuration options is missing an
+    /// <c>ApplicationException</c> will be thrown
+    /// </summary>
+    /// <param name="settings">
+    /// The options containing all necessary configuration data from
+    /// <c>appsettings.json</c>.
+    /// </param>
+    /// <param name="identity">
+    /// The main identity value for the subject property in a JWT.
+    /// </param>
+    /// <exception cref="ApplicationException"></exception>
+    public void GenerateTokenValue(IOptions<JwtSettings> settings, string identity)
     {
         // Proof if configuration is available
         var config = settings.Value;

@@ -1,18 +1,28 @@
-using FinBookeAPI.Models.Configuration.Interfaces;
-
 namespace FinBookeAPI.Models.Configuration;
 
 /// <summary>
-/// Class <c>JwTSettings</c> models the configurations for authentication data in <c>appsettings.json</c>
+/// Class <c>JwtSettings</c> models the configurations for authentication data in <c>appsettings.json</c>
 /// as well as secret section.
 /// </summary>
-public class JwTSettings : IJwtSettings
+public class JwtSettings
 {
     /// <summary>
     /// The name of the section in the <c>appsettings.json</c> file.
     /// </summary>
     public const string SectionName = "JwtConfig";
-    public string Issuer { get; set; } = "";
-    public string Audience { get; set; } = "";
-    public string Secret { get; set; } = "";
+
+    /// <summary>
+    /// The <c>URI</c> of the host which generates a JWT token.
+    /// </summary>
+    public string? Issuer { get; set; } = "";
+
+    /// <summary>
+    /// The <c>URI</c> of the host which receives the JWT token for validation.
+    /// </summary>
+    public string? Audience { get; set; } = "";
+
+    /// <summary>
+    /// The secret to verify and generate JWT tokens.
+    /// </summary>
+    public string? Secret { get; set; } = "";
 }

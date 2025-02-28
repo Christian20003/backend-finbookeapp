@@ -1,5 +1,4 @@
 using FinBookeAPI.Models.Authentication;
-using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 using Microsoft.AspNetCore.Identity;
@@ -8,7 +7,7 @@ namespace FinBookeAPI.Services.Authentication;
 
 public partial class AuthenticationService : IAuthenticationService
 {
-    public async Task<IUserClient> Login(IUserLogin data)
+    public async Task<UserClient> Login(UserLogin data)
     {
         _logger.LogDebug("Login call of {user}", data.Email);
 
@@ -75,7 +74,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// This method proofs if the provided password corresponds to the user account and is valid. This method will
     /// throw an <c><see cref="AuthenticationException"/></c> if one of the following occurs:
     /// <list type="bullet">
-    ///     <item>The provided password is not correct (<see cref="ErrorCodes"/>: <c>ACCESS_DENIED</c>).</item>
+    ///     <item>The provided password is not correct (<see cref="ErrorCodes"/>: <c>INVALID_CREDENTIALS</c>).</item>
     ///     <item>The user is locked out for any authentication attempt (<see cref="ErrorCodes"/>: <c>ACCESS_DENIED</c>).</item>
     /// </list>
     /// </summary>
@@ -103,7 +102,10 @@ public partial class AuthenticationService : IAuthenticationService
                 "Provided password of user {id} is not valid",
                 user.Id
             );
-            throw new AuthenticationException("Password not correct", ErrorCodes.ACCESS_DENIED);
+            throw new AuthenticationException(
+                "Password not correct",
+                ErrorCodes.INVALID_CREDENTIALS
+            );
         }
         else if (check == SignInResult.LockedOut)
         {

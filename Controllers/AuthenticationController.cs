@@ -1,43 +1,76 @@
 
-using FinBookeAPI.Models.Authentication.Interfaces;
+using FinBookeAPI.DTO.Authentication;
+using FinBookeAPI.Models.Configuration;
+using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Services.Authentication;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace backend_finbookeapp.Controllers;
+namespace FinBookeAPI.Controllers;
 
 [ApiController]
-[Route("[authorize]")]
-[AllowAnonymous]
-public class LoginController : ControllerBase
+[Route("api/[controller]")]
+public class AuthenticationController(
+    ILogger<AuthenticationController> logger,
+    IAuthenticationService service
+) : ControllerBase
 {
+    private readonly ILogger<AuthenticationController> _logger = logger;
+    private readonly IAuthenticationService _service = service;
 
-    private readonly ILogger<LoginController> _logger;
-    private readonly IAuthenticationService _authenticationService;
-
-    public LoginController(IAuthenticationService authenticationService,
-                            ILogger<LoginController> logger)
+    [HttpPost]
+    [Route("login")]
+    public async Task<ActionResult<UserDTO>> Login([FromBody] LoginDTO data)
     {
-        _authenticationService = authenticationService;
-        _logger = logger;
-    }
-
-
-    [HttpPost("login")]
-
-    public async Task<ActionResult<IUserClient>> UserLogin(IUserLogin userLoginData)
-    {
-
-        if (userLoginData is null)
+        _logger.LogInformation(LogEvents.INCOMING_REQUEST, "New login request");
+        if (!ModelState.IsValid)
         {
-            return BadRequest();
+            return BadRequest(ModelState);
         }
-        var user = await _authenticationService.Login(userLoginData);
-        return CreatedAtAction("login successful", user);
-
-
+        try
+        {
+            var result = await _service.Login(data.GetUserLogin());
+            var response = new UserDTO(result);
+            return Ok(response);
+        }
+        catch (AuthenticationException exception)
+        {
+            _logger.LogWarning(
+                LogEvents.FAILED_OPERATION,
+                exception,
+                "Something went wrong during login"
+            );
+            switch (exception.Code)
+            {
+                case ErrorCodes.INVALID_CREDENTIALS:
+                {
+                    ModelState.AddModelError("Message", "Invalid user account credentials");
+                    return Unauthorized(ModelState);
+                }
+                case ErrorCodes.ACCESS_DENIED:
+                {
+                    ModelState.AddModelError(
+                        "Message",
+                        "You are currently been locked out temporally"
+                    );
+                    return StatusCode(423, ModelState);
+                }
+                default:
+                {
+                    ModelState.AddModelError("Message", "An internal server error occurred");
+                    return StatusCode(500, ModelState);
+                }
+            }
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(LogEvents.FAILED_OPERATION, exception, "An unexpected error occurred");
+            ModelState.AddModelError("Message", "An internal server error occurred");
+            return StatusCode(500, ModelState);
+        }
     }
-
+    
+    
     [HttpPost("signup")]
     public async Task<ActionResult<IUserClient>> UserRegistration(IUserRegister userRegData)
     {
@@ -51,5 +84,5 @@ public class LoginController : ControllerBase
 
 
     }
-
 }
+

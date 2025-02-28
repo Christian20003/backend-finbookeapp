@@ -30,7 +30,7 @@ public static class SettingsExtension
             configuration.GetSection(FinancialDataDtabaseSettings.SectionName)
         );
         // Add JWT token settings
-        services.Configure<JwTSettings>(configuration.GetSection(JwTSettings.SectionName));
+        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
 
         // Add SMTP-Server settings
         services.Configure<SmtpServer>(configuration.GetSection(SmtpServer.SectionName));

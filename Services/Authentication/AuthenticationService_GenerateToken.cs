@@ -1,5 +1,4 @@
 using FinBookeAPI.Models.Authentication;
-using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +7,7 @@ namespace FinBookeAPI.Services.Authentication;
 
 public partial class AuthenticationService : IAuthenticationService
 {
-    public async Task<IUserClient> GenerateToken(IUserTokenRequest request)
+    public async Task<UserClient> GenerateToken(UserTokenRequest request)
     {
         _logger.LogDebug("Generate a new JWT for {user}", request.Email);
         var user = await CheckUserAccount(_protector.Protect(request.Email));
@@ -60,7 +59,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// See method description.
     /// </exception>
-    private async Task<IRefreshToken> CreateRefreshToken(UserDatabase user)
+    private async Task<RefreshToken> CreateRefreshToken(UserDatabase user)
     {
         // Generate new token
         var refreshToken = new RefreshToken

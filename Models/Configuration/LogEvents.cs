@@ -11,6 +11,8 @@ public class LogEvents
     public const int SUCCESSFUL_OPERATION = 2000;
     public const int SUCCESSFUL_LOGIN = 2001;
 
+    public const int INCOMING_REQUEST = 3001;
+
     public const int FAILED_OPERATION = 4000;
     public const int FAILED_UPDATE = 4001;
     public const int FAILED_INSERT = 4002;
