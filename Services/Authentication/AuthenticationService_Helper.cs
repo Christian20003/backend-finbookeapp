@@ -107,14 +107,14 @@ public partial class AuthenticationService : IAuthenticationService
                     ErrorCodes.ACCESS_DENIED
                 );
             }
-            /* if (storedToken.ExpiresAt.Ticks < DateTime.UtcNow.Ticks)
+            if (storedToken.ExpiresAt.Ticks < DateTime.UtcNow.Ticks)
             {
                 _logger.LogWarning(LogEvents.UNAUTHORIZED, "Refresh token has expired");
                 throw new AuthenticationException(
                     "Refresh token has expired",
                     ErrorCodes.ACCESS_EXPIRED
                 );
-            } */
+            }
         }
         catch (OperationCanceledException exception)
         {

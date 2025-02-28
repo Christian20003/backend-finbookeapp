@@ -13,7 +13,7 @@ using Moq;
 
 namespace FinBookeAPI.Tests.Authentication;
 
-public class LogoutUnitTests
+public class GenerateTokenUnitTests
 {
     // DEPENDENCIES
     private readonly Mock<UserManager<UserDatabase>> UserManager;
@@ -27,10 +27,11 @@ public class LogoutUnitTests
 
     // DATA
     private readonly UserDatabase User;
-    private readonly Mock<IUserTokenRequest> request;
+    private readonly Mock<IUserTokenRequest> Request;
     private readonly Mock<IRefreshToken> Token;
+    private readonly Mock<IJwtSettings> Settings;
 
-    public LogoutUnitTests()
+    public GenerateTokenUnitTests()
     {
         // Initialize dependencies
         UserManager = MockUserManager.GetMock();
@@ -44,7 +45,8 @@ public class LogoutUnitTests
         // Initialize important data objects
         User = MockUserDatabase.GetMock();
         Token = MockRefreshToken.GetMock();
-        request = MockUserTokenRequest.GetMock();
+        Request = MockUserTokenRequest.GetMock();
+        Settings = MockJwtSettings.GetMock();
 
         // Mocking methods that have in most cases the same output
         UserManager
@@ -54,9 +56,7 @@ public class LogoutUnitTests
         AuthDbContext
             .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<IRefreshToken, bool>>>()))
             .ReturnsAsync(Token.Object);
-        AuthDbContext
-            .Setup(obj => obj.RemoveRefreshToken(It.IsAny<string>()))
-            .ReturnsAsync(Token.Object);
+        JwtSettings.Setup(obj => obj.Value).Returns(Settings.Object);
 
         // Initialize test object
         Service = new AuthenticationService(
@@ -71,63 +71,67 @@ public class LogoutUnitTests
     }
 
     [Fact]
-    public async Task User_Account_Not_Found()
+    public async Task Receive_Invalid_Email_Property()
     {
         UserManager.Setup(obj => obj.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(() => null);
 
-        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Logout(request.Object));
+        await Assert.ThrowsAsync<AuthenticationException>(
+            () => Service.GenerateToken(Request.Object)
+        );
     }
 
     [Fact]
-    public async Task User_Has_Invalid_Username()
+    public async Task Database_Stores_Invalid_UserName()
     {
         User.UserName = null;
 
-        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Logout(request.Object));
+        await Assert.ThrowsAsync<AuthenticationException>(
+            () => Service.GenerateToken(Request.Object)
+        );
     }
 
     [Fact]
-    public async Task User_Has_Invalid_Email()
+    public async Task Database_Stores_Invalid_Email()
     {
         User.Email = null;
 
-        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Logout(request.Object));
+        await Assert.ThrowsAsync<AuthenticationException>(
+            () => Service.GenerateToken(Request.Object)
+        );
     }
 
     [Fact]
-    public async Task Refresh_Token_Not_Found_In_CheckRefreshToken()
+    public async Task RefreshToken_Not_Found()
     {
         AuthDbContext
             .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<IRefreshToken, bool>>>()))
             .ReturnsAsync(() => null);
 
-        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Logout(request.Object));
+        await Assert.ThrowsAsync<AuthenticationException>(
+            () => Service.GenerateToken(Request.Object)
+        );
     }
 
     [Fact]
-    public async Task Refresh_Token_Is_Invalid()
+    public async Task Provided_RefreshToken_Is_Invalid()
     {
-        Token.SetupProperty(obj => obj.Token, "abcde");
+        var falseToken = new Mock<IRefreshToken>();
+        falseToken.SetupProperty(obj => obj.Token, "123456789");
+        Request.SetupProperty(obj => obj.Token, falseToken.Object);
 
-        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Logout(request.Object));
+        await Assert.ThrowsAsync<AuthenticationException>(
+            () => Service.GenerateToken(Request.Object)
+        );
     }
 
     [Fact]
-    public async Task RefreshToken_Has_Expired()
+    public async Task Provided_RefreshToken_Has_Expired()
     {
         Token.SetupProperty(obj => obj.ExpiresAt, DateTime.UtcNow.AddDays(-2));
 
-        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Logout(request.Object));
-    }
-
-    [Fact]
-    public async Task Refresh_Token_Not_Found_In_RemoveRefreshToken()
-    {
-        AuthDbContext
-            .Setup(obj => obj.RemoveRefreshToken(It.IsAny<string>()))
-            .Throws<NullReferenceException>();
-
-        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Logout(request.Object));
+        await Assert.ThrowsAsync<AuthenticationException>(
+            () => Service.GenerateToken(Request.Object)
+        );
     }
 
     [Fact]
@@ -137,15 +141,27 @@ public class LogoutUnitTests
             .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<IRefreshToken, bool>>>()))
             .Throws<OperationCanceledException>();
 
-        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Logout(request.Object));
+        await Assert.ThrowsAsync<AuthenticationException>(
+            () => Service.GenerateToken(Request.Object)
+        );
     }
 
     [Fact]
-    public async Task Successful_logout()
+    public async Task JWT_Settings_Not_Set()
     {
-        await Service.Logout(request.Object);
+        Settings.SetupProperty(obj => obj.Secret, null);
 
-        UserManager.Verify(obj => obj.UpdateAsync(It.IsAny<UserDatabase>()), Times.Once());
-        Assert.Equal("", User.RefreshTokenId);
+        await Assert.ThrowsAsync<AuthenticationException>(
+            () => Service.GenerateToken(Request.Object)
+        );
+    }
+
+    [Fact]
+    public async Task New_Valid_JWT_Generated()
+    {
+        var result = await Service.GenerateToken(Request.Object);
+
+        Assert.InRange(result.Session.Token.Value.Length, 50, 200);
+        Assert.True(DateTime.UtcNow.Ticks < result.Session.Token.Expires);
     }
 }

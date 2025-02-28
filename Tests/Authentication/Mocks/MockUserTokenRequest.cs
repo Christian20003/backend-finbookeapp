@@ -1,10 +1,9 @@
-using FakeItEasy;
 using FinBookeAPI.Models.Authentication.Interfaces;
 using Moq;
 
 namespace FinBookeAPI.Tests.Authentication.Mocks;
 
-public static class MockIUserTokenRequest
+public static class MockUserTokenRequest
 {
     public static Mock<IUserTokenRequest> GetMock()
     {

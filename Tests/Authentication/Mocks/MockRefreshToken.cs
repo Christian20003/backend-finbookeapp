@@ -11,6 +11,7 @@ public static class MockRefreshToken
         obj.SetupProperty(o => o.Id, TestData.TokenId);
         obj.SetupProperty(o => o.UserId, TestData.UserId);
         obj.SetupProperty(o => o.Token, TestData.Token);
+        obj.SetupProperty(o => o.ExpiresAt, DateTime.UtcNow.AddDays(1));
         return obj;
     }
 }

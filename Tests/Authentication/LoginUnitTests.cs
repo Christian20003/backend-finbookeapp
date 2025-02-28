@@ -86,7 +86,7 @@ public class LoginUnitTests
     }
 
     [Fact]
-    public async Task ReceiveInvalidEmailProperty()
+    public async Task Receive_Invalid_Email_Property()
     {
         UserManager.Setup(obj => obj.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(() => null);
 
@@ -94,7 +94,7 @@ public class LoginUnitTests
     }
 
     [Fact]
-    public async Task ReceiveInvalidPasswordProperty()
+    public async Task Receive_Invalid_Password_Property()
     {
         SignInManager
             .Setup(obj =>
@@ -110,7 +110,7 @@ public class LoginUnitTests
     }
 
     [Fact]
-    public async Task UserIsLockedOutForFurtherRequests()
+    public async Task User_LockedOut_For_Authentication()
     {
         SignInManager
             .Setup(obj =>
@@ -126,53 +126,70 @@ public class LoginUnitTests
     }
 
     [Fact]
-    public async Task DatabaseStoreInvalidUserName()
+    public async Task Database_Stores_Invalid_UserName()
     {
-        //User.SetupProperty(obj => obj.UserName, null);
         User.UserName = null;
 
         await Assert.ThrowsAsync<AuthenticationException>(() => Service.Login(Data.Object));
     }
 
     [Fact]
-    public async Task DatabaseStoreInvalidEmail()
+    public async Task Database_Stores_Invalid_Email()
     {
-        //User.SetupProperty(obj => obj.Email, null);
         User.Email = null;
 
         await Assert.ThrowsAsync<AuthenticationException>(() => Service.Login(Data.Object));
     }
 
     [Fact]
-    public async Task GenerateNewRefreshToken()
+    public async Task Database_Cancels_Operation()
+    {
+        AuthDbContext
+            .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<IRefreshToken, bool>>>()))
+            .Throws<OperationCanceledException>();
+
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Login(Data.Object));
+    }
+
+    [Fact]
+    public async Task JWT_Settings_Not_Set()
+    {
+        Settings.SetupProperty(obj => obj.Secret, null);
+
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.Login(Data.Object));
+    }
+
+    [Fact]
+    public async Task Generate_NewRefreshToken_If_Not_Exist()
     {
         AuthDbContext
             .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<IRefreshToken, bool>>>()))
             .ReturnsAsync(() => null);
 
-        await Service.Login(Data.Object);
+        var result = await Service.Login(Data.Object);
 
         UserManager.Verify(obj => obj.UpdateAsync(It.IsAny<UserDatabase>()), Times.Once());
         AuthDbContext.Verify(obj => obj.AddRefreshToken(It.IsAny<IRefreshToken>()), Times.Once());
+        Assert.Equal(Token.Object, result.Session.RefreshToken);
     }
 
     [Fact]
-    public async Task UseExistingRefreshToken()
+    public async Task Generate_New_Valid_JWT_Token()
+    {
+        var result = await Service.Login(Data.Object);
+
+        Assert.InRange(result.Session.Token.Value.Length, 50, 200);
+        Assert.True(DateTime.UtcNow.Ticks < result.Session.Token.Expires);
+    }
+
+    [Fact]
+    public async Task Use_Existing_RefreshToken()
     {
         var result = await Service.Login(Data.Object);
 
         UserManager.Verify(obj => obj.UpdateAsync(It.IsAny<UserDatabase>()), Times.Never());
         AuthDbContext.Verify(obj => obj.AddRefreshToken(It.IsAny<IRefreshToken>()), Times.Never());
         Assert.Equal(Token.Object.Token, result.Session.RefreshToken.Token);
-    }
-
-    [Fact]
-    public async Task GenerateNewJWTToken()
-    {
-        var result = await Service.Login(Data.Object);
-
-        Assert.NotNull(result.Session.Token);
-        Assert.NotEqual("", result.Session.Token.Value);
     }
 
     [Fact]
