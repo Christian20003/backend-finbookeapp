@@ -1,3 +1,4 @@
+
 using FinBookeAPI.DTO.Authentication;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
@@ -68,4 +69,20 @@ public class AuthenticationController(
             return StatusCode(500, ModelState);
         }
     }
+    
+    
+    [HttpPost("signup")]
+    public async Task<ActionResult<IUserClient>> UserRegistration(IUserRegister userRegData)
+    {
+
+        if (userRegData is null)
+        {
+            return BadRequest();
+        }
+        var user = await _authenticationService.Register(userRegData);
+        return CreatedAtAction("Registration successful", user);
+
+
+    }
 }
+
