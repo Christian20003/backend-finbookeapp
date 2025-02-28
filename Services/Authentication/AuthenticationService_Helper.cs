@@ -13,7 +13,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// This method proofs if any user account exist in the authentication database with the provided email address. This method will
     /// throw an <c><see cref="AuthenticationException"/></c> if one of the following occurs:
     /// <list type="bullet">
-    ///     <item>The provided email does not have a user account (<see cref="ErrorCodes"/>: <c>ENTRY_NOT_FOUND</c>).</item>
+    ///     <item>The provided email does not have a user account (<see cref="ErrorCodes"/>: <c>INVALID_CREDENTIALS</c>).</item>
     ///     <item>The found user account has an empty string as username property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
     ///     <item>The found user account has an empty string as email property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
     /// </list>
@@ -35,7 +35,7 @@ public partial class AuthenticationService : IAuthenticationService
         if (user == null)
         {
             _logger.LogWarning(LogEvents.FAILED_SEARCH, "User account could not be found");
-            throw new AuthenticationException("User not found", ErrorCodes.ENTRY_NOT_FOUND);
+            throw new AuthenticationException("User not found", ErrorCodes.INVALID_CREDENTIALS);
         }
         // Proof if username property is set
         if (user.UserName == null)
