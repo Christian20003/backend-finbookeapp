@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using FinBookeAPI.Models.Authentication;
-using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +26,7 @@ public class AuthDbContext(
     /// <summary>
     /// This object represents the table that stores all refresh tokens.
     /// </summary>
-    public DbSet<IRefreshToken> RefreshToken { get; init; }
+    public DbSet<RefreshToken> RefreshToken { get; init; }
 
     /// <summary>
     /// This function configures the authentication database by reading all specified configurations
@@ -69,8 +68,8 @@ public class AuthDbContext(
     /// <exception cref="OperationCanceledException">
     /// If the requested search operation has been cancelled.
     /// </exception>
-    public virtual Task<IRefreshToken?> FindRefreshToken(
-        Expression<Func<IRefreshToken, bool>> predicate
+    public virtual Task<RefreshToken?> FindRefreshToken(
+        Expression<Func<RefreshToken, bool>> predicate
     )
     {
         return RefreshToken.FirstOrDefaultAsync(predicate);
@@ -88,7 +87,7 @@ public class AuthDbContext(
     /// <exception cref="OperationCanceledException">
     /// If the requested add operation has been cancelled.
     /// </exception>
-    public virtual async Task<IRefreshToken> AddRefreshToken(IRefreshToken token)
+    public virtual async Task<RefreshToken> AddRefreshToken(RefreshToken token)
     {
         var result = await RefreshToken.AddAsync(token);
         return result.Entity;
@@ -106,7 +105,7 @@ public class AuthDbContext(
     /// <exception cref="OperationCanceledException">
     /// If the requested operation has been cancelled.
     /// </exception>
-    public virtual async Task<IRefreshToken> RemoveRefreshToken(string id)
+    public virtual async Task<RefreshToken> RemoveRefreshToken(string id)
     {
         var token =
             await FindRefreshToken(token => token.Id == id)

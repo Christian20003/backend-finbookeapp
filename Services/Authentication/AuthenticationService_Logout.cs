@@ -1,4 +1,4 @@
-using FinBookeAPI.Models.Authentication.Interfaces;
+using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +7,7 @@ namespace FinBookeAPI.Services.Authentication;
 
 public partial class AuthenticationService : IAuthenticationService
 {
-    public async Task Logout(IUserTokenRequest request)
+    public async Task Logout(UserTokenRequest request)
     {
         _logger.LogDebug("Logout call of {user}", request.Email);
         var user = await CheckUserAccount(_protector.Protect(request.Email));

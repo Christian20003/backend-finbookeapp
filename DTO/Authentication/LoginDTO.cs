@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using FinBookeAPI.Models.Authentication;
-using FinBookeAPI.Models.Authentication.Interfaces;
 
 namespace FinBookeAPI.DTO.Authentication;
 
@@ -13,7 +12,7 @@ public class LoginDTO
     [Required(ErrorMessage = "Password property is missing")]
     public string Password { get; set; } = "";
 
-    public IUserLogin GetUserLogin()
+    public UserLogin GetUserLogin()
     {
         return new UserLogin { Email = Email, Password = Password };
     }

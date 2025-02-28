@@ -1,4 +1,4 @@
-using FinBookeAPI.Models.Authentication.Interfaces;
+using FinBookeAPI.Models.Authentication;
 
 namespace FinBookeAPI.DTO.Authentication;
 
@@ -12,7 +12,7 @@ public class RefreshTokenDTO
 
     public RefreshTokenDTO() { }
 
-    public RefreshTokenDTO(IRefreshToken token)
+    public RefreshTokenDTO(RefreshToken token)
     {
         Id = token.Id;
         Token = token.Token;

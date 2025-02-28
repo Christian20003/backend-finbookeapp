@@ -1,13 +1,12 @@
 using System.Net.Mail;
-using FinBookeAPI.Models.Authentication.Interfaces;
+using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
-using FinBookeAPI.Models.Exceptions;
 
 namespace FinBookeAPI.Services.Authentication;
 
 public partial class AuthenticationService : IAuthenticationService
 {
-    public async Task SecurityCode(IUserResetRequest request)
+    public async Task SecurityCode(UserResetRequest request)
     {
         _logger.LogDebug("Generate security code for {user}", request.Email);
         var options = _upperCaseLetters + _digits;

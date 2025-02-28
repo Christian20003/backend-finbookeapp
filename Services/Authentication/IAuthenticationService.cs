@@ -1,4 +1,4 @@
-using FinBookeAPI.Models.Authentication.Interfaces;
+using FinBookeAPI.Models.Authentication;
 
 namespace FinBookeAPI.Services.Authentication;
 
@@ -29,12 +29,12 @@ public interface IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// See method description.
     /// </exception>
-    public Task<IUserClient> Login(IUserLogin data);
+    public Task<UserClient> Login(UserLogin data);
 
     /*
         1. Does email or username already exist
     */
-    public Task<IUserClient> Register(IUserRegister data);
+    public Task<UserClient> Register(UserRegister data);
 
     /// <summary>
     /// This method sends a new generated security code to the provided email through an SMTP-Server and stores the result as well
@@ -54,7 +54,7 @@ public interface IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// See method description.
     /// </exception>
-    public Task SecurityCode(IUserResetRequest request);
+    public Task SecurityCode(UserResetRequest request);
 
     /// <summary>
     /// This method resets the password of the user and sends the new random generated password via email to the user. This method
@@ -76,7 +76,7 @@ public interface IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// See method description.
     /// </exception>
-    public Task ResetPassword(IUserResetRequest request);
+    public Task ResetPassword(UserResetRequest request);
 
     /// <summary>
     /// This method allows the user to get a new JWT. This method will throw an <c><see cref="AuthenticationException"/></c>
@@ -102,7 +102,7 @@ public interface IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// See method description.
     /// </exception>
-    public Task<IUserClient> GenerateToken(IUserTokenRequest request);
+    public Task<UserClient> GenerateToken(UserTokenRequest request);
 
     /// <summary>
     /// This method process a logout attempt. his method will throw an <c><see cref="AuthenticationException"/></c>
@@ -123,5 +123,5 @@ public interface IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// See method description.
     /// </exception>
-    public Task Logout(IUserTokenRequest request);
+    public Task Logout(UserTokenRequest request);
 }

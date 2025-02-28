@@ -1,5 +1,4 @@
 using FinBookeAPI.Models.Authentication;
-using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 using Microsoft.AspNetCore.Identity;
@@ -8,7 +7,7 @@ namespace FinBookeAPI.Services.Authentication;
 
 public partial class AuthenticationService : IAuthenticationService
 {
-    public async Task<IUserClient> Login(IUserLogin data)
+    public async Task<UserClient> Login(UserLogin data)
     {
         _logger.LogDebug("Login call of {user}", data.Email);
 

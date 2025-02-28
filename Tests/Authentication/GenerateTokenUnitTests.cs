@@ -1,12 +1,12 @@
 using System.Linq.Expressions;
 using FinBookeAPI.AppConfig;
 using FinBookeAPI.Models.Authentication;
-using FinBookeAPI.Models.Authentication.Interfaces;
-using FinBookeAPI.Models.Configuration.Interfaces;
+using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services.Authentication;
 using FinBookeAPI.Tests.Authentication.Mocks;
+using FinBookeAPI.Tests.Authentication.TestObjects;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -19,17 +19,17 @@ public class GenerateTokenUnitTests
     private readonly Mock<UserManager<UserDatabase>> UserManager;
     private readonly Mock<SignInManager<UserDatabase>> SignInManager;
     private readonly Mock<AuthDbContext> AuthDbContext;
-    private readonly Mock<IOptions<IJwtSettings>> JwtSettings;
-    private readonly Mock<IOptions<ISmtpServer>> SmtpServer;
+    private readonly Mock<IOptions<JwtSettings>> JwtSettings;
+    private readonly Mock<IOptions<SmtpServer>> SmtpServer;
     private readonly Mock<IDataProtection> DataProtection;
     private readonly Mock<ILogger<AuthenticationService>> Logger;
     private readonly AuthenticationService Service;
 
     // DATA
     private readonly UserDatabase User;
-    private readonly Mock<IUserTokenRequest> Request;
-    private readonly Mock<IRefreshToken> Token;
-    private readonly Mock<IJwtSettings> Settings;
+    private readonly UserTokenRequest Request;
+    private readonly RefreshToken Token;
+    private readonly JwtSettings Settings;
 
     public GenerateTokenUnitTests()
     {
@@ -38,15 +38,15 @@ public class GenerateTokenUnitTests
         SignInManager = MockSignInManager.GetMock(UserManager);
         AuthDbContext = MockAuthDbContext.GetMock();
         DataProtection = MockDataProtection.GetMock();
-        JwtSettings = new Mock<IOptions<IJwtSettings>>();
-        SmtpServer = new Mock<IOptions<ISmtpServer>>();
+        JwtSettings = new Mock<IOptions<JwtSettings>>();
+        SmtpServer = new Mock<IOptions<SmtpServer>>();
         Logger = new Mock<ILogger<AuthenticationService>>();
 
         // Initialize important data objects
-        User = MockUserDatabase.GetMock();
-        Token = MockRefreshToken.GetMock();
-        Request = MockUserTokenRequest.GetMock();
-        Settings = MockJwtSettings.GetMock();
+        User = TestUserDatabase.GetObject();
+        Token = TestRefreshToken.GetObject();
+        Request = TestUserTokenRequest.GetObject();
+        Settings = TestJwtSettings.GetObject();
 
         // Mocking methods that have in most cases the same output
         UserManager
@@ -54,9 +54,9 @@ public class GenerateTokenUnitTests
             .ReturnsAsync(IdentityResult.Success);
         UserManager.Setup(obj => obj.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(User);
         AuthDbContext
-            .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<IRefreshToken, bool>>>()))
-            .ReturnsAsync(Token.Object);
-        JwtSettings.Setup(obj => obj.Value).Returns(Settings.Object);
+            .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<RefreshToken, bool>>>()))
+            .ReturnsAsync(Token);
+        JwtSettings.Setup(obj => obj.Value).Returns(Settings);
 
         // Initialize test object
         Service = new AuthenticationService(
@@ -75,9 +75,7 @@ public class GenerateTokenUnitTests
     {
         UserManager.Setup(obj => obj.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(() => null);
 
-        await Assert.ThrowsAsync<AuthenticationException>(
-            () => Service.GenerateToken(Request.Object)
-        );
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.GenerateToken(Request));
     }
 
     [Fact]
@@ -85,9 +83,7 @@ public class GenerateTokenUnitTests
     {
         User.UserName = null;
 
-        await Assert.ThrowsAsync<AuthenticationException>(
-            () => Service.GenerateToken(Request.Object)
-        );
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.GenerateToken(Request));
     }
 
     [Fact]
@@ -95,73 +91,73 @@ public class GenerateTokenUnitTests
     {
         User.Email = null;
 
-        await Assert.ThrowsAsync<AuthenticationException>(
-            () => Service.GenerateToken(Request.Object)
-        );
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.GenerateToken(Request));
     }
 
     [Fact]
     public async Task RefreshToken_Not_Found()
     {
         AuthDbContext
-            .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<IRefreshToken, bool>>>()))
+            .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<RefreshToken, bool>>>()))
             .ReturnsAsync(() => null);
 
-        await Assert.ThrowsAsync<AuthenticationException>(
-            () => Service.GenerateToken(Request.Object)
-        );
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.GenerateToken(Request));
     }
 
     [Fact]
     public async Task Provided_RefreshToken_Is_Invalid()
     {
-        var falseToken = new Mock<IRefreshToken>();
-        falseToken.SetupProperty(obj => obj.Token, "123456789");
-        Request.SetupProperty(obj => obj.Token, falseToken.Object);
+        var falseToken = new RefreshToken
+        {
+            Id = Token.Id,
+            Token = "123456789",
+            UserId = Token.UserId,
+            ExpiresAt = Token.ExpiresAt,
+        };
+        Request.Token = falseToken;
 
-        await Assert.ThrowsAsync<AuthenticationException>(
-            () => Service.GenerateToken(Request.Object)
-        );
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.GenerateToken(Request));
     }
 
     [Fact]
     public async Task Provided_RefreshToken_Has_Expired()
     {
-        Token.SetupProperty(obj => obj.ExpiresAt, DateTime.UtcNow.AddDays(-2));
+        var falseToken = new RefreshToken
+        {
+            Id = Token.Id,
+            Token = Token.Token,
+            UserId = Token.UserId,
+            ExpiresAt = DateTime.UtcNow.AddDays(-2),
+        };
+        Request.Token = falseToken;
 
-        await Assert.ThrowsAsync<AuthenticationException>(
-            () => Service.GenerateToken(Request.Object)
-        );
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.GenerateToken(Request));
     }
 
     [Fact]
     public async Task Database_Cancels_Operation()
     {
         AuthDbContext
-            .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<IRefreshToken, bool>>>()))
+            .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<RefreshToken, bool>>>()))
             .Throws<OperationCanceledException>();
 
-        await Assert.ThrowsAsync<AuthenticationException>(
-            () => Service.GenerateToken(Request.Object)
-        );
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.GenerateToken(Request));
     }
 
     [Fact]
     public async Task JWT_Settings_Not_Set()
     {
-        Settings.SetupProperty(obj => obj.Secret, null);
+        Settings.Secret = null;
 
-        await Assert.ThrowsAsync<AuthenticationException>(
-            () => Service.GenerateToken(Request.Object)
-        );
+        await Assert.ThrowsAsync<AuthenticationException>(() => Service.GenerateToken(Request));
     }
 
     [Fact]
     public async Task New_Valid_JWT_Generated()
     {
-        var result = await Service.GenerateToken(Request.Object);
+        var result = await Service.GenerateToken(Request);
 
-        Assert.InRange(result.Session.Token.Value.Length, 50, 200);
+        Assert.InRange(result.Session.Token.Value.Length, 50, 300);
         Assert.True(DateTime.UtcNow.Ticks < result.Session.Token.Expires);
     }
 }

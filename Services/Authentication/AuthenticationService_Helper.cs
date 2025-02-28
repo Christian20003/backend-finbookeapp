@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Mail;
 using FinBookeAPI.Models.Authentication;
-using FinBookeAPI.Models.Authentication.Interfaces;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 
@@ -79,7 +78,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// <exception cref="AuthenticationException">
     /// See method description.
     /// </exception>
-    private async Task CheckRefreshToken(IRefreshToken token, UserDatabase user)
+    private async Task CheckRefreshToken(RefreshToken token, UserDatabase user)
     {
         _logger.LogDebug("Proof existence of refresh token for {user}", user.Email);
         try

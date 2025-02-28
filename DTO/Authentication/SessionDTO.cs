@@ -1,3 +1,5 @@
+using FinBookeAPI.Models.Authentication;
+
 namespace FinBookeAPI.DTO.Authentication;
 
 public class SessionDTO
@@ -10,7 +12,7 @@ public class SessionDTO
 
     public SessionDTO() { }
 
-    public SessionDTO(Models.Authentication.Interfaces.ISession session)
+    public SessionDTO(Session session)
     {
         JwtToken = session.Token.Value;
         JwtExpires = session.Token.Expires;

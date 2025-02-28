@@ -1,4 +1,4 @@
-using FinBookeAPI.Models.Authentication.Interfaces;
+using FinBookeAPI.Models.Authentication;
 
 namespace FinBookeAPI.DTO.Authentication;
 
@@ -16,7 +16,7 @@ public class UserDTO
 
     public UserDTO() { }
 
-    public UserDTO(IUserClient user)
+    public UserDTO(UserClient user)
     {
         Id = user.Id;
         Name = user.Name;
