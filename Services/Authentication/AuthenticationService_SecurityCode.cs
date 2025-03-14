@@ -10,7 +10,7 @@ public partial class AuthenticationService : IAuthenticationService
     {
         _logger.LogDebug("Generate security code for {user}", request.Email);
         var options = _upperCaseLetters + _digits;
-        var user = await CheckUserAccount(_protector.Protect(request.Email));
+        var user = await CheckUserAccount(_protector.ProtectEmail(request.Email));
         var code = GenerateRandomString(options, 6);
         var message = new MailMessage
         {

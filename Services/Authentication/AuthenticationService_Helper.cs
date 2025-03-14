@@ -3,6 +3,7 @@ using System.Net.Mail;
 using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinBookeAPI.Services.Authentication;
 
@@ -29,6 +30,7 @@ public partial class AuthenticationService : IAuthenticationService
     private async Task<UserDatabase> CheckUserAccount(string email)
     {
         _logger.LogDebug("Find user account of {user}", email);
+        //var user = await _userManager.Users.FirstOrDefaultAsync(user => _protector.UnprotectEmail(user.Email ?? "") == email);
         var user = await _userManager.FindByEmailAsync(email);
         // Proof if user exist
         if (user == null)

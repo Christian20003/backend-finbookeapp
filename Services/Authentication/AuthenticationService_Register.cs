@@ -12,7 +12,11 @@ public partial class AuthenticationService : IAuthenticationService
 
         CheckUserInDb(data);
 
-        var newUser = new UserDatabase { UserName = data.Name, Email = data.Email };
+        var newUser = new UserDatabase
+        {
+            UserName = _protector.Protect(data.Name),
+            Email = _protector.ProtectEmail(data.Email),
+        };
         await _userManager.CreateAsync(newUser);
         await _userManager.AddPasswordAsync(newUser, data.Password);
 
@@ -44,7 +48,7 @@ public partial class AuthenticationService : IAuthenticationService
         {
             Id = databaseUser.Id,
             Name = _protector.Unprotect(databaseUser.UserName),
-            Email = _protector.Unprotect(databaseUser.Email),
+            Email = _protector.UnprotectEmail(databaseUser.Email),
             ImagePath = databaseUser.ImagePath,
             Session = new Session { Token = token, RefreshToken = refreshToken },
         };

@@ -10,7 +10,7 @@ public partial class AuthenticationService : IAuthenticationService
     public async Task<UserClient> GenerateToken(UserTokenRequest request)
     {
         _logger.LogDebug("Generate a new JWT for {user}", request.Email);
-        var user = await CheckUserAccount(_protector.Protect(request.Email));
+        var user = await CheckUserAccount(_protector.ProtectEmail(request.Email));
         await CheckRefreshToken(request.Token, user);
         try
         {
@@ -20,7 +20,7 @@ public partial class AuthenticationService : IAuthenticationService
             {
                 Id = user.Id,
                 Name = _protector.Unprotect(user.UserName ?? ""),
-                Email = _protector.Unprotect(user.Email ?? ""),
+                Email = _protector.UnprotectEmail(user.Email ?? ""),
                 ImagePath = user.ImagePath,
                 Session = new Session { Token = token, RefreshToken = request.Token },
             };

@@ -10,7 +10,7 @@ public partial class AuthenticationService : IAuthenticationService
     public async Task Logout(UserTokenRequest request)
     {
         _logger.LogDebug("Logout call of {user}", request.Email);
-        var user = await CheckUserAccount(_protector.Protect(request.Email));
+        var user = await CheckUserAccount(_protector.ProtectEmail(request.Email));
         await CheckRefreshToken(request.Token, user);
         try
         {

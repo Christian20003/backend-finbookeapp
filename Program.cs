@@ -14,7 +14,7 @@ builder.Services.AddDbContext<AuthDbContext>();
 builder.Services.AddDbContext<DataDbContext>();
 builder.Services.AddSecurity(builder.Configuration);
 
-builder.Services.AddScoped<IDataProtection, DataProtection>();
+builder.Services.AddSingleton<IDataProtection, DataProtection>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 var app = builder.Build();

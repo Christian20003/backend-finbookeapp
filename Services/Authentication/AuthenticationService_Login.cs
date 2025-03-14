@@ -11,7 +11,7 @@ public partial class AuthenticationService : IAuthenticationService
     {
         _logger.LogDebug("Login call of {user}", data.Email);
 
-        var email = _protector.Protect(data.Email);
+        var email = _protector.ProtectEmail(data.Email);
         var user = await CheckUserAccount(email);
         await CheckPassword(user, data.Password);
 
@@ -24,7 +24,7 @@ public partial class AuthenticationService : IAuthenticationService
 
             // Generate new token and user object
             _logger.LogDebug("Create user object to be sent to the user");
-            var name = _protector.Unprotect(user.UserName ?? "");
+            var name = _protector.Unprotect(user.UserName!);
             var token = new Token();
             token.GenerateTokenValue(_settings, name);
 
@@ -37,7 +37,7 @@ public partial class AuthenticationService : IAuthenticationService
             {
                 Id = user.Id,
                 Name = _protector.Unprotect(user.UserName ?? ""),
-                Email = _protector.Unprotect(user.Email ?? ""),
+                Email = _protector.UnprotectEmail(user.Email ?? ""),
                 ImagePath = user.ImagePath,
                 Session = new Session { Token = token, RefreshToken = refreshToken },
             };

@@ -18,7 +18,7 @@ public partial class AuthenticationService : IAuthenticationService
             "Reset password call with provided security code for {user}",
             request.Email
         );
-        var user = await CheckUserAccount(_protector.Protect(request.Email));
+        var user = await CheckUserAccount(_protector.ProtectEmail(request.Email));
         if (user.SecurityCode == null || user.SecurityCodeCreatedAt == null || request.Code == null)
         {
             _logger.LogWarning(
