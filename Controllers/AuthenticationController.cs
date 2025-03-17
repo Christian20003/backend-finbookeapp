@@ -24,50 +24,11 @@ public class AuthenticationController(
         _logger.LogInformation(LogEvents.OBJECT_INVALID, "New login request");
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState);
+            return Ok(ModelState);
         }
-        try
-        {
-            var result = await _service.Login(data.GetUserLogin());
-            var response = new UserDTO(result);
-            return Ok(response);
-        }
-        catch (AuthenticationException exception)
-        {
-            _logger.LogWarning(
-                LogEvents.OPERATION_FAILED,
-                exception,
-                "Something went wrong during login"
-            );
-            /* switch (exception.Code)
-            {
-                case ErrorCodes.INVALID_CREDENTIALS:
-                {
-                    ModelState.AddModelError("Message", "Invalid user account credentials");
-                    return Unauthorized(ModelState);
-                }
-                case ErrorCodes.ACCESS_DENIED:
-                {
-                    ModelState.AddModelError(
-                        "Message",
-                        "You are currently been locked out temporally"
-                    );
-                    return StatusCode(423, ModelState);
-                }
-                default:
-                {
-                    ModelState.AddModelError("Message", "An internal server error occurred");
-                    return StatusCode(500, ModelState);
-                }
-            } */
-            return BadRequest();
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError(LogEvents.OPERATION_FAILED, exception, "An unexpected error occurred");
-            ModelState.AddModelError("Message", "An internal server error occurred");
-            return StatusCode(500, ModelState);
-        }
+        var result = await _service.Login(data.GetUserLogin());
+        var response = new UserDTO(result);
+        return Ok(response);
     }
 
     [HttpPost("signup")]
