@@ -22,7 +22,7 @@ public partial class AuthenticationService : IAuthenticationService
         message.To.Add(request.Email);
         SendEmail(message);
         _logger.LogInformation(
-            LogEvents.SUCCESSFUL_OPERATION,
+            LogEvents.OPERATION_SUCCESS,
             "New security code has been sent to a user"
         );
         user.SecurityCode = _protector.Protect(code);

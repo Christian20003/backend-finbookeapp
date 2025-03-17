@@ -16,7 +16,7 @@ namespace FinBookeAPI.Tests.Authentication;
 public class LoginUnitTests
 {
     // DEPENDENCIES
-    private readonly Mock<UserManager<UserDatabase>> UserManager;
+    private readonly Mock<IAccountManager> UserManager;
     private readonly Mock<SignInManager<UserDatabase>> SignInManager;
     private readonly Mock<AuthDbContext> AuthDbContext;
     private readonly Mock<IOptions<JwtSettings>> JwtSettings;
@@ -37,8 +37,8 @@ public class LoginUnitTests
     public LoginUnitTests()
     {
         // Initialize dependencies
-        UserManager = MockUserManager.GetMock();
-        SignInManager = MockSignInManager.GetMock(UserManager);
+        UserManager = MockAccountManager.GetMock();
+        SignInManager = MockSignInManager.GetMock(MockUserManager.GetMock());
         AuthDbContext = MockAuthDbContext.GetMock();
         DataProtection = MockDataProtection.GetMock();
         JwtSettings = new Mock<IOptions<JwtSettings>>();
@@ -52,10 +52,11 @@ public class LoginUnitTests
         Data = TestUserLogin.GetObject();
 
         // Mocking methods that have in most cases the same output
+        var accounts = new List<UserDatabase> { User }.AsQueryable();
         UserManager
-            .Setup(obj => obj.UpdateAsync(It.IsAny<UserDatabase>()))
+            .Setup(obj => obj.UpdateUserAsync(It.IsAny<UserDatabase>()))
             .ReturnsAsync(IdentityResult.Success);
-        UserManager.Setup(obj => obj.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(User);
+        UserManager.Setup(obj => obj.GetUsersAsync()).Returns(accounts.ToAsyncEnumerable());
         SignInManager
             .Setup(obj =>
                 obj.CheckPasswordSignInAsync(
@@ -88,7 +89,8 @@ public class LoginUnitTests
     [Fact]
     public async Task Receive_Invalid_Email_Property()
     {
-        UserManager.Setup(obj => obj.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(() => null);
+        var accounts = new List<UserDatabase>().AsQueryable();
+        UserManager.Setup(obj => obj.GetUsersAsync()).Returns(accounts.ToAsyncEnumerable());
 
         await Assert.ThrowsAsync<AuthenticationException>(() => Service.Login(Data));
     }
@@ -168,7 +170,7 @@ public class LoginUnitTests
 
         var result = await Service.Login(Data);
 
-        UserManager.Verify(obj => obj.UpdateAsync(It.IsAny<UserDatabase>()), Times.Once());
+        UserManager.Verify(obj => obj.UpdateUserAsync(It.IsAny<UserDatabase>()), Times.Once());
         AuthDbContext.Verify(obj => obj.AddRefreshToken(It.IsAny<RefreshToken>()), Times.Once());
         Assert.Equal(Token, result.Session.RefreshToken);
     }
@@ -187,7 +189,7 @@ public class LoginUnitTests
     {
         var result = await Service.Login(Data);
 
-        UserManager.Verify(obj => obj.UpdateAsync(It.IsAny<UserDatabase>()), Times.Never());
+        UserManager.Verify(obj => obj.UpdateUserAsync(It.IsAny<UserDatabase>()), Times.Never());
         AuthDbContext.Verify(obj => obj.AddRefreshToken(It.IsAny<RefreshToken>()), Times.Never());
         Assert.Equal(Token.Token, result.Session.RefreshToken.Token);
     }

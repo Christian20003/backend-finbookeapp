@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 namespace FinBookeAPI.Services.Authentication;
 
 public partial class AuthenticationService(
-    UserManager<UserDatabase> userManager,
+    IAccountManager accountManager,
     SignInManager<UserDatabase> signInManager,
     AuthDbContext database,
     IOptions<JwtSettings> settings,
@@ -17,7 +17,7 @@ public partial class AuthenticationService(
     ILogger<AuthenticationService> logger
 ) : IAuthenticationService
 {
-    private readonly UserManager<UserDatabase> _userManager = userManager;
+    private readonly IAccountManager _accountManager = accountManager;
     private readonly SignInManager<UserDatabase> _signInManager = signInManager;
     private readonly AuthDbContext _database = database;
     private readonly IOptions<JwtSettings> _settings = settings;

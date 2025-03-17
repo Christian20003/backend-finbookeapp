@@ -10,13 +10,13 @@ public class AuthenticationException : Exception
     /// </summary>
     public ErrorCodes Code { get; }
 
-    public AuthenticationException(string message, ErrorCodes code, Exception e)
+    public AuthenticationException(ErrorCodes code, string message, Exception e)
         : base(message, e)
     {
         Code = code;
     }
 
-    public AuthenticationException(string message, ErrorCodes code)
+    public AuthenticationException(ErrorCodes code, string message)
         : base(message)
     {
         Code = code;

@@ -10,11 +10,8 @@ public partial class AuthenticationService : IAuthenticationService
     public async Task<UserClient> Login(UserLogin data)
     {
         _logger.LogDebug("Login call of {user}", data.Email);
-
-        var email = _protector.ProtectEmail(data.Email);
-        var user = await CheckUserAccount(email);
+        var user = await CheckUserAccount(data.Email);
         await CheckPassword(user, data.Password);
-
         try
         {
             // Proof if refresh token exist and create a new one if not
@@ -29,15 +26,15 @@ public partial class AuthenticationService : IAuthenticationService
             token.GenerateTokenValue(_settings, name);
 
             _logger.LogInformation(
-                LogEvents.SUCCESSFUL_LOGIN,
+                LogEvents.OPERATION_SUCCESS,
                 "A successful login from {Id}",
                 user.Id
             );
             return new UserClient
             {
                 Id = user.Id,
-                Name = _protector.Unprotect(user.UserName ?? ""),
-                Email = _protector.UnprotectEmail(user.Email ?? ""),
+                Name = _protector.Unprotect(user.UserName!),
+                Email = _protector.UnprotectEmail(user.Email!),
                 ImagePath = user.ImagePath,
                 Session = new Session { Token = token, RefreshToken = refreshToken },
             };
@@ -45,26 +42,26 @@ public partial class AuthenticationService : IAuthenticationService
         catch (OperationCanceledException exception)
         {
             _logger.LogError(
-                LogEvents.FAILED_OPERATION,
+                LogEvents.OPERATION_FAILED,
                 exception,
                 "Database operation has been canceled"
             );
             throw new AuthenticationException(
-                "Database operation has been canceled",
                 ErrorCodes.DATABASE_ERROR,
+                "Database operation has been canceled",
                 exception
             );
         }
         catch (ApplicationException exception)
         {
             _logger.LogError(
-                LogEvents.MISSING_PROPERTY,
+                LogEvents.PROPERTY_MISSING,
                 exception,
                 "Important settings to generate JWT are missing"
             );
             throw new AuthenticationException(
-                "Important settings to generate JWT are missing",
                 ErrorCodes.CONFIG_NOT_FOUND,
+                "Important settings to generate JWT are missing",
                 exception
             );
         }
@@ -75,7 +72,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// throw an <c><see cref="AuthenticationException"/></c> if one of the following occurs:
     /// <list type="bullet">
     ///     <item>The provided password is not correct (<see cref="ErrorCodes"/>: <c>INVALID_CREDENTIALS</c>).</item>
-    ///     <item>The user is locked out for any authentication attempt (<see cref="ErrorCodes"/>: <c>ACCESS_DENIED</c>).</item>
+    ///     <item>The user is locked out for any authentication attempt (<see cref="ErrorCodes"/>: <c>ACCESS_LOCKED</c>).</item>
     /// </list>
     /// </summary>
     /// <param name="user">
@@ -98,21 +95,24 @@ public partial class AuthenticationService : IAuthenticationService
         if (check == SignInResult.Failed)
         {
             _logger.LogWarning(
-                LogEvents.UNAUTHORIZED,
+                LogEvents.PROPERTY_INVALID,
                 "Provided password of user {id} is not valid",
                 user.Id
             );
             throw new AuthenticationException(
-                "Password not correct",
-                ErrorCodes.INVALID_CREDENTIALS
+                ErrorCodes.INVALID_CREDENTIALS,
+                "Password not correct"
             );
         }
         else if (check == SignInResult.LockedOut)
         {
-            _logger.LogWarning(LogEvents.UNAUTHORIZED, "Login attempt with lockout restriction");
+            _logger.LogWarning(
+                LogEvents.OPERATION_FAILED,
+                "Login attempt with lockout restriction"
+            );
             throw new AuthenticationException(
-                "Unauthorized login attempt",
-                ErrorCodes.ACCESS_DENIED
+                ErrorCodes.ACCESS_LOCKED,
+                "Unauthorized login attempt"
             );
         }
     }

@@ -15,6 +15,7 @@ builder.Services.AddDbContext<DataDbContext>();
 builder.Services.AddSecurity(builder.Configuration);
 
 builder.Services.AddSingleton<IDataProtection, DataProtection>();
+builder.Services.AddSingleton<IAccountManager, AccountManager>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 var app = builder.Build();

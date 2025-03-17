@@ -3,7 +3,6 @@ using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Services.Authentication;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinBookeAPI.Controllers;
@@ -22,7 +21,7 @@ public class AuthenticationController(
     [Route("login")]
     public async Task<ActionResult<UserDTO>> Login([FromBody] LoginDTO data)
     {
-        _logger.LogInformation(LogEvents.INCOMING_REQUEST, "New login request");
+        _logger.LogInformation(LogEvents.OBJECT_INVALID, "New login request");
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -36,11 +35,11 @@ public class AuthenticationController(
         catch (AuthenticationException exception)
         {
             _logger.LogWarning(
-                LogEvents.FAILED_OPERATION,
+                LogEvents.OPERATION_FAILED,
                 exception,
                 "Something went wrong during login"
             );
-            switch (exception.Code)
+            /* switch (exception.Code)
             {
                 case ErrorCodes.INVALID_CREDENTIALS:
                 {
@@ -60,11 +59,12 @@ public class AuthenticationController(
                     ModelState.AddModelError("Message", "An internal server error occurred");
                     return StatusCode(500, ModelState);
                 }
-            }
+            } */
+            return BadRequest();
         }
         catch (Exception exception)
         {
-            _logger.LogError(LogEvents.FAILED_OPERATION, exception, "An unexpected error occurred");
+            _logger.LogError(LogEvents.OPERATION_FAILED, exception, "An unexpected error occurred");
             ModelState.AddModelError("Message", "An internal server error occurred");
             return StatusCode(500, ModelState);
         }

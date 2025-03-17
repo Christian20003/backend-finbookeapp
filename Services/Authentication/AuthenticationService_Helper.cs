@@ -3,7 +3,6 @@ using System.Net.Mail;
 using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
-using Microsoft.EntityFrameworkCore;
 
 namespace FinBookeAPI.Services.Authentication;
 
@@ -15,7 +14,6 @@ public partial class AuthenticationService : IAuthenticationService
     /// <list type="bullet">
     ///     <item>The provided email does not have a user account (<see cref="ErrorCodes"/>: <c>INVALID_CREDENTIALS</c>).</item>
     ///     <item>The found user account has an empty string as username property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
-    ///     <item>The found user account has an empty string as email property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
     /// </list>
     /// </summary>
     /// <param name="email">
@@ -29,34 +27,39 @@ public partial class AuthenticationService : IAuthenticationService
     /// </exception>
     private async Task<UserDatabase> CheckUserAccount(string email)
     {
-        _logger.LogDebug("Find user account of {user}", email);
-        //var user = await _userManager.Users.FirstOrDefaultAsync(user => _protector.UnprotectEmail(user.Email ?? "") == email);
-        var user = await _userManager.FindByEmailAsync(email);
+        _logger.LogDebug("Find user account of {email}", email);
+        UserDatabase? user = null;
+        var accounts = _accountManager.GetUsersAsync();
+        await foreach (var account in accounts)
+        {
+            if (account.Email == null)
+            {
+                continue;
+            }
+            if (_protector.UnprotectEmail(account.Email) == email)
+            {
+                user = account;
+                break;
+            }
+        }
         // Proof if user exist
         if (user == null)
         {
-            _logger.LogWarning(LogEvents.FAILED_SEARCH, "User account could not be found");
-            throw new AuthenticationException("User not found", ErrorCodes.INVALID_CREDENTIALS);
+            _logger.LogWarning(LogEvents.SEARCH_FAILED, "User account could not be found");
+            throw new AuthenticationException(
+                ErrorCodes.INVALID_CREDENTIALS,
+                "User account could not be found"
+            );
         }
         // Proof if username property is set
         if (user.UserName == null)
         {
             _logger.LogWarning(
-                LogEvents.MISSING_PROPERTY,
+                LogEvents.PROPERTY_MISSING,
                 "Unexpected missing username property of user {id}",
                 user.Id
             );
-            throw new AuthenticationException("Empty username", ErrorCodes.UNEXPECTED_STRUCTURE);
-        }
-        // Proof if email property is set
-        if (user.Email == null)
-        {
-            _logger.LogWarning(
-                LogEvents.MISSING_PROPERTY,
-                "Unexpected missing email property of user {id}",
-                user.Id
-            );
-            throw new AuthenticationException("Empty email", ErrorCodes.UNEXPECTED_STRUCTURE);
+            throw new AuthenticationException(ErrorCodes.UNEXPECTED_STRUCTURE, "Username is null");
         }
         return user;
     }
@@ -65,8 +68,8 @@ public partial class AuthenticationService : IAuthenticationService
     /// This method proofs the validity of the provided <c>token</c>. This method will throw an <c><see cref="AuthenticationException"/></c>
     /// if one of the following occurs:
     /// <list type="bullet">
-    ///     <item>The provided user account does not have a refresh token (<see cref="ErrorCodes"/>: <c>ENTRY_NOT_FOUND</c>).</item>
-    ///     <item>The provided token does not correspond to the stored token (<see cref="ErrorCodes"/>: <c>ACCESS_DENIED</c>).</item>
+    ///     <item>The provided user account does not have a refresh token (<see cref="ErrorCodes"/>: <c>INVALID_TOKEN</c>).</item>
+    ///     <item>The provided token does not correspond to the stored token (<see cref="ErrorCodes"/>: <c>INVALID_TOKEN</c>).</item>
     ///     <item>The stored token has expired (<see cref="ErrorCodes"/>: <c>ACCESS_EXPIRED</c>).</item>
     ///     <item>Necessary database operations have been canceled (<see cref="ErrorCodes"/>: <c>DATABASE_ERROR</c>).</item>
     /// </list>
@@ -82,7 +85,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// </exception>
     private async Task CheckRefreshToken(RefreshToken token, UserDatabase user)
     {
-        _logger.LogDebug("Proof existence of refresh token for {user}", user.Email);
+        _logger.LogDebug("Proof existence of refresh token for {email}", user.Email);
         try
         {
             var storedToken = await _database.FindRefreshToken(obj =>
@@ -90,39 +93,39 @@ public partial class AuthenticationService : IAuthenticationService
             );
             if (storedToken == null)
             {
-                _logger.LogInformation(LogEvents.MISSING_OBJECT, "Refresh token not found");
+                _logger.LogInformation(LogEvents.SEARCH_FAILED, "Refresh token not found");
                 throw new AuthenticationException(
-                    "Refresh token not found",
-                    ErrorCodes.ENTRY_NOT_FOUND
+                    ErrorCodes.INVALID_TOKEN,
+                    "Refresh token not found"
                 );
             }
             token.HashValue();
             if (storedToken.Token != token.Token)
             {
                 _logger.LogWarning(
-                    LogEvents.UNAUTHORIZED,
-                    "Invalid refresh token provided for logout"
+                    LogEvents.PROPERTY_UNEQUAL,
+                    "Provided refresh token does not correspond to the stored one"
                 );
                 throw new AuthenticationException(
-                    "Invalid refresh token",
-                    ErrorCodes.ACCESS_DENIED
+                    ErrorCodes.INVALID_TOKEN,
+                    "Provided refresh token does not correspond to the stored one"
                 );
             }
             if (storedToken.ExpiresAt.Ticks < DateTime.UtcNow.Ticks)
             {
-                _logger.LogWarning(LogEvents.UNAUTHORIZED, "Refresh token has expired");
+                _logger.LogWarning(LogEvents.PROPERTY_TOO_SMALL, "Refresh token has expired");
                 throw new AuthenticationException(
-                    "Refresh token has expired",
-                    ErrorCodes.ACCESS_EXPIRED
+                    ErrorCodes.ACCESS_EXPIRED,
+                    "Refresh token has expired"
                 );
             }
         }
         catch (OperationCanceledException exception)
         {
-            _logger.LogError(LogEvents.FAILED_OPERATION, "Database operation has been canceled");
+            _logger.LogError(LogEvents.OPERATION_FAILED, "Database operation has been canceled");
             throw new AuthenticationException(
-                "Database operation has been canceled",
                 ErrorCodes.DATABASE_ERROR,
+                "Database operation has been canceled",
                 exception
             );
         }
@@ -143,16 +146,16 @@ public partial class AuthenticationService : IAuthenticationService
     /// </exception>
     private async Task UpdateUser(UserDatabase user)
     {
-        _logger.LogDebug("Update user account of {user}", user.Email);
-        var update = await _userManager.UpdateAsync(user);
+        _logger.LogDebug("Update user account of {email}", user.Email);
+        var update = await _accountManager.UpdateUserAsync(user);
         if (!update.Succeeded)
         {
             _logger.LogWarning(
-                LogEvents.FAILED_UPDATE,
-                "Refresh token could not be updated for user - {user}",
+                LogEvents.UPDATE_FAILED,
+                "Refresh token could not be updated for {user}",
                 user.Id
             );
-            throw new AuthenticationException("Failed update of user", ErrorCodes.UPDATE_FAILED);
+            throw new AuthenticationException(ErrorCodes.UPDATE_FAILED, "Failed update of user");
         }
     }
 
@@ -192,10 +195,10 @@ public partial class AuthenticationService : IAuthenticationService
                 || exception is SmtpFailedRecipientsException
             )
         {
-            _logger.LogError(LogEvents.FAILED_OPERATION, "SMTP-Server does not sent the email");
+            _logger.LogError(LogEvents.OPERATION_FAILED, "SMTP-Server does not sent the email");
             throw new AuthenticationException(
-                "Mail could not be sent",
                 ErrorCodes.EXTERNAL_SERVICE_ERROR,
+                "Mail could not be sent",
                 exception
             );
         }

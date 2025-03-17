@@ -16,7 +16,7 @@ namespace FinBookeAPI.Tests.Authentication;
 public class GenerateTokenUnitTests
 {
     // DEPENDENCIES
-    private readonly Mock<UserManager<UserDatabase>> UserManager;
+    private readonly Mock<IAccountManager> UserManager;
     private readonly Mock<SignInManager<UserDatabase>> SignInManager;
     private readonly Mock<AuthDbContext> AuthDbContext;
     private readonly Mock<IOptions<JwtSettings>> JwtSettings;
@@ -34,8 +34,8 @@ public class GenerateTokenUnitTests
     public GenerateTokenUnitTests()
     {
         // Initialize dependencies
-        UserManager = MockUserManager.GetMock();
-        SignInManager = MockSignInManager.GetMock(UserManager);
+        UserManager = MockAccountManager.GetMock();
+        SignInManager = MockSignInManager.GetMock(MockUserManager.GetMock());
         AuthDbContext = MockAuthDbContext.GetMock();
         DataProtection = MockDataProtection.GetMock();
         JwtSettings = new Mock<IOptions<JwtSettings>>();
@@ -49,10 +49,11 @@ public class GenerateTokenUnitTests
         Settings = TestJwtSettings.GetObject();
 
         // Mocking methods that have in most cases the same output
+        var accounts = new List<UserDatabase> { User }.AsQueryable();
         UserManager
-            .Setup(obj => obj.UpdateAsync(It.IsAny<UserDatabase>()))
+            .Setup(obj => obj.UpdateUserAsync(It.IsAny<UserDatabase>()))
             .ReturnsAsync(IdentityResult.Success);
-        UserManager.Setup(obj => obj.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(User);
+        UserManager.Setup(obj => obj.GetUsersAsync()).Returns(accounts.ToAsyncEnumerable());
         AuthDbContext
             .Setup(obj => obj.FindRefreshToken(It.IsAny<Expression<Func<RefreshToken, bool>>>()))
             .ReturnsAsync(Token);
@@ -73,7 +74,8 @@ public class GenerateTokenUnitTests
     [Fact]
     public async Task Receive_Invalid_Email_Property()
     {
-        UserManager.Setup(obj => obj.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(() => null);
+        var accounts = new List<UserDatabase>().AsQueryable();
+        UserManager.Setup(obj => obj.GetUsersAsync()).Returns(accounts.ToAsyncEnumerable());
 
         await Assert.ThrowsAsync<AuthenticationException>(() => Service.GenerateToken(Request));
     }

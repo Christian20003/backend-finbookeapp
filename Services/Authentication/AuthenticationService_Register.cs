@@ -17,10 +17,11 @@ public partial class AuthenticationService : IAuthenticationService
             UserName = _protector.Protect(data.Name),
             Email = _protector.ProtectEmail(data.Email),
         };
-        await _userManager.CreateAsync(newUser);
-        await _userManager.AddPasswordAsync(newUser, data.Password);
+        var result = await _accountManager.CreateUserAsync(newUser, data.Password);
 
-        var databaseUser = await _userManager.FindByEmailAsync(newUser.Email);
+        // TODO: Change
+        var databaseUsers = _accountManager.GetUsersAsync();
+        var databaseUser = await databaseUsers.FirstAsync();
 
         // Proof if refresh token exist and create a new one if not
         var refreshToken =
@@ -36,7 +37,7 @@ public partial class AuthenticationService : IAuthenticationService
         token.GenerateTokenValue(_settings, name);
 
         _logger.LogInformation(
-            LogEvents.SUCCESSFUL_LOGIN,
+            LogEvents.OPERATION_SUCCESS,
             "A successful login from {Id}",
             databaseUser.Id
         );
@@ -56,13 +57,13 @@ public partial class AuthenticationService : IAuthenticationService
 
     private async void CheckUserInDb(UserRegister newUser)
     {
-        var test1 = await _userManager.FindByNameAsync(newUser.Email);
+        /* var test1 = await _userManager.FindByNameAsync(newUser.Email);
         var test2 = await _userManager.FindByNameAsync(newUser.Name);
         var isValid = test1 == null && test2 == null;
 
         if (!isValid)
         {
-            throw new AuthenticationException("User alread exist", ErrorCodes.UNEXPECTED_STRUCTURE);
-        }
+            throw new AuthenticationException(ErrorCodes.UNEXPECTED_STRUCTURE, "User alread exist");
+        } */
     }
 }

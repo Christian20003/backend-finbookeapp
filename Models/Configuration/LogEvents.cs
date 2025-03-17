@@ -5,19 +5,17 @@ namespace FinBookeAPI.Models.Configuration;
 /// </summary>
 public class LogEvents
 {
-    public const int MISSING_OBJECT = 1000;
-    public const int MISSING_PROPERTY = 1001;
+    public const int OPERATION_SUCCESS = 2000;
 
-    public const int SUCCESSFUL_OPERATION = 2000;
-    public const int SUCCESSFUL_LOGIN = 2001;
-
-    public const int INCOMING_REQUEST = 3001;
-
-    public const int FAILED_OPERATION = 4000;
-    public const int FAILED_UPDATE = 4001;
-    public const int FAILED_INSERT = 4002;
-    public const int FAILED_SEARCH = 4003;
-    public const int FAILED_CHECK = 4004;
-
-    public const int UNAUTHORIZED = 5000;
+    public const int OBJECT_INVALID = 4000;
+    public const int PROPERTY_MISSING = 4001;
+    public const int PROPERTY_INVALID = 4002;
+    public const int PROPERTY_UNEQUAL = 4003;
+    public const int PROPERTY_TOO_SMALL = 4004;
+    public const int PROPERTY_TOO_LARGE = 4005;
+    public const int OPERATION_FAILED = 4006;
+    public const int UPDATE_FAILED = 4007;
+    public const int INSERT_FAILED = 4008;
+    public const int SEARCH_FAILED = 4009;
+    public const int DELETE_FAILED = 4010;
 }

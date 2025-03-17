@@ -10,17 +10,17 @@ public partial class AuthenticationService : IAuthenticationService
     public async Task<UserClient> GenerateToken(UserTokenRequest request)
     {
         _logger.LogDebug("Generate a new JWT for {user}", request.Email);
-        var user = await CheckUserAccount(_protector.ProtectEmail(request.Email));
+        var user = await CheckUserAccount(request.Email);
         await CheckRefreshToken(request.Token, user);
         try
         {
             var token = new Token();
-            token.GenerateTokenValue(_settings, user.UserName ?? "");
+            token.GenerateTokenValue(_settings, user.UserName!);
             return new UserClient
             {
                 Id = user.Id,
-                Name = _protector.Unprotect(user.UserName ?? ""),
-                Email = _protector.UnprotectEmail(user.Email ?? ""),
+                Name = _protector.Unprotect(user.UserName!),
+                Email = _protector.UnprotectEmail(user.Email!),
                 ImagePath = user.ImagePath,
                 Session = new Session { Token = token, RefreshToken = request.Token },
             };
@@ -28,13 +28,13 @@ public partial class AuthenticationService : IAuthenticationService
         catch (ApplicationException exception)
         {
             _logger.LogError(
-                LogEvents.MISSING_PROPERTY,
+                LogEvents.PROPERTY_MISSING,
                 exception,
                 "Important settings to generate JWT are missing"
             );
             throw new AuthenticationException(
-                "Important settings to generate JWT are missing",
                 ErrorCodes.CONFIG_NOT_FOUND,
+                "Important settings to generate JWT are missing",
                 exception
             );
         }
@@ -84,13 +84,13 @@ public partial class AuthenticationService : IAuthenticationService
             if (creation == null)
             {
                 _logger.LogError(
-                    LogEvents.FAILED_INSERT,
+                    LogEvents.INSERT_FAILED,
                     "Refresh token could not be inserted for user - {user}",
                     user.Id
                 );
                 throw new AuthenticationException(
-                    "Failed to create refresh token",
-                    ErrorCodes.INSERT_FAILED
+                    ErrorCodes.INSERT_FAILED,
+                    "Failed to create refresh token"
                 );
             }
             await _database.SaveChangesAsync();
@@ -103,13 +103,13 @@ public partial class AuthenticationService : IAuthenticationService
             )
         {
             _logger.LogError(
-                LogEvents.FAILED_OPERATION,
+                LogEvents.OPERATION_FAILED,
                 exception,
                 "Database operation has been canceled"
             );
             throw new AuthenticationException(
-                "Database operation has been canceled",
                 ErrorCodes.DATABASE_ERROR,
+                "Database operation has been canceled",
                 exception
             );
         }

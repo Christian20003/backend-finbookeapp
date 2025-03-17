@@ -33,6 +33,7 @@
     <PackageReference Include="Moq.EntityFrameworkCore" />
     <PackageReference Include="NReco.Logging.File" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
+    <PackageReference Include="System.Linq.Async" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

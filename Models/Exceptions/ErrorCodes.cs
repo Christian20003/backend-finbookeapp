@@ -5,14 +5,24 @@ namespace FinBookeAPI.Models.Exceptions;
 /// </summary>
 public enum ErrorCodes
 {
-    CONFIG_NOT_FOUND,
-    ENTRY_NOT_FOUND,
+    // Authentication specific
+    INVALID_CREDENTIALS,
+    INVALID_TOKEN,
+    INVALID_CODE,
+    ACCESS_EXPIRED,
+    ACCESS_LOCKED,
+
+    // Structure specifc
     UNEXPECTED_STRUCTURE,
+
+    // CRUD-operation specifc
+    ENTRY_NOT_FOUND,
     UPDATE_FAILED,
     INSERT_FAILED,
-    INVALID_CREDENTIALS,
-    ACCESS_DENIED,
-    ACCESS_EXPIRED,
+    DELETE_FAILED,
+
+    // Dependency specifc
+    CONFIG_NOT_FOUND,
     DATABASE_ERROR,
     EXTERNAL_SERVICE_ERROR,
 }
