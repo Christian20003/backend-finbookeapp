@@ -8,8 +8,9 @@ public enum ErrorCodes
     // Authentication specific
     INVALID_CREDENTIALS,
     INVALID_TOKEN,
+    EXPIRED_TOKEN,
     INVALID_CODE,
-    ACCESS_EXPIRED,
+    EXPIRED_CODE,
     ACCESS_LOCKED,
 
     // Structure specifc

@@ -61,7 +61,7 @@ public interface IAuthenticationService
     ///     <item>The provided email does not have a user account (<see cref="ErrorCodes"/>: <c>INVALID_CREDENTIALS</c>).</item>
     ///     <item>The found user account has an empty string as username property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
     ///     <item>The user account does not have a valid security code property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
-    ///     <item>The provided security code has expired (<see cref="ErrorCodes"/>: <c>ACCESS_EXPIRED</c>).</item>
+    ///     <item>The provided security code has expired (<see cref="ErrorCodes"/>: <c>EXPIRED_CODE</c>).</item>
     ///     <item>The provided security code is not correct (<see cref="ErrorCodes"/>: <c>INVALID_CODE</c>).</item>
     ///     <item>The provided message could not be sent due to an SMTP-Server error (<see cref="ErrorCodes"/>: <c>EXTERNAL_SERVICE_ERROR</c>).</item>
     ///     <item>The corresponding user account could not be updated (<see cref="ErrorCodes"/>: <c>UPDATE_FAILED</c>).</item>
@@ -83,7 +83,7 @@ public interface IAuthenticationService
     ///     <item>The found user account has an empty string as username property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
     ///     <item>The user account does not have a refresh token (<see cref="ErrorCodes"/>: <c>INVALID_TOKEN</c>).</item>
     ///     <item>The provided token does not correspond to the stored token (<see cref="ErrorCodes"/>: <c>INVALID_TOKEN</c>).</item>
-    ///     <item>The stored token has expired (<see cref="ErrorCodes"/>: <c>ACCESS_EXPIRED</c>).</item>
+    ///     <item>The stored token has expired (<see cref="ErrorCodes"/>: <c>EXPIRED_TOKEN</c>).</item>
     ///     <item>Important settings for generating tokens are missing (<see cref="ErrorCodes"/>: <c>CONFIG_NOT_FOUND</c>).</item>
     ///     <item>Necessary database operations have been canceled (<see cref="ErrorCodes"/>: <c>DATABASE_ERROR</c>).</item>
     /// </list>
@@ -108,7 +108,7 @@ public interface IAuthenticationService
     ///     <item>The found user account has an empty string as username property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
     ///     <item>The user account does not have a refresh token (<see cref="ErrorCodes"/>: <c>INVALID_TOKEN</c> or <c>DELETE_FAILED</c>).</item>
     ///     <item>The provided token does not correspond to the stored token (<see cref="ErrorCodes"/>: <c>INVALID_TOKEN</c>).</item>
-    ///     <item>The stored token has expired (<see cref="ErrorCodes"/>: <c>ACCESS_EXPIRED</c>).</item>
+    ///     <item>The stored token has expired (<see cref="ErrorCodes"/>: <c>EXPIRED_TOKEN</c>).</item>
     ///     <item>Necessary database operations have been canceled (<see cref="ErrorCodes"/>: <c>DATABASE_ERROR</c>).</item>
     /// </list>
     /// </summary>

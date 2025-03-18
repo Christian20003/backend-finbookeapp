@@ -35,7 +35,7 @@ public partial class AuthenticationService : IAuthenticationService
         {
             _logger.LogWarning(LogEvents.PROPERTY_TOO_SMALL, "Lifetime of security code exceeded");
             throw new AuthenticationException(
-                ErrorCodes.ACCESS_EXPIRED,
+                ErrorCodes.EXPIRED_CODE,
                 "Generated security code is not valid anymore"
             );
         }

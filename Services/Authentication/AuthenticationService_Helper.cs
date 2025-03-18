@@ -70,7 +70,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// <list type="bullet">
     ///     <item>The provided user account does not have a refresh token (<see cref="ErrorCodes"/>: <c>INVALID_TOKEN</c>).</item>
     ///     <item>The provided token does not correspond to the stored token (<see cref="ErrorCodes"/>: <c>INVALID_TOKEN</c>).</item>
-    ///     <item>The stored token has expired (<see cref="ErrorCodes"/>: <c>ACCESS_EXPIRED</c>).</item>
+    ///     <item>The stored token has expired (<see cref="ErrorCodes"/>: <c>EXPIRED_TOKEN</c>).</item>
     ///     <item>Necessary database operations have been canceled (<see cref="ErrorCodes"/>: <c>DATABASE_ERROR</c>).</item>
     /// </list>
     /// </summary>
@@ -115,7 +115,7 @@ public partial class AuthenticationService : IAuthenticationService
             {
                 _logger.LogWarning(LogEvents.PROPERTY_TOO_SMALL, "Refresh token has expired");
                 throw new AuthenticationException(
-                    ErrorCodes.ACCESS_EXPIRED,
+                    ErrorCodes.EXPIRED_TOKEN,
                     "Refresh token has expired"
                 );
             }

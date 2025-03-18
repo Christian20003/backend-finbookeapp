@@ -29,60 +29,77 @@ public class ExceptionHandling : IMiddleware
     )
     {
         context.Response.ContentType = "application/json";
+        var body = new ErrorResponse
+        {
+            Type = "AuthenticationException",
+            Code = exception.Code,
+            Instance = context.Request.Path,
+        };
         switch (exception.Code)
         {
             case ErrorCodes.INVALID_CREDENTIALS:
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                var body = new ErrorResponse
-                {
-                    Status = context.Response.StatusCode,
-                    Message = "Invalid username or password",
-                    Code = exception.Code,
-                };
+                body.Title = "Invalid email or password";
+                body.Detail = "Authentication failed due to incorrect email or password";
+                body.Status = context.Response.StatusCode;
+                return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
+            }
+            case ErrorCodes.UNEXPECTED_STRUCTURE:
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
+                body.Title = "Missing account property";
+                body.Detail = "Authentication failed due to incorrect username";
+                body.Status = context.Response.StatusCode;
                 return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
             }
             case ErrorCodes.INVALID_TOKEN:
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                var body = new ErrorResponse
-                {
-                    Status = context.Response.StatusCode,
-                    Message = "The provided refresh token is invalid",
-                    Code = exception.Code,
-                };
+                body.Title = "Invalid refresh token";
+                body.Detail = "Authentication failed due to an incorrect refresh token";
+                body.Status = context.Response.StatusCode;
                 return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
             }
-            case ErrorCodes.ACCESS_EXPIRED:
+            case ErrorCodes.EXPIRED_TOKEN:
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                var body = new ErrorResponse
-                {
-                    Status = context.Response.StatusCode,
-                    Message = "The refresh token has expired",
-                    Code = exception.Code,
-                };
+                body.Title = "Expired refresh token";
+                body.Detail = "Authentication failed due to an expired refresh token";
+                body.Status = context.Response.StatusCode;
+                return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
+            }
+            case ErrorCodes.INVALID_CODE:
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                body.Title = "Invalid security code";
+                body.Detail = "Reset password failed due to an incorrect security code";
+                body.Status = context.Response.StatusCode;
+                return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
+            }
+            case ErrorCodes.EXPIRED_CODE:
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                body.Title = "Expired security code";
+                body.Detail = "Reset password failed due to an expired security code";
+                body.Status = context.Response.StatusCode;
                 return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
             }
             case ErrorCodes.ACCESS_LOCKED:
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Locked;
-                var body = new ErrorResponse
-                {
-                    Status = context.Response.StatusCode,
-                    Message = "You are currently locked out for further login attempts",
-                    Code = exception.Code,
-                };
+                body.Title = "Access locked (5 minutes)";
+                body.Detail =
+                    "Authentication failed due to locked access. Too many failed attempts";
+                body.Status = context.Response.StatusCode;
                 return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
             }
             default:
             {
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                var body = new ErrorResponse
-                {
-                    Status = context.Response.StatusCode,
-                    Message = "A server-side operation failed",
-                };
+                body.Title = "Server operation failed";
+                body.Detail = "Authentication failed due to an unexpected operation failure";
+                body.Status = context.Response.StatusCode;
                 return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
             }
         }
@@ -94,8 +111,11 @@ public class ExceptionHandling : IMiddleware
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
         var body = new ErrorResponse
         {
+            Type = "Exception",
+            Title = "Unexpected failure",
+            Detail = "Requested operation failed due to an unexpected operation failure",
+            Instance = context.Request.Path,
             Status = context.Response.StatusCode,
-            Message = "A server-side operation failed",
         };
         return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
     }

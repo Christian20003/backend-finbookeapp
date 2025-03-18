@@ -21,6 +21,7 @@ builder.Services.AddSingleton<IDataProtection, DataProtection>();
 builder.Services.AddScoped<IAccountManager, AccountManager>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddTransient<ExceptionHandling>();
+builder.Services.AddTransient<BadRequestHandling>();
 
 var app = builder.Build();
 
@@ -29,6 +30,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseCustomSwagger();
 }
+app.UseMiddleware<BadRequestHandling>();
 app.UseMiddleware<ExceptionHandling>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
