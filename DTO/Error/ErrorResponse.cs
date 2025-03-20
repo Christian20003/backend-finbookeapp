@@ -1,4 +1,5 @@
 using FinBookeAPI.Models.Exceptions;
+using Newtonsoft.Json;
 
 namespace FinBookeAPI.DTO.Error;
 
@@ -10,30 +11,48 @@ public class ErrorResponse
     /// <summary>
     /// The type of the error (e.g. a specific exception type)
     /// </summary>
+    [JsonProperty(PropertyName = "type")]
     public string Type { get; set; } = "";
 
     /// <summary>
     /// The title of this error.
     /// </summary>
+    [JsonProperty(PropertyName = "title")]
     public string Title { get; set; } = "";
 
     /// <summary>
     /// A detailed description of the error.
     /// </summary>
+    [JsonProperty(PropertyName = "detail")]
     public string Detail { get; set; } = "";
 
     /// <summary>
     /// The http status code of the error.
     /// </summary>
+    [JsonProperty(PropertyName = "status")]
     public int Status { get; set; }
 
     /// <summary>
     /// The error code which gives further inside about the error source.
     /// </summary>
-    public ErrorCodes? Code { get; set; } = null;
+    [JsonProperty(PropertyName = "code", NullValueHandling = NullValueHandling.Ignore)]
+    public ErrorCodes? Code { get; set; }
 
-    // The uri where this error occurred.
+    /// <summary>
+    /// The URI path were this error occurred.
+    /// </summary>
+    [JsonProperty(PropertyName = "instance")]
     public string Instance { get; set; } = "";
 
-    public List<string>? InvalidProps { get; set; } = null;
+    /// <summary>
+    /// A list of invalid or missing properties.
+    /// </summary>
+    [JsonProperty(PropertyName = "properties", NullValueHandling = NullValueHandling.Ignore)]
+    public Dictionary<string, List<string>>? InvalidProps { get; set; }
+
+    /// <summary>
+    /// The date where this error was created
+    /// </summary>
+    [JsonProperty(PropertyName = "created")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

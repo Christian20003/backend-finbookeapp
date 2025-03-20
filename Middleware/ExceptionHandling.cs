@@ -33,7 +33,8 @@ public class ExceptionHandling : IMiddleware
         {
             Type = "AuthenticationException",
             Code = exception.Code,
-            Instance = context.Request.Path,
+            Instance =
+                context.Request.Scheme + "://" + context.Request.Host.Value + context.Request.Path,
         };
         switch (exception.Code)
         {
