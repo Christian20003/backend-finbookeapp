@@ -4,32 +4,27 @@ using FinBookeAPI.Models.Authentication;
 namespace FinBookeAPI.DTO.Authentication;
 
 /// <summary>
-/// The class <c>LoginDTO</c> models a transfer object including all login data.
+/// The class <c>GetCodeDTO</c> represents a transfer object to get a security code to
+/// be able of reseting a users password.
 /// </summary>
-public class LoginDTO
+public class GetCodeDTO
 {
     /// <summary>
-    /// The provided email of the user.
+    /// The email address of the user account.
     /// </summary>
     [Required(ErrorMessage = "Email property is missing")]
     [EmailAddress(ErrorMessage = "Email property should be a valid email address")]
     public string Email { get; set; } = "";
 
     /// <summary>
-    /// The provided password of the user account.
-    /// </summary>
-    [Required(ErrorMessage = "Password property is missing")]
-    public string Password { get; set; } = "";
-
-    /// <summary>
-    /// This method converts the current <c>LoginDTO</c> instance into an object that
+    /// This method converts the current <c>GetCodeDTO</c> instance into an object that
     /// can be processed by the provided <c>AuthenticationService</c>.
     /// </summary>
     /// <returns>
     /// The object which can be used in the <c>AuthenticationService</c>.
     /// </returns>
-    public UserLogin GetUserLogin()
+    public UserResetRequest GetUserResetRequest()
     {
-        return new UserLogin { Email = Email, Password = Password };
+        return new UserResetRequest { Email = Email };
     }
 }

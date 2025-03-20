@@ -5,6 +5,8 @@ namespace FinBookeAPI.Models.Configuration;
 /// </summary>
 public class LogEvents
 {
+    public const int INCOMING_REQUEST = 1000;
+
     public const int OPERATION_SUCCESS = 2000;
 
     public const int OBJECT_INVALID = 4000;
