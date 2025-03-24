@@ -55,6 +55,7 @@ public class ExceptionHandling : IMiddleware
                 return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
             }
             case ErrorCodes.INVALID_TOKEN:
+            case ErrorCodes.DELETE_FAILED:
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                 body.Title = "Invalid refresh token";

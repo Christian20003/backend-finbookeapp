@@ -1,4 +1,5 @@
 using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Exceptions;
 
 namespace FinBookeAPI.Services.Authentication;
 
@@ -112,7 +113,7 @@ public interface IAuthenticationService
     ///     <item>Necessary database operations have been canceled (<see cref="ErrorCodes"/>: <c>DATABASE_ERROR</c>).</item>
     /// </list>
     /// </summary>
-    /// <param name="email">
+    /// <param name="request">
     /// The email of the user which should be logged out.
     /// </param>
     /// <exception cref="AuthenticationException">

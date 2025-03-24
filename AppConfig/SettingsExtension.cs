@@ -7,10 +7,10 @@ public static class SettingsExtension
     /// <summary>
     /// This method adds the following configuration classes to the dependency injector:
     /// <list type="bullet">
-    ///     <item><c><see cref="AuthDatabaseSettings"/></c></item>
-    ///     <item><c><see cref="FinancialDataDatabaseSettings"/></c></item>
-    ///     <item><c><see cref="JwTSettings"/></c></item>
-    ///     <item><c><see cref="SmtpServer"/></c></item>
+    ///     <item><c>AuthDatabaseSettings</c></item>
+    ///     <item><c>FinancialDataDatabaseSettings</c></item>
+    ///     <item><c>JwTSettings</c></item>
+    ///     <item><c>SmtpServer</c></item>
     /// </list>
     /// </summary>
     /// <param name="services">Specifies the contract for a collection of service descriptors.</param>

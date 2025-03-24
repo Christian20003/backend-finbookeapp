@@ -4,7 +4,7 @@ using FinBookeAPI.Models.Authentication;
 namespace FinBookeAPI.DTO.Authentication;
 
 /// <summary>
-/// The class <c>ReauthenticateDTO</c> represents a transfer object to be of generating
+/// The class <c>ReauthenticateDTO</c> represents a transfer object to be able of generating
 /// a new JWT.
 /// </summary>
 public class ReauthenticateDTO
