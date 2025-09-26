@@ -1,4 +1,5 @@
 using FinBookeAPI.AppConfig;
+using FinBookeAPI.Database.CategoryDatabase;
 using FinBookeAPI.Middleware;
 using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services.Authentication;
@@ -20,6 +21,7 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddSingleton<IDataProtection, DataProtection>();
 builder.Services.AddScoped<IAccountManager, AccountManager>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<ICategoryDatabase, CategoryDatabase>();
 builder.Services.AddTransient<ExceptionHandling>();
 builder.Services.AddTransient<BadRequestHandling>();
 

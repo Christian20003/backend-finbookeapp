@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using FinBookeAPI.Attributes;
 
-namespace FinBookeAPI.Models.Category;
+namespace FinBookeAPI.Models.CategoryModels;
 
 public class Category
 {
