@@ -4,6 +4,7 @@ using FinBookeAPI.Models.Wrapper;
 //using FinBookeAPI.Services.Authentication;
 using FinBookeAPI.Services.Email;
 using FinBookeAPI.Services.GenHash;
+using FinBookeAPI.Services.Token;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,10 +24,14 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddSingleton<IDataProtection, DataProtection>();
 builder.Services.AddScoped<IAccountManager, AccountManager>();
 
-// Services
-// builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+// Services that provides additional functionality
 builder.Services.AddScoped<IGenHashService, GenHashService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+// Services that provides key functionality
+// builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
 builder.Services.AddTransient<ExceptionHandling>();
 builder.Services.AddTransient<BadRequestHandling>();
 

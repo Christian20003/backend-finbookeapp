@@ -22,7 +22,7 @@ public static class SecurityExtension
     {
         // Add an identity system
         services
-            .AddIdentityCore<UserDatabase>()
+            .AddIdentityCore<UserAccount>()
             .AddSignInManager()
             .AddEntityFrameworkStores<AuthDbContext>()
             .AddDefaultTokenProviders();
@@ -58,7 +58,7 @@ public static class SecurityExtension
             var jwt = _configuration.GetSection("JwtConfig");
             var issuer = jwt["ValidIssuer"];
             var audience = jwt["ValidAudience"];
-            var secret = jwt["Secret"];
+            var secret = jwt["AccessTokenSecret"];
             if (issuer == null || audience == null || secret == null)
             {
                 throw new ApplicationException("Missing authentication data in configuration");
