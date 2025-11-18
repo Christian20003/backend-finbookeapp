@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
 
-namespace FinBookeAPI.Services.GenHash;
+namespace FinBookeAPI.Services.SecurityUtility;
 
-public partial class GenHashService : IGenHashService
+public partial class SecurityUtilityService : ISecurityUtilityService
 {
     /// <summary>
     /// This method generates a char array containing random characters.

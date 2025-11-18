@@ -1,6 +1,6 @@
-namespace FinBookeAPI.Services.GenHash;
+namespace FinBookeAPI.Services.SecurityUtility;
 
-public partial class GenHashService : IGenHashService
+public partial class SecurityUtilityService : ISecurityUtilityService
 {
     public string GenerateAccessCode(int length)
     {

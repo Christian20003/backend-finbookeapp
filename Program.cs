@@ -3,7 +3,7 @@ using FinBookeAPI.Middleware;
 using FinBookeAPI.Models.Wrapper;
 //using FinBookeAPI.Services.Authentication;
 using FinBookeAPI.Services.Email;
-using FinBookeAPI.Services.GenHash;
+using FinBookeAPI.Services.SecurityUtility;
 using FinBookeAPI.Services.Token;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,7 +25,7 @@ builder.Services.AddSingleton<IDataProtection, DataProtection>();
 builder.Services.AddScoped<IAccountManager, AccountManager>();
 
 // Services that provides additional functionality
-builder.Services.AddScoped<IGenHashService, GenHashService>();
+builder.Services.AddScoped<ISecurityUtilityService, SecurityUtilityService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 

@@ -1,6 +1,6 @@
-namespace FinBookeAPI.Services.GenHash;
+namespace FinBookeAPI.Services.SecurityUtility;
 
-public interface IGenHashService
+public interface ISecurityUtilityService
 {
     /// <summary>
     /// This method generates a new random password.

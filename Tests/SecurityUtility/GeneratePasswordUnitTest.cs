@@ -1,12 +1,12 @@
 using System.Text.RegularExpressions;
-using FinBookeAPI.Services.GenHash;
+using FinBookeAPI.Services.SecurityUtility;
 using Moq;
 
-namespace FinBookeAPI.Tests.GenHash;
+namespace FinBookeAPI.Tests.SecurityUtility;
 
 public partial class GeneratePasswordUnitTest
 {
-    private readonly GenHashService _service;
+    private readonly SecurityUtilityService _service;
 
     [GeneratedRegex("[a-z]")]
     private static partial Regex HasLowerCase();
@@ -22,8 +22,8 @@ public partial class GeneratePasswordUnitTest
 
     public GeneratePasswordUnitTest()
     {
-        var logger = new Mock<ILogger<GenHashService>>();
-        _service = new GenHashService(logger.Object);
+        var logger = new Mock<ILogger<SecurityUtilityService>>();
+        _service = new SecurityUtilityService(logger.Object);
     }
 
     [Fact]
