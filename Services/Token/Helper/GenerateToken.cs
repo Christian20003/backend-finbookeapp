@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using FinBookeAPI.Models.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace FinBookeAPI.Services.Token;
@@ -28,15 +29,27 @@ public partial class TokenService : ITokenService
     private string GenerateToken(IEnumerable<Claim> claims, string secret, DateTime expires)
     {
         _logger.LogDebug("Generate a new token");
-        var config = _settings.Value;
-        if (config.Audience == null || config.Issuer == null)
+        var audience = _settings.Value.Audience;
+        var issuer = _settings.Value.Issuer;
+        if (audience == null)
         {
-            throw new ApplicationException("Missing configuration data to generate tokens.");
+            _logger.LogError(LogEvents.ConfigurationError, "Audience configuration is null");
+            throw new ApplicationException("Audience configuration is null");
+        }
+        if (issuer == null)
+        {
+            _logger.LogError(LogEvents.ConfigurationError, "Issuer configuration is null");
+            throw new ApplicationException("Issuer configuration is null");
         }
 
         var bytes = Encoding.UTF8.GetBytes(secret);
         if (bytes.Length < 16)
         {
+            _logger.LogError(
+                LogEvents.ConfigurationError,
+                "Secret has less than 16 bytes: {length}",
+                bytes.Length
+            );
             throw new ApplicationException("Given secret is too small to generated symmetric key");
         }
         var key = new SymmetricSecurityKey(bytes);
@@ -45,8 +58,8 @@ public partial class TokenService : ITokenService
         {
             Subject = new ClaimsIdentity(claims),
             Expires = expires,
-            Issuer = config.Issuer,
-            Audience = config.Audience,
+            Issuer = issuer,
+            Audience = audience,
             SigningCredentials = new SigningCredentials(
                 key,
                 SecurityAlgorithms.HmacSha256Signature
