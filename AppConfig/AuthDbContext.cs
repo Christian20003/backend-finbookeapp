@@ -1,9 +1,11 @@
 using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
+using FinBookeAPI.Models.Token;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using MongoDB.EntityFrameworkCore.Extensions;
 
 namespace FinBookeAPI.AppConfig;
 
@@ -21,6 +23,8 @@ public class AuthDbContext(
     IOptions<AuthDatabaseSettings> _settings
 ) : IdentityDbContext<UserAccount>(options)
 {
+    public DbSet<JwtToken> TokenCollection { get; init; }
+
     /// <summary>
     /// This function configures the authentication database by reading all specified configurations
     /// in the <c>appsettings.json</c> file.
@@ -34,5 +38,17 @@ public class AuthDbContext(
         var database = _settings.Value;
         var mongoClient = new MongoClient(database.ConnectionString);
         optionsBuilder.UseMongoDB(mongoClient, database.DatabaseName);
+    }
+
+    /// <summary>
+    /// This function creates all specified tables / collections in the database.
+    /// </summary>
+    /// <param name="builder">
+    ///  API to model the shape of all entities in this database.
+    /// </param>
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+        builder.Entity<JwtToken>().ToCollection("authentication");
     }
 }

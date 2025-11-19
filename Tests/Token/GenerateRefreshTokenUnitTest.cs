@@ -1,3 +1,4 @@
+using FinBookeAPI.Collections.TokenCollection;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Services.Token;
 using FinBookeAPI.Tests.Token.Records;
@@ -16,9 +17,10 @@ public class GenerateRefreshTokenUnitTest
     public GenerateRefreshTokenUnitTest()
     {
         var logger = new Mock<ILogger<TokenService>>();
+        var collection = new Mock<ITokenCollection>();
         _settings = new Mock<IOptions<JwtSettings>>();
         _settings.Setup(obj => obj.Value).Returns(_options);
-        _service = new TokenService(_settings.Object, logger.Object);
+        _service = new TokenService(collection.Object, _settings.Object, logger.Object);
     }
 
     [Fact]

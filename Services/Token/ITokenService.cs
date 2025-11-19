@@ -1,4 +1,5 @@
 using FinBookeAPI.Models.Token;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace FinBookeAPI.Services.Token;
@@ -44,16 +45,17 @@ public interface ITokenService
     public JwtToken GenerateRefreshToken(string userId);
 
     /// <summary>
-    /// This method verifies a refresh token
+    /// This method verifies if a given refresh token is a valid JWT.
     /// </summary>
     /// <param name="token">
     /// The token that should be verified
     /// </param>
     /// <returns>
-    /// The user id stored in the refresh token.
+    /// The user id and the time where the token expires.
     /// </returns>
     /// <exception cref="ApplicationException">
-    /// If required configuration data is null.
+    /// If required configuration data is null or the secret to generate a symmetric key
+    /// has less than 16 bytes.
     /// </exception>
     /// <exception cref="ArgumentNullException">
     /// If the provided token is null or empty.
@@ -85,5 +87,165 @@ public interface ITokenService
     /// <exception cref="InvalidOperationException">
     /// If the user id is not inside the refresh token.
     /// </exception>
-    public string VerifyRefreshToken(string token);
+    public (string, long) VerifyRefreshToken(string token);
+
+    /// <summary>
+    /// This method verifies if a given access token is a valid JWT.
+    /// </summary>
+    /// <param name="token">
+    /// The token that should be verified
+    /// </param>
+    /// <returns>
+    /// The user id and the time where this token expires.
+    /// </returns>
+    /// <exception cref="ApplicationException">
+    /// If required configuration data is null or the secret to generate a symmetric key
+    /// has less than 16 bytes.
+    /// </exception>
+    /// <exception cref="ArgumentNullException">
+    /// If the provided token is null or empty.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// If the provided token exceeds the maximum length.
+    /// </exception>
+    /// <exception cref="SecurityTokenMalformedException">
+    /// If the token does not fulfill the required structure.
+    /// </exception>
+    /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">
+    /// If the 'kid' header claim is not null AND decryption fails.
+    /// </exception>
+    /// <exception cref="SecurityTokenException">
+    /// If the 'enc' header claim is null or empty.
+    /// </exception>
+    /// <exception cref="SecurityTokenExpiredException">
+    /// If the token has expired.
+    /// </exception>
+    /// <exception cref="SecurityTokenInvalidSignatureException">
+    /// If the signature is not valid.
+    /// </exception>
+    /// <exception cref="SecurityTokenInvalidIssuerException">
+    /// If the 'issuer' property in the token is invalid.
+    /// </exception>
+    /// <exception cref="SecurityTokenInvalidAudienceException">
+    /// The 'audience' property in the token is invalid.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// If the user id is not inside the access token.
+    /// </exception>
+    public (string, long) VerifyAccessToken(string token);
+
+    /// <summary>
+    /// This method stores the access token in a database.
+    /// </summary>
+    /// <param name="token">
+    /// The token that should be stored.
+    /// </param>
+    /// <exception cref="ApplicationException">
+    /// If required configuration data is null or the secret to generate a symmetric key
+    /// has less than 16 bytes.
+    /// </exception>
+    /// <exception cref="ArgumentNullException">
+    /// If the provided token is null or empty.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// If the provided token exceeds the maximum length.
+    /// </exception>
+    /// <exception cref="SecurityTokenMalformedException">
+    /// If the token does not fulfill the required structure.
+    /// </exception>
+    /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">
+    /// If the 'kid' header claim is not null AND decryption fails.
+    /// </exception>
+    /// <exception cref="SecurityTokenException">
+    /// If the 'enc' header claim is null or empty.
+    /// </exception>
+    /// <exception cref="SecurityTokenExpiredException">
+    /// If the token has expired.
+    /// </exception>
+    /// <exception cref="SecurityTokenInvalidSignatureException">
+    /// If the signature is not valid.
+    /// </exception>
+    /// <exception cref="SecurityTokenInvalidIssuerException">
+    /// If the 'issuer' property in the token is invalid.
+    /// </exception>
+    /// <exception cref="SecurityTokenInvalidAudienceException">
+    /// The 'audience' property in the token is invalid.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// If the user id is not inside the access token.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    /// If the database operation failed.
+    /// </exception>
+    public Task StoreAccessToken(string token);
+
+    /// <summary>
+    /// This method stores the refresh token in a database.
+    /// </summary>
+    /// <param name="token">
+    /// The token that should be stored.
+    /// </param>
+    /// <exception cref="ApplicationException">
+    /// If required configuration data is null or the secret to generate a symmetric key
+    /// has less than 16 bytes.
+    /// </exception>
+    /// <exception cref="ArgumentNullException">
+    /// If the provided token is null or empty.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// If the provided token exceeds the maximum length.
+    /// </exception>
+    /// <exception cref="SecurityTokenMalformedException">
+    /// If the token does not fulfill the required structure.
+    /// </exception>
+    /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">
+    /// If the 'kid' header claim is not null AND decryption fails.
+    /// </exception>
+    /// <exception cref="SecurityTokenException">
+    /// If the 'enc' header claim is null or empty.
+    /// </exception>
+    /// <exception cref="SecurityTokenExpiredException">
+    /// If the token has expired.
+    /// </exception>
+    /// <exception cref="SecurityTokenInvalidSignatureException">
+    /// If the signature is not valid.
+    /// </exception>
+    /// <exception cref="SecurityTokenInvalidIssuerException">
+    /// If the 'issuer' property in the token is invalid.
+    /// </exception>
+    /// <exception cref="SecurityTokenInvalidAudienceException">
+    /// The 'audience' property in the token is invalid.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// If the user id is not inside the refresh token.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    /// If the database operation failed.
+    /// </exception>
+    public Task StoreRefreshToken(string token);
+
+    /// <summary>
+    /// This method proofs if the token exists in the database.
+    /// </summary>
+    /// <param name="token">
+    /// The token value that should be checked.
+    /// </param>
+    /// <returns>
+    /// <c>true</c> if the token exists in the database, otherwise <c>false</c>.
+    /// </returns>
+    /// <exception cref="OperationCanceledException">
+    /// If the database operation failed.
+    /// </exception>
+    public Task<bool> TokenExists(string token);
+
+    /// <summary>
+    /// This method deletes all tokens in the database that have been expired.
+    /// </summary>
+    /// <exception cref="DbUpdateException">
+    /// If the database update failed.
+    /// </exception>
+    /// <exception cref="DbUpdateConcurrencyException">
+    /// If tokens to be deleted have been modified.
+    /// </exception>
+    public Task CleanTokenDatabase();
 }

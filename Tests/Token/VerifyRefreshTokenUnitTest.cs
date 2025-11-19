@@ -1,3 +1,4 @@
+using FinBookeAPI.Collections.TokenCollection;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Token;
 using FinBookeAPI.Services.Token;
@@ -18,9 +19,10 @@ public class VerifyRefreshTokenUnitTest
     public VerifyRefreshTokenUnitTest()
     {
         var logger = new Mock<ILogger<TokenService>>();
+        var collection = new Mock<ITokenCollection>();
         _settings = new Mock<IOptions<JwtSettings>>();
         _settings.Setup(obj => obj.Value).Returns(_options);
-        _service = new TokenService(_settings.Object, logger.Object);
+        _service = new TokenService(collection.Object, _settings.Object, logger.Object);
         _token = _service.GenerateRefreshToken(userId);
     }
 
@@ -51,7 +53,7 @@ public class VerifyRefreshTokenUnitTest
     [Fact]
     public void Should_SucceedVerification_WhenAllPropertiesAreValid()
     {
-        var id = _service.VerifyRefreshToken(_token.Value);
+        var (id, _) = _service.VerifyRefreshToken(_token.Value);
 
         Assert.Equal(userId, id);
     }
