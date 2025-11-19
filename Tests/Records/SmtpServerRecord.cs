@@ -1,6 +1,6 @@
 using FinBookeAPI.Models.Configuration;
 
-namespace FinBookeAPI.Tests.Email.Records;
+namespace FinBookeAPI.Tests.Records;
 
 public static class SmtpServerRecord
 {

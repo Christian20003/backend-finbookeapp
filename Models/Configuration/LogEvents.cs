@@ -5,5 +5,6 @@ namespace FinBookeAPI.Models.Configuration;
 /// </summary>
 public static class LogEvents
 {
+    public const int AuthenticationFailed = 8000;
     public const int ConfigurationError = 9000;
 }

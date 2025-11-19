@@ -1,18 +1,7 @@
-using FinBookeAPI.Services.SecurityUtility;
-using Moq;
-
 namespace FinBookeAPI.Tests.SecurityUtility;
 
-public partial class HashUnitTest
+public partial class SecurityUtilityUnitTests
 {
-    private readonly SecurityUtilityService _service;
-
-    public HashUnitTest()
-    {
-        var logger = new Mock<ILogger<SecurityUtilityService>>();
-        _service = new SecurityUtilityService(logger.Object);
-    }
-
     [Fact]
     public void Should_GenerateNotEmptyHashValue()
     {
