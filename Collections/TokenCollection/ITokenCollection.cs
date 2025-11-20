@@ -11,8 +11,11 @@ public interface ITokenCollection
     /// <param name="token">
     /// The token that should be added.
     /// </param>
+    /// <exception cref="DbUpdateException">
+    /// If the insertion operation in the database failed.
+    /// </exception>
     /// <exception cref="OperationCanceledException">
-    /// If the database operation failed.
+    /// If the database operation has been canceled.
     /// </exception>
     public Task Add(JwtToken token);
 
@@ -26,7 +29,7 @@ public interface ITokenCollection
     /// <c>true</c> if the provided token value is already stored, otherwise <c>false</c>.
     /// </returns>
     /// <exception cref="OperationCanceledException">
-    /// If the database operation failed.
+    /// If the database operation has been canceled.
     /// </exception>
     public Task<bool> Contains(string token);
 
@@ -34,10 +37,13 @@ public interface ITokenCollection
     /// This method removes all tokens from the collection that have been expired.
     /// </summary>
     /// <exception cref="DbUpdateException">
-    /// If the database update failed.
+    /// If the deletion operation in the database failed.
     /// </exception>
     /// <exception cref="DbUpdateConcurrencyException">
     /// If tokens to be deleted have been modified.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    /// If the database operation has been canceled.
     /// </exception>
     public Task Delete();
 }

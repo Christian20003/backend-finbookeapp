@@ -174,8 +174,11 @@ public interface ITokenService
     /// <exception cref="InvalidOperationException">
     /// If the user id is not inside the access token.
     /// </exception>
+    /// <exception cref="DbUpdateException">
+    /// If the insertion operation in the database failed.
+    /// </exception>
     /// <exception cref="OperationCanceledException">
-    /// If the database operation failed.
+    /// If the database operation has been canceled.
     /// </exception>
     public Task StoreAccessToken(string token);
 
@@ -216,11 +219,11 @@ public interface ITokenService
     /// <exception cref="SecurityTokenInvalidAudienceException">
     /// The 'audience' property in the token is invalid.
     /// </exception>
-    /// <exception cref="InvalidOperationException">
-    /// If the user id is not inside the refresh token.
+    /// <exception cref="DbUpdateException">
+    /// If the insertion operation in the database failed.
     /// </exception>
     /// <exception cref="OperationCanceledException">
-    /// If the database operation failed.
+    /// If the database operation has been canceled.
     /// </exception>
     public Task StoreRefreshToken(string token);
 
@@ -234,7 +237,7 @@ public interface ITokenService
     /// <c>true</c> if the token exists in the database, otherwise <c>false</c>.
     /// </returns>
     /// <exception cref="OperationCanceledException">
-    /// If the database operation failed.
+    /// If the database operation has been canceled.
     /// </exception>
     public Task<bool> TokenExists(string token);
 
@@ -246,6 +249,9 @@ public interface ITokenService
     /// </exception>
     /// <exception cref="DbUpdateConcurrencyException">
     /// If tokens to be deleted have been modified.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    /// If the database operation has been canceled.
     /// </exception>
     public Task CleanTokenDatabase();
 }

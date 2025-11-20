@@ -11,6 +11,7 @@ public class TokenCollection(AuthDbContext context) : ITokenCollection
     public async Task Add(JwtToken token)
     {
         await _database.TokenCollection.AddAsync(token);
+        await _database.SaveChangesAsync();
     }
 
     public async Task<bool> Contains(string token)
