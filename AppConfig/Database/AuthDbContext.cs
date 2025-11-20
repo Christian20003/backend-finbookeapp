@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MongoDB.EntityFrameworkCore.Extensions;
 
-namespace FinBookeAPI.AppConfig;
+namespace FinBookeAPI.AppConfig.Database;
 
 /// <summary>
 /// This class models the context for the authentication database.

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
-namespace FinBookeAPI.AppConfig;
+namespace FinBookeAPI.AppConfig.Database;
 
 /// <summary>
 /// This class models the context for the financial data database.

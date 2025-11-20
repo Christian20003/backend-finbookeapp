@@ -1,10 +1,11 @@
 using System.Text;
+using FinBookeAPI.AppConfig.Database;
 using FinBookeAPI.Models.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
-namespace FinBookeAPI.AppConfig;
+namespace FinBookeAPI.AppConfig.Authentication;
 
 public static class SecurityExtension
 {

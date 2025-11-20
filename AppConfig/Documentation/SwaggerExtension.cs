@@ -1,7 +1,7 @@
 using System.Reflection;
 using Microsoft.OpenApi.Models;
 
-namespace FinBookeAPI.AppConfig;
+namespace FinBookeAPI.AppConfig.Documentation;
 
 public static class SwaggerExtension
 {

@@ -1,6 +1,6 @@
 using NReco.Logging.File;
 
-namespace FinBookeAPI.AppConfig;
+namespace FinBookeAPI.AppConfig.Documentation;
 
 public static class LoggingExtension
 {
@@ -41,6 +41,7 @@ public static class LoggingExtension
             var loggingSettings = configuration.GetSection("Logging");
             // Remove all current logging settings
             loggingBuilder.ClearProviders();
+            loggingBuilder.EnableRedaction();
             // Add file logging
             loggingBuilder.AddFile(
                 loggingSettings,

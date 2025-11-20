@@ -1,6 +1,6 @@
 using FinBookeAPI.Models.Configuration;
 
-namespace FinBookeAPI.AppConfig;
+namespace FinBookeAPI.AppConfig.Mapping;
 
 public static class SettingsExtension
 {

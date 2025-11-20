@@ -1,4 +1,4 @@
-using FinBookeAPI.AppConfig;
+using FinBookeAPI.AppConfig.Database;
 using FinBookeAPI.Models.Token;
 using Microsoft.EntityFrameworkCore;
 
