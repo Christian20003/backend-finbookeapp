@@ -1,123 +1,213 @@
+using System.Net.Mail;
+using System.Security.Authentication;
 using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Exceptions;
+using FinBookeAPI.Models.Token;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace FinBookeAPI.Services.Authentication;
 
 public interface IAuthenticationService
 {
     /// <summary>
-    /// This method process a login attempt by using the provided login data. This method will throw an
-    /// <c><see cref="AuthenticationException"/></c> if one of the following occurs:
-    /// <list type="bullet">
-    ///     <item>The provided email does not have a user account (<see cref="ErrorCodes"/>: <c>INVALID_CREDENTIALS</c>).</item>
-    ///     <item>The provided password is not correct (<see cref="ErrorCodes"/>: <c>INVALID_CREDENTIALS</c>).</item>
-    ///     <item>The found user account has an empty string as username property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
-    ///     <item>The corresponding user account could not be updated (<see cref="ErrorCodes"/>: <c>UPDATE_FAILED</c>).</item>
-    ///     <item>The generated refresh token could not be stored (<see cref="ErrorCodes"/>: <c>INSERT_FAILED</c>).</item>
-    ///     <item>The user is locked out for any authentication attempt (<see cref="ErrorCodes"/>: <c>ACCESS_LOCKED</c>).</item>
-    ///     <item>Important settings for generating tokens are missing (<see cref="ErrorCodes"/>: <c>CONFIG_NOT_FOUND</c>).</item>
-    ///     <item>Necessary database operations have been canceled (<see cref="ErrorCodes"/>: <c>DATABASE_ERROR</c>).</item>
-    /// </list>
+    /// This method processes a login attempt by using the provided login data.
     /// </summary>
-    /// <param name="data">
-    /// Object which contains the login data received from the client.
+    /// <param name="email">
+    /// The email address of the user who wants to log in.
+    /// </param>
+    /// <param name="password">
+    /// The password of the user who wants to log in.
     /// </param>
     /// <returns>
-    /// A client object which contains all relevant information which should be sent to the client
-    /// for further authentication requests.
+    /// A user object with all important properties from the user account.
     /// </returns>
-    /// <exception cref="AuthenticationException">
-    /// See method description.
+    /// <exception cref="ArgumentException">
+    /// If the provided email address is not valid.
     /// </exception>
-    public Task<UserClient> Login(UserLogin data);
-
-    /*
-        1. Does email or username already exist
-    */
-    public Task<UserClient> Register(UserRegister data);
+    /// <exception cref="InvalidCredentialException">
+    /// If the provided email address and password cannot be assigned to a stored user account.
+    /// </exception>
+    /// <exception cref="ResourceLockedException">
+    /// If the user account is locked due to incorrect login attempts or user interaction.
+    /// </exception>
+    /// <exception cref="ApplicationException">
+    /// If configuration data for authentication is null or invalid.
+    /// </exception>
+    public Task<User> Login(string email, string password);
 
     /// <summary>
-    /// This method sends a new generated security code to the provided email through an SMTP-Server and stores the result as well
-    /// in the authentication database. This method will throw an <c><see cref="AuthenticationException"/></c> if one of the
-    /// following occurs:
-    /// <list type="bullet">
-    ///     <item>The provided email does not have a user account (<see cref="ErrorCodes"/>: <c>INVALID_CREDENTIALS</c>).</item>
-    ///     <item>The found user account has an empty string as username property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
-    ///     <item>The provided message could not be sent due to an SMTP-Server error (<see cref="ErrorCodes"/>: <c>EXTERNAL_SERVICE_ERROR</c>).</item>
-    ///     <item>The corresponding user account could not be updated (<see cref="ErrorCodes"/>: <c>UPDATE_FAILED</c>).</item>
-    /// </list>
+    /// This method process a register request by generating a new user account.
     /// </summary>
-    /// <param name="request">
-    /// The object with an email address.
+    /// <param name="email">
+    /// The email address of the new user account.
     /// </param>
-    /// <exception cref="AuthenticationException">
-    /// See method description.
-    /// </exception>
-    public Task SecurityCode(UserResetRequest request);
-
-    /// <summary>
-    /// This method resets the password of the user and sends the new random generated password via email to the user. This method
-    /// will throw an <c><see cref="AuthenticationException"/></c> if one of the following occurs:
-    /// <list type="bullet">
-    ///     <item>The provided email does not have a user account (<see cref="ErrorCodes"/>: <c>INVALID_CREDENTIALS</c>).</item>
-    ///     <item>The found user account has an empty string as username property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
-    ///     <item>The user account does not have a valid security code property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
-    ///     <item>The provided security code has expired (<see cref="ErrorCodes"/>: <c>EXPIRED_CODE</c>).</item>
-    ///     <item>The provided security code is not correct (<see cref="ErrorCodes"/>: <c>INVALID_CODE</c>).</item>
-    ///     <item>The provided message could not be sent due to an SMTP-Server error (<see cref="ErrorCodes"/>: <c>EXTERNAL_SERVICE_ERROR</c>).</item>
-    ///     <item>The corresponding user account could not be updated (<see cref="ErrorCodes"/>: <c>UPDATE_FAILED</c>).</item>
-    /// </list>
-    /// </summary>
-    /// <param name="request">
-    /// The object with an email address and received security code.
+    /// <param name="userName">
+    /// The username of the new user account.
     /// </param>
-    /// <exception cref="AuthenticationException">
-    /// See method description.
-    /// </exception>
-    public Task ResetPassword(UserResetRequest request);
-
-    /// <summary>
-    /// This method allows the user to get a new JWT. This method will throw an <c><see cref="AuthenticationException"/></c>
-    /// if one of the following occurs:
-    /// <list type="bullet">
-    ///     <item>The provided email does not have a user account (<see cref="ErrorCodes"/>: <c>INVALID_CREDENTIALS</c>).</item>
-    ///     <item>The found user account has an empty string as username property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
-    ///     <item>The user account does not have a refresh token (<see cref="ErrorCodes"/>: <c>INVALID_TOKEN</c>).</item>
-    ///     <item>The provided token does not correspond to the stored token (<see cref="ErrorCodes"/>: <c>INVALID_TOKEN</c>).</item>
-    ///     <item>The stored token has expired (<see cref="ErrorCodes"/>: <c>EXPIRED_TOKEN</c>).</item>
-    ///     <item>Important settings for generating tokens are missing (<see cref="ErrorCodes"/>: <c>CONFIG_NOT_FOUND</c>).</item>
-    ///     <item>Necessary database operations have been canceled (<see cref="ErrorCodes"/>: <c>DATABASE_ERROR</c>).</item>
-    /// </list>
-    /// </summary>
-    /// <param name="request">
-    /// The object with an email address and refresh token.
+    /// <param name="password">
+    /// The password of the new user account.
     /// </param>
     /// <returns>
-    /// A client object which contains all relevant information which should be sent to the client for further
-    /// authentication requests.
+    /// An user object with all relevant user data.
     /// </returns>
-    /// <exception cref="AuthenticationException">
-    /// See method description.
+    /// <exception cref="ArgumentException">
+    /// If the provided email is not a valid email address or the user name is an empty string.
     /// </exception>
-    public Task<UserClient> GenerateToken(UserTokenRequest request);
+    /// <exception cref="IdentityResultException">
+    /// If at least a user account condition is violated
+    /// (e.g. username is already in use, password has not the required length or strength)
+    /// </exception>
+    /// <exception cref="ApplicationException">
+    /// If configuration data for authentication is null or invalid.
+    /// </exception>
+    public Task<User> Register(string email, string userName, string password);
 
     /// <summary>
-    /// This method process a logout attempt. his method will throw an <c><see cref="AuthenticationException"/></c>
-    /// if one of the following occurs:
-    /// <list type="bullet">
-    ///     <item>The provided email does not have a user account (<see cref="ErrorCodes"/>: <c>INVALID_CREDENTIALS</c>).</item>
-    ///     <item>The found user account has an empty string as username property (<see cref="ErrorCodes"/>: <c>UNEXPECTED_STRUCTURE</c>).</item>
-    ///     <item>The user account does not have a refresh token (<see cref="ErrorCodes"/>: <c>INVALID_TOKEN</c> or <c>DELETE_FAILED</c>).</item>
-    ///     <item>The provided token does not correspond to the stored token (<see cref="ErrorCodes"/>: <c>INVALID_TOKEN</c>).</item>
-    ///     <item>The stored token has expired (<see cref="ErrorCodes"/>: <c>EXPIRED_TOKEN</c>).</item>
-    ///     <item>Necessary database operations have been canceled (<see cref="ErrorCodes"/>: <c>DATABASE_ERROR</c>).</item>
-    /// </list>
+    /// This method sends a new generated access code to the provided email through an SMTP-Server and stores the result.
     /// </summary>
-    /// <param name="request">
-    /// The email of the user which should be logged out.
+    /// <param name="email">
+    /// The email address where the security code should be sent.
     /// </param>
-    /// <exception cref="AuthenticationException">
-    /// See method description.
+    /// <exception cref="ArgumentException">
+    /// If the provided email is not a valid email address.
     /// </exception>
-    public Task Logout(UserTokenRequest request);
+    /// <exception cref="InvalidCredentialException">
+    /// If the email is not assigned to any user account.
+    /// </exception>
+    /// <exception cref="ApplicationException">
+    /// If configuration data to send emails is null or invalid.
+    /// If the template email file is not found or locked.
+    /// </exception>
+    /// <exception cref="SmtpException">
+    /// If the connection with the SMTP-Server failed as well as authentication.
+    /// </exception>
+    /// <exception cref="ObjectDisposedException">
+    /// If the message object has been deleted, before sending.
+    /// </exception>
+    /// <exception cref="SmtpFailedRecipientException">
+    /// If the message could not be sent to the client.
+    /// </exception>
+    public Task SendAccessCode(string email);
+
+    /// <summary>
+    /// This method resets the password of the user and sends the new random generated password via email to the user.
+    /// </summary>
+    /// <param name="email">
+    /// The email address of the user account.
+    /// </param>
+    /// <param name="accessCode">
+    /// The access code that the user has received with an email.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// If the provided email is not a valid email address.
+    /// </exception>
+    /// <exception cref="InvalidCredentialException">
+    /// If the email is not assigned to any user account.
+    /// </exception>
+    /// <exception cref="AuthorizationException">
+    /// If the accessCode is invalid or has expired.
+    /// </exception>
+    /// <exception cref="ApplicationException">
+    /// If configuration data to send emails is null or invalid.
+    /// If the template email file is not found or locked.
+    /// </exception>
+    /// <exception cref="SmtpException">
+    /// If the connection with the SMTP-Server failed as well as authentication.
+    /// </exception>
+    /// <exception cref="ObjectDisposedException">
+    /// If the message object has been deleted, before sending.
+    /// </exception>
+    /// <exception cref="SmtpFailedRecipientException">
+    /// If the message could not be sent to the client.
+    /// </exception>
+    public Task ResetPassword(string email, string accessCode);
+
+    /// <summary>
+    /// This method generate a new access token for authentication, but only if the given
+    /// refresh token is valid.
+    /// </summary>
+    /// <param name="refreshToken">
+    /// The refresh token.
+    /// </param>
+    /// <returns>
+    /// The newly generated access token.
+    /// </returns>
+    /// <exception cref="ApplicationException">
+    /// If required configuration data is null or the secrets to generate symmetric keys
+    /// have less than 16 bytes.
+    /// </exception>
+    /// <exception cref="ArgumentNullException">
+    /// If the provided token is null or empty.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// If the provided token exceeds the maximum length or is revoked.
+    /// </exception>
+    /// <exception cref="SecurityTokenMalformedException">
+    /// If the token does not fulfill the required structure.
+    /// </exception>
+    /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">
+    /// If the 'kid' header claim is not null AND decryption fails.
+    /// </exception>
+    /// <exception cref="SecurityTokenException">
+    /// If the 'enc' header claim is null or empty.
+    /// </exception>
+    /// <exception cref="SecurityTokenInvalidSignatureException">
+    /// If the signature is not valid.
+    /// </exception>
+    /// <exception cref="SecurityTokenInvalidIssuerException">
+    /// If the 'issuer' property in the token is invalid.
+    /// </exception>
+    /// <exception cref="SecurityTokenInvalidAudienceException">
+    /// If the 'audience' property in the token is invalid.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    /// If the database operation has been canceled.
+    /// </exception>
+    public Task<JwtToken> IssueJwtToken(string refreshToken);
+
+    /// <summary>
+    /// This method logs out a user by revoking both tokens.
+    /// </summary>
+    /// <param name="accessToken">
+    /// The access token for authentication.
+    /// </param>
+    /// <param name="refreshToken">
+    /// The refresh token to generate new access tokens.
+    /// </param>
+    /// <exception cref="ApplicationException">
+    /// If required configuration data is null or the secrets to generate symmetric keys
+    /// have less than 16 bytes.
+    /// </exception>
+    /// <exception cref="ArgumentNullException">
+    /// If a provided token is null or empty.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// If a provided token exceeds the maximum length.
+    /// </exception>
+    /// <exception cref="SecurityTokenMalformedException">
+    /// If a token does not fulfill the required structure.
+    /// </exception>
+    /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">
+    /// If the 'kid' header claim is not null AND decryption fails.
+    /// </exception>
+    /// <exception cref="SecurityTokenException">
+    /// If the 'enc' header claim is null or empty.
+    /// </exception>
+    /// <exception cref="SecurityTokenInvalidSignatureException">
+    /// If a signature is not valid.
+    /// </exception>
+    /// <exception cref="SecurityTokenInvalidIssuerException">
+    /// If the 'issuer' property in a token is invalid.
+    /// </exception>
+    /// <exception cref="SecurityTokenInvalidAudienceException">
+    /// If the 'audience' property in a token is invalid.
+    /// </exception>
+    /// <exception cref="DbUpdateException">
+    /// If the insertion operation in the database failed.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    /// If the database operation has been canceled.
+    /// </exception>
+    public Task Logout(string accessToken, string refreshToken);
 }

@@ -9,7 +9,7 @@ public class ExceptionHandling : IMiddleware
 {
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        try
+        /* try
         {
             await next(context);
         }
@@ -20,10 +20,10 @@ public class ExceptionHandling : IMiddleware
         catch (Exception exception)
         {
             await HandleException(context, exception);
-        }
+        } */
     }
 
-    private Task HandleAuthenticationException(
+    /* private Task HandleAuthenticationException(
         HttpContext context,
         AuthenticationException exception
     )
@@ -105,7 +105,7 @@ public class ExceptionHandling : IMiddleware
                 return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
             }
         }
-    }
+    } */
 
     private Task HandleException(HttpContext context, Exception exception)
     {
