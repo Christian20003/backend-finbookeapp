@@ -13,20 +13,25 @@ public class SmtpServer
     /// <summary>
     /// The host of the SMTP-Server
     /// </summary>
-    public string Host { get; set; } = "";
+    public string? Host { get; set; } = "";
 
     /// <summary>
     /// The port of the SMTP-Server
     /// </summary>
-    public int Port { get; set; } = 0;
+    public int Port { get; set; } = 587;
 
     /// <summary>
     /// The username for authentication on the SMTP-Server
     /// </summary>
-    public string Username { get; set; } = "";
+    public string? Username { get; set; } = "";
 
     /// <summary>
     /// The password for authentication on the SMTP-Server
     /// </summary>
-    public string Password { get; set; } = "";
+    public string? Password { get; set; } = "";
+
+    /// <summary>
+    /// The email address that should be used for sending emails
+    /// </summary>
+    public string? Address { get; set; } = "";
 }
