@@ -79,7 +79,6 @@ public partial class TokenService : ITokenService
             throw new ApplicationException("Given secret is too small to generated symmetric key");
         }
         var tokenHandler = new JwtSecurityTokenHandler();
-        Console.WriteLine(audience);
         var validationParam = new TokenValidationParameters
         {
             ValidateAudience = true,
