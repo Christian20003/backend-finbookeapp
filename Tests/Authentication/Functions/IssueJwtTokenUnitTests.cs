@@ -21,7 +21,7 @@ public partial class AuthenticationServiceUnitTests
     }
 
     [Fact]
-    public async Task Should_GenerateNewJwtToken_WhenValidationWasSuccessfull()
+    public async Task Should_GenerateNewJwtToken_WhenValidationWasSuccessful()
     {
         _tokenService.Setup(obj => obj.GenerateAccessToken(It.IsAny<string>())).Returns(_token);
         var result = await _service.IssueJwtToken(_token.Value);

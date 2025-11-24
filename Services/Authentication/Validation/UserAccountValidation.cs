@@ -24,7 +24,7 @@ public partial class AuthenticationService : IAuthenticationService
         _logger.LogDebug("Verify user account of {email}", PrivacyGuard.Hide(_redactor, email));
         var accounts = _accountManager.GetUsersAsync();
         var user = await accounts.FirstOrDefaultAsync(account =>
-            account.Email == _protector.ProtectEmail(email)
+            email == _protector.UnprotectEmail(account.Email!)
         );
         // Proof if user exist
         if (user == null)

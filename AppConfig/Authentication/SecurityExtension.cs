@@ -57,8 +57,8 @@ public static class SecurityExtension
         authBuilder.AddJwtBearer(options =>
         {
             var jwt = _configuration.GetSection("JwtConfig");
-            var issuer = jwt["ValidIssuer"];
-            var audience = jwt["ValidAudience"];
+            var issuer = jwt["Issuer"];
+            var audience = jwt["Audience"];
             var secret = jwt["AccessTokenSecret"];
             if (issuer == null || audience == null || secret == null)
             {

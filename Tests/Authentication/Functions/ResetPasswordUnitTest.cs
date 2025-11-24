@@ -79,7 +79,7 @@ public partial class AuthenticationServiceUnitTests
     }
 
     [Fact]
-    public async Task Should_UpdateUserAccount_WhenResetPasswordWasSuccessfull()
+    public async Task Should_UpdateUserAccount_WhenResetPasswordWasSuccessful()
     {
         await _service.ResetPassword(_userAccount.Email!, _userAccount.AccessCode!);
 
@@ -97,7 +97,7 @@ public partial class AuthenticationServiceUnitTests
     } */
 
     [Fact]
-    public async Task Should_SendEmail_WhenResetPasswordWasSuccessfull()
+    public async Task Should_SendEmail_WhenResetPasswordWasSuccessful()
     {
         await _service.ResetPassword(_userAccount.Email!, _userAccount.AccessCode!);
 

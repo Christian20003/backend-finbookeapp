@@ -81,7 +81,7 @@ public partial class AuthenticationService : IAuthenticationService
         _emailService.Send(email, subject, body);
         _logger.LogInformation(
             LogEvents.ResetCredentialsSuccess,
-            "Successfull password reset for {id}",
+            "Successful password reset for {id}",
             user.Id
         );
     }

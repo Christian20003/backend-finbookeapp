@@ -10,12 +10,9 @@ public class AccountManager(UserManager<UserAccount> userManager) : IAccountMana
 
     public async Task<IdentityResult> CreateUserAsync(UserAccount user, string password)
     {
-        var result = await _userManager.CreateAsync(user);
-        if (!result.Succeeded)
-        {
-            return result;
-        }
-        return await _userManager.AddPasswordAsync(user, password);
+        var result = await _userManager.CreateAsync(user, password);
+        Console.WriteLine(result);
+        return result;
     }
 
     public IAsyncEnumerable<UserAccount> GetUsersAsync()

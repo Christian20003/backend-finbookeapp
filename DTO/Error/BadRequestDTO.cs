@@ -1,6 +1,6 @@
 namespace FinBookeAPI.DTO.Error;
 
-public class BadRequestResponse
+public class BadRequestDTO
 {
     public string Type { get; set; } = "";
 

@@ -49,6 +49,6 @@ public class AuthDbContext(
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.Entity<JwtToken>().ToCollection("authentication");
+        builder.Entity<JwtToken>().ToCollection("InvalidTokens");
     }
 }

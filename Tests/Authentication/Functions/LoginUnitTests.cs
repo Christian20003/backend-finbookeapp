@@ -72,7 +72,7 @@ public partial class AuthenticationServiceUnitTests
     }
 
     [Fact]
-    public async Task Should_ReturnJwtTokens_WhenAuthenticationIsSuccessfull()
+    public async Task Should_ReturnJwtTokens_WhenAuthenticationIsSuccessful()
     {
         var result = await _service.Login(_userAccount.Email!, _userAccount.PasswordHash!);
         var expected = JwtTokenRecord.GetObject();
@@ -84,7 +84,7 @@ public partial class AuthenticationServiceUnitTests
     }
 
     [Fact]
-    public async Task Should_ReturnUserData_WhenAuthenticationIsSuccessfull()
+    public async Task Should_ReturnUserData_WhenAuthenticationIsSuccessful()
     {
         var result = await _service.Login(_userAccount.Email!, _userAccount.PasswordHash!);
 

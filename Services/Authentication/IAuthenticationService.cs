@@ -152,6 +152,9 @@ public interface IAuthenticationService
     /// <exception cref="SecurityTokenException">
     /// If the 'enc' header claim is null or empty.
     /// </exception>
+    /// <exception cref="SecurityTokenExpiredException">
+    /// If the refresh token has expired.
+    /// </exception>
     /// <exception cref="SecurityTokenInvalidSignatureException">
     /// If the signature is not valid.
     /// </exception>

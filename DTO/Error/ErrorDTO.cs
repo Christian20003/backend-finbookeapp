@@ -1,4 +1,3 @@
-using FinBookeAPI.Models.Exceptions;
 using Newtonsoft.Json;
 
 namespace FinBookeAPI.DTO.Error;
@@ -33,12 +32,6 @@ public class ErrorResponse
     public int Status { get; set; }
 
     /// <summary>
-    /// The error code which gives further inside about the error source.
-    /// </summary>
-    [JsonProperty(PropertyName = "code", NullValueHandling = NullValueHandling.Ignore)]
-    public ErrorCodes? Code { get; set; }
-
-    /// <summary>
     /// The URI path were this error occurred.
     /// </summary>
     [JsonProperty(PropertyName = "instance")]
@@ -48,11 +41,11 @@ public class ErrorResponse
     /// A list of invalid or missing properties.
     /// </summary>
     [JsonProperty(PropertyName = "properties", NullValueHandling = NullValueHandling.Ignore)]
-    public Dictionary<string, List<string>>? InvalidProps { get; set; }
+    public Dictionary<string, List<string>>? Properties { get; set; } = null;
 
     /// <summary>
     /// The date where this error was created
     /// </summary>
-    [JsonProperty(PropertyName = "created")]
+    [JsonProperty(PropertyName = "createdAt")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
