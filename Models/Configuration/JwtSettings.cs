@@ -24,5 +24,20 @@ public class JwtSettings
     /// <summary>
     /// The secret to verify and generate JWT tokens.
     /// </summary>
-    public string? Secret { get; set; } = "";
+    public string? AccessTokenSecret { get; set; } = "";
+
+    /// <summary>
+    /// The secret to verify and generate refresh tokens.
+    /// </summary>
+    public string? RefreshTokenSecret { get; set; } = "";
+
+    /// <summary>
+    /// The life span of a JWT token.
+    /// </summary>
+    public int AccessTokenExpireM { get; set; } = 60;
+
+    /// <summary>
+    /// The life span to be able of refreshing the JWT token.
+    /// </summary>
+    public int RefreshTokenExpireD { get; set; } = 1;
 }

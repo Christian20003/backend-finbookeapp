@@ -1,21 +1,21 @@
 using System.Net;
+using System.Security.Authentication;
 using FinBookeAPI.DTO.Error;
 using FinBookeAPI.Models.Exceptions;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
 namespace FinBookeAPI.Middleware;
 
-public class ExceptionHandling : IMiddleware
+public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
 {
+    private readonly ILogger<ExceptionHandling> _logger = logger;
+
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         try
         {
             await next(context);
-        }
-        catch (AuthenticationException exception)
-        {
-            await HandleAuthenticationException(context, exception);
         }
         catch (Exception exception)
         {
@@ -23,102 +23,108 @@ public class ExceptionHandling : IMiddleware
         }
     }
 
-    private Task HandleAuthenticationException(
-        HttpContext context,
-        AuthenticationException exception
-    )
-    {
-        context.Response.ContentType = "application/json";
-        var body = new ErrorResponse
-        {
-            Type = "AuthenticationException",
-            Code = exception.Code,
-            Instance =
-                context.Request.Scheme + "://" + context.Request.Host.Value + context.Request.Path,
-        };
-        switch (exception.Code)
-        {
-            case ErrorCodes.INVALID_CREDENTIALS:
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                body.Title = "Invalid email or password";
-                body.Detail = "Authentication failed due to incorrect email or password";
-                body.Status = context.Response.StatusCode;
-                return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
-            }
-            case ErrorCodes.UNEXPECTED_STRUCTURE:
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
-                body.Title = "Missing account property";
-                body.Detail = "Authentication failed due to incorrect username";
-                body.Status = context.Response.StatusCode;
-                return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
-            }
-            case ErrorCodes.INVALID_TOKEN:
-            case ErrorCodes.DELETE_FAILED:
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                body.Title = "Invalid refresh token";
-                body.Detail = "Authentication failed due to an incorrect refresh token";
-                body.Status = context.Response.StatusCode;
-                return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
-            }
-            case ErrorCodes.EXPIRED_TOKEN:
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                body.Title = "Expired refresh token";
-                body.Detail = "Authentication failed due to an expired refresh token";
-                body.Status = context.Response.StatusCode;
-                return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
-            }
-            case ErrorCodes.INVALID_CODE:
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                body.Title = "Invalid security code";
-                body.Detail = "Reset password failed due to an incorrect security code";
-                body.Status = context.Response.StatusCode;
-                return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
-            }
-            case ErrorCodes.EXPIRED_CODE:
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                body.Title = "Expired security code";
-                body.Detail = "Reset password failed due to an expired security code";
-                body.Status = context.Response.StatusCode;
-                return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
-            }
-            case ErrorCodes.ACCESS_LOCKED:
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.Locked;
-                body.Title = "Access locked (5 minutes)";
-                body.Detail =
-                    "Authentication failed due to locked access. Too many failed attempts";
-                body.Status = context.Response.StatusCode;
-                return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
-            }
-            default:
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                body.Title = "Server operation failed";
-                body.Detail = "Authentication failed due to an unexpected operation failure";
-                body.Status = context.Response.StatusCode;
-                return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
-            }
-        }
-    }
-
     private Task HandleException(HttpContext context, Exception exception)
     {
         context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
         var body = new ErrorResponse
         {
-            Type = "Exception",
-            Title = "Unexpected failure",
-            Detail = "Requested operation failed due to an unexpected operation failure",
-            Instance = context.Request.Path,
             Status = context.Response.StatusCode,
+            Instance =
+                context.Request.Scheme + "://" + context.Request.Host.Value + context.Request.Path,
         };
+        switch (exception)
+        {
+            case InvalidCredentialException:
+            {
+                body.Type = "AuthenticationException";
+                body.Title = "Invalid credentials";
+                body.Detail = "Provided email or password is not valid";
+                body.Status = (int)HttpStatusCode.Forbidden;
+                break;
+            }
+            case ResourceLockedException:
+            {
+                body.Type = "AuthenticationException";
+                body.Title = "Requested resource is locked";
+                body.Detail = exception.Message;
+                body.Status = (int)HttpStatusCode.Locked;
+                break;
+            }
+            case AuthorizationException:
+            {
+                body.Type = "AuthorizationException";
+                body.Title = "Unauthorized access";
+                body.Detail = exception.Message;
+                body.Status = (int)HttpStatusCode.Unauthorized;
+                break;
+            }
+            case SecurityTokenException:
+            case SecurityTokenMalformedException:
+            {
+                body.Type = "AuthenticationException";
+                body.Title = "Invalid token";
+                body.Detail = "Provided authentication token is not valid";
+                body.Status = (int)HttpStatusCode.Forbidden;
+                break;
+            }
+            case IdentityResultException:
+            {
+                var data = (IdentityResultException)exception;
+                var dict = new Dictionary<string, List<string>>();
+                foreach (var error in data.Errors)
+                {
+                    switch (error.Code)
+                    {
+                        case "DuplicateEmail":
+                        {
+                            dict.Add("Email", [error.Description]);
+                            break;
+                        }
+                        case "DuplicateUserName":
+                        {
+                            dict.Add("Name", [error.Description]);
+                            break;
+                        }
+                        case "PasswordRequiresDigit":
+                        case "PasswordRequiresLower":
+                        case "PasswordRequiresNonAlphanumeric":
+                        case "PasswordRequiresUniqueChars":
+                        case "PasswordRequiresUpper":
+                        case "PasswordTooShort":
+                        {
+                            if (!dict.ContainsKey("Password"))
+                                dict.Add("Password", []);
+                            dict["Password"].Add(error.Description);
+                            break;
+                        }
+                    }
+                }
+                body.Properties = dict;
+                body.Type = "AuthenticationException";
+                body.Title = "Insufficient credentials";
+                body.Detail = "Provided credentials do not fulfill all requirements";
+                body.Status = (int)HttpStatusCode.BadRequest;
+                break;
+            }
+            case ArgumentException:
+            {
+                body.Type = "ArgumentException";
+                body.Title = "Invalid argument";
+                body.Detail = exception.Message;
+                body.Status = (int)HttpStatusCode.BadRequest;
+                break;
+            }
+            default:
+            {
+                body.Type = "UnexpectedException";
+                body.Title = "Unexpected failure";
+                body.Detail = "Requested operation failed due to an unexpected server failure";
+                body.Status = (int)HttpStatusCode.InternalServerError;
+                _logger.LogWarning(exception, "Exception that must be fixed by the administrator");
+                break;
+            }
+        }
+        context.Response.StatusCode = body.Status;
         return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
     }
 }

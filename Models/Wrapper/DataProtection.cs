@@ -18,7 +18,6 @@ public class DataProtection(IDataProtectionProvider provider) : IDataProtection
         {
             throw new ArgumentException("Provided value is not an email");
         }
-        Console.WriteLine(Protector.Protect(value[..index]));
         return Protector.Protect(value[..index]) + value[index..];
     }
 

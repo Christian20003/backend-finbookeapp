@@ -12,7 +12,7 @@ public interface IAccountManager
     /// <returns>
     /// Enumerator over all list of user accounts.
     /// </returns>
-    IAsyncEnumerable<UserDatabase> GetUsersAsync();
+    IAsyncEnumerable<UserAccount> GetUsersAsync();
 
     /// <summary>
     /// This method updates a user account (except password).
@@ -23,7 +23,7 @@ public interface IAccountManager
     /// <returns>
     /// Flag if the requested operation has been successfully executed.
     /// </returns>
-    Task<IdentityResult> UpdateUserAsync(UserDatabase user);
+    Task<IdentityResult> UpdateUserAsync(UserAccount user);
 
     /// <summary>
     /// This method creates a new user account.
@@ -37,7 +37,7 @@ public interface IAccountManager
     /// <returns>
     /// Flag if the requested operation has been successfully executed.
     /// </returns>
-    Task<IdentityResult> CreateUserAsync(UserDatabase user, string password);
+    Task<IdentityResult> CreateUserAsync(UserAccount user, string password);
 
     /// <summary>
     /// This method replaces the current password with the provided one
@@ -52,5 +52,5 @@ public interface IAccountManager
     /// <returns>
     /// Flag if the requested operation has been successfully executed.
     /// </returns>
-    Task<IdentityResult> SetPasswordAsync(UserDatabase user, string password);
+    Task<IdentityResult> SetPasswordAsync(UserAccount user, string password);
 }
