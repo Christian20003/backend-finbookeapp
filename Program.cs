@@ -4,8 +4,8 @@ using FinBookeAPI.AppConfig.Database;
 using FinBookeAPI.AppConfig.Documentation;
 using FinBookeAPI.AppConfig.Mapping;
 using FinBookeAPI.AppConfig.Redaction;
+using FinBookeAPI.Collections.CategoryCollection;
 using FinBookeAPI.Collections.TokenCollection;
-using FinBookeAPI.Database.CategoryDatabase;
 using FinBookeAPI.Middleware;
 using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services.Authentication;
@@ -44,7 +44,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Services that provides key functionality
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-builder.Services.AddScoped<ICategoryDatabase, CategoryDatabase>();
+builder.Services.AddScoped<ICategoryCollection, CategoryCollection>();
 builder.Services.AddTransient<ExceptionHandling>();
 builder.Services.AddTransient<BadRequestHandling>();
 

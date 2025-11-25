@@ -1,4 +1,4 @@
-using FinBookeAPI.Models.CategoryModels;
+using FinBookeAPI.Models.CategoryType;
 using FinBookeAPI.Models.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
