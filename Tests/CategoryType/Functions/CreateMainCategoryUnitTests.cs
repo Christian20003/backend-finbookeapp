@@ -3,7 +3,7 @@ namespace FinBookeAPI.Tests.CategoryType;
 public partial class CategoryServiceUnitTests
 {
     [Fact]
-    public async Task Should_FailGeneratingCategory_WhenNameIsEmpty()
+    public async Task Should_FailCreatingCategory_WhenNameIsEmpty()
     {
         _category.Name = "";
 
@@ -11,7 +11,7 @@ public partial class CategoryServiceUnitTests
     }
 
     [Fact]
-    public async Task Should_FailGeneratingCategory_WhenColorIsEmpty()
+    public async Task Should_FailCreatingCategory_WhenColorIsEmpty()
     {
         _category.Color = "";
 
@@ -19,7 +19,15 @@ public partial class CategoryServiceUnitTests
     }
 
     [Fact]
-    public async Task Should_FailGeneratingCategory_WhenChildDoesNotExist()
+    public async Task Should_FailCreatingCategory_WhenColorHasInvalidFormat()
+    {
+        _category.Color = "abcde";
+
+        await Assert.ThrowsAsync<FormatException>(() => _service.CreateMainCategory(_category));
+    }
+
+    [Fact]
+    public async Task Should_FailCreatingCategory_WhenChildDoesNotExist()
     {
         _category.UserId = _database.Last().UserId;
         _category.Children = [_database.Last().Id, new Guid()];
@@ -28,7 +36,7 @@ public partial class CategoryServiceUnitTests
     }
 
     [Fact]
-    public async Task Should_FailGeneratingCategory_WhenChildIsNotOwned()
+    public async Task Should_FailCreatingCategory_WhenChildIsNotOwned()
     {
         _category.Children = [_database.Last().Id];
 

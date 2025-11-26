@@ -7,35 +7,9 @@ public partial class CategoryService : ICategoryService
 {
     public async Task<Category> CreateMainCategory(Category category)
     {
-        _logger.LogDebug("Add new category {name}", category.Name);
-        if (string.IsNullOrWhiteSpace(category.Name))
-        {
-            _logger.LogWarning(LogEvents.CategoryOperationFailed, "Category name is null or empty");
-            throw new ArgumentException("Category name is null or empty", nameof(category));
-        }
-        if (string.IsNullOrWhiteSpace(category.Color))
-        {
-            _logger.LogWarning(
-                LogEvents.CategoryOperationFailed,
-                "Category color is null or empty"
-            );
-            throw new ArgumentException("Category color is null or empty", nameof(category));
-        }
-        if (
-            category.Children.Any()
-            && await _collection.ExistCategories(category.Children, category.UserId)
-        )
-        {
-            _logger.LogWarning(
-                LogEvents.CategoryOperationFailed,
-                "At least one of these categories does not exist {ids}",
-                category.Children.ToString()
-            );
-            throw new ArgumentException(
-                "One or more of the provided child categories does not exist",
-                nameof(category)
-            );
-        }
+        _logger.LogDebug("Add new main category {name}", category.Name);
+        VerifyCategory(category);
+        await VerifyCategoryChilds(category.UserId, category.Children);
 
         var result = await _collection.CreateCategory(category);
         _logger.LogInformation(
