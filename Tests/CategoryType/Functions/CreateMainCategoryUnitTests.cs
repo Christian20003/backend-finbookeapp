@@ -1,9 +1,11 @@
+using FinBookeAPI.Models.Exceptions;
+
 namespace FinBookeAPI.Tests.CategoryType;
 
 public partial class CategoryServiceUnitTests
 {
     [Fact]
-    public async Task Should_FailCreatingCategory_WhenNameIsEmpty()
+    public async Task Should_FailCreatingMainCategory_WhenNameIsEmpty()
     {
         _category.Name = "";
 
@@ -11,7 +13,15 @@ public partial class CategoryServiceUnitTests
     }
 
     [Fact]
-    public async Task Should_FailCreatingCategory_WhenColorIsEmpty()
+    public async Task Should_FailCreatingMainCategory_WhenUserIdIsEmpty()
+    {
+        _category.UserId = Guid.Empty;
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateMainCategory(_category));
+    }
+
+    [Fact]
+    public async Task Should_FailCreatingMainCategory_WhenColorIsEmpty()
     {
         _category.Color = "";
 
@@ -19,7 +29,7 @@ public partial class CategoryServiceUnitTests
     }
 
     [Fact]
-    public async Task Should_FailCreatingCategory_WhenColorHasInvalidFormat()
+    public async Task Should_FailCreatingMainCategory_WhenColorHasInvalidFormat()
     {
         _category.Color = "abcde";
 
@@ -27,24 +37,26 @@ public partial class CategoryServiceUnitTests
     }
 
     [Fact]
-    public async Task Should_FailCreatingCategory_WhenChildDoesNotExist()
+    public async Task Should_FailCreatingMainCategory_WhenChildDoesNotExist()
     {
         _category.UserId = _database.Last().UserId;
-        _category.Children = [_database.Last().Id, new Guid()];
+        _category.Children = [_database.Last().Id, Guid.NewGuid()];
 
         await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateMainCategory(_category));
     }
 
     [Fact]
-    public async Task Should_FailCreatingCategory_WhenChildIsNotOwned()
+    public async Task Should_FailCreatingMainCategory_WhenChildIsNotOwned()
     {
         _category.Children = [_database.Last().Id];
 
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateMainCategory(_category));
+        await Assert.ThrowsAsync<AuthorizationException>(
+            () => _service.CreateMainCategory(_category)
+        );
     }
 
     [Fact]
-    public async Task Should_StoreCategory()
+    public async Task Should_StoreMainCategory()
     {
         await _service.CreateMainCategory(_category);
 
@@ -52,7 +64,7 @@ public partial class CategoryServiceUnitTests
     }
 
     [Fact]
-    public async Task Should_ReturnCreatedCategory()
+    public async Task Should_ReturnCreatedMainCategory()
     {
         var result = await _service.CreateMainCategory(_category);
 

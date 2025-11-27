@@ -10,20 +10,21 @@ public static class CategoryRecord
         {
             Name = "Living",
             Color = "rgb(66,55,88)",
-            UserId = new Guid(),
+            UserId = Guid.NewGuid(),
+            Children = [],
         };
     }
 
     public static List<Category> GetObjects()
     {
-        var userId = new Guid();
-        var firstChild = new Guid();
-        var secondChild = new Guid();
+        var userId = Guid.NewGuid();
+        var firstChild = Guid.NewGuid();
+        var secondChild = Guid.NewGuid();
         return
         [
             new Category
             {
-                UserId = new Guid(),
+                UserId = Guid.NewGuid(),
                 Name = "Hobbys",
                 Color = "rgb(77,44,33)",
             },

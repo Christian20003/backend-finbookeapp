@@ -1,5 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-using FinBookeAPI.Attributes;
+using System.Text;
 
 namespace FinBookeAPI.Models.CategoryType;
 
@@ -11,7 +10,7 @@ public class Category
     public Guid Id { get; set; } = Guid.NewGuid();
 
     /// <summary>
-    /// The id of the user who created the category. If not set, the category will be available for all users.
+    /// The id of the user who created the category.
     /// </summary>
     public Guid UserId { get; set; } = Guid.Empty;
 
@@ -39,4 +38,21 @@ public class Category
     /// The date where this category was modified
     /// </summary>
     public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
+
+    public Category() { }
+
+    public Category(Category category)
+    {
+        Id = category.Id;
+        Name = category.Name;
+        UserId = category.UserId;
+        Color = category.Color;
+        CreatedAt = category.CreatedAt;
+        ModifiedAt = category.ModifiedAt;
+    }
+
+    public override string ToString()
+    {
+        return $"Category: {{ Id: {Id}, Name: {Name}, UserId: {UserId}, Children: [{string.Join(", ", Children)}], Color: {Color}, CreatedAt: {CreatedAt}, ModifiedAt: {ModifiedAt} }}";
+    }
 }

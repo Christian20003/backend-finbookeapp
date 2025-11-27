@@ -9,15 +9,7 @@ public static class MockCategoryCollection
     public static Mock<ICategoryCollection> GetMock(List<Category> data)
     {
         var result = new Mock<ICategoryCollection>();
-        result
-            .Setup(obj => obj.CreateCategory(It.IsAny<Category>()))
-            .Callback<Category>(data.Add)
-            .ReturnsAsync(
-                (Category input) =>
-                {
-                    return input;
-                }
-            );
+        result.Setup(obj => obj.CreateCategory(It.IsAny<Category>())).Callback<Category>(data.Add);
         result
             .Setup(obj => obj.UpdateCategory(It.IsAny<Category>()))
             .Callback<Category>(input =>
@@ -27,31 +19,19 @@ public static class MockCategoryCollection
                 {
                     data[idx] = input;
                 }
-            })
-            .ReturnsAsync(
-                (Category input) =>
-                {
-                    return input;
-                }
-            );
+            });
         result
             .Setup(obj => obj.DeleteCategory(It.IsAny<Category>()))
             .Callback<Category>(input =>
             {
                 data.Remove(input);
-            })
-            .ReturnsAsync(
-                (Category input) =>
-                {
-                    return input;
-                }
-            );
+            });
         result
             .Setup(obj => obj.GetCategory(It.IsAny<Guid>()))
             .ReturnsAsync(
                 (Guid id) =>
                 {
-                    return data.First(elem => elem.Id == id);
+                    return data.FirstOrDefault(elem => elem.Id == id);
                 }
             );
         result
@@ -63,19 +43,41 @@ public static class MockCategoryCollection
                 }
             );
         result
-            .Setup(obj => obj.ExistCategory(It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .Setup(obj => obj.ExistCategory(It.IsAny<Guid>()))
             .ReturnsAsync(
-                (Guid id, Guid userId) =>
+                (Guid id) =>
                 {
-                    return data.Any(elem => elem.Id == id && elem.UserId == userId);
+                    return data.Any(elem => elem.Id == id);
                 }
             );
         result
-            .Setup(obj => obj.ExistCategories(It.IsAny<IEnumerable<Guid>>(), It.IsAny<Guid>()))
+            .Setup(obj => obj.ExistCategories(It.IsAny<IEnumerable<Guid>>()))
             .ReturnsAsync(
-                (IEnumerable<Guid> ids, Guid userId) =>
+                (IEnumerable<Guid> ids) =>
                 {
-                    return ids.All(id => data.Any(elem => elem.Id == id && elem.UserId == userId));
+                    return ids.All(id => data.Any(elem => elem.Id == id));
+                }
+            );
+        result
+            .Setup(obj => obj.HasAccess(It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .ReturnsAsync(
+                (Guid userId, Guid id) =>
+                {
+                    return data.Any(elem =>
+                        elem.Id == id && (elem.UserId == userId || elem.UserId == Guid.Empty)
+                    );
+                }
+            );
+        result
+            .Setup(obj => obj.HasAccess(It.IsAny<Guid>(), It.IsAny<IEnumerable<Guid>>()))
+            .ReturnsAsync(
+                (Guid userId, IEnumerable<Guid> ids) =>
+                {
+                    return ids.All(id =>
+                        data.Any(elem =>
+                            elem.Id == id && (elem.UserId == userId || elem.UserId == Guid.Empty)
+                        )
+                    );
                 }
             );
         return result;
