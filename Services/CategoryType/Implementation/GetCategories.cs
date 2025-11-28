@@ -1,3 +1,4 @@
+using FinBookeAPI.AppConfig.Documentation;
 using FinBookeAPI.Models.CategoryType;
 using FinBookeAPI.Models.Configuration;
 
@@ -10,10 +11,11 @@ public partial class CategoryService : ICategoryService
         _logger.LogDebug("Read all categories of {id}", userId);
 
         if (userId == Guid.Empty)
-        {
-            _logger.LogWarning(LogEvents.CategoryOperationFailed, "UserId is an empty Guid");
-            throw new ArgumentException("UserId is an empty Guid", nameof(userId));
-        }
+            Logging.ThrowAndLogWarning(
+                _logger,
+                LogEvents.CategoryOperationFailed,
+                new ArgumentException("UserId is an empty Guid", nameof(userId))
+            );
 
         var data = await _collection.GetCategories(userId);
         var childIds = data.SelectMany(elem => elem.Children);

@@ -1,3 +1,4 @@
+using FinBookeAPI.AppConfig.Documentation;
 using FinBookeAPI.Attributes;
 using FinBookeAPI.Models.CategoryType;
 using FinBookeAPI.Models.Configuration;
@@ -32,78 +33,57 @@ public partial class CategoryService : ICategoryService
         _logger.LogDebug("Verify category {category}", category.ToString());
         var colorValidator = new ColorAttribute();
         if (category.UserId == Guid.Empty)
-        {
-            _logger.LogWarning(
+            Logging.ThrowAndLogWarning(
+                _logger,
                 LogEvents.CategoryOperationFailed,
-                "UserId {userId} of category {id} is not valid",
-                category.UserId,
-                category.Id
+                new ArgumentException(
+                    $"UserId {category.UserId} of category {category.Id} is not valid",
+                    nameof(category)
+                )
             );
-            throw new ArgumentException(
-                $"UserId {category.UserId} of category {category.Id} is not valid",
-                nameof(category)
-            );
-        }
         if (string.IsNullOrWhiteSpace(category.Name))
-        {
-            _logger.LogWarning(
+            Logging.ThrowAndLogWarning(
+                _logger,
                 LogEvents.CategoryOperationFailed,
-                "Category name is null or empty from {categoryId}",
-                category.Id
+                new ArgumentException(
+                    $"Category name is null or empty from {category.Id}",
+                    nameof(category)
+                )
             );
-            throw new ArgumentException(
-                $"Category name is null or empty from {category.Id}",
-                nameof(category)
-            );
-        }
         if (string.IsNullOrWhiteSpace(category.Color))
-        {
-            _logger.LogWarning(
+            Logging.ThrowAndLogWarning(
+                _logger,
                 LogEvents.CategoryOperationFailed,
-                "Category color is null or empty from {categoryId}",
-                category.Id
+                new ArgumentException(
+                    $"Category color is null or empty from {category.Id}",
+                    nameof(category)
+                )
             );
-            throw new ArgumentException(
-                $"Category color is null or empty from {category.Id}",
-                nameof(category)
-            );
-        }
         if (!colorValidator.IsValid(category.Color))
-        {
-            _logger.LogWarning(
+            Logging.ThrowAndLogWarning(
+                _logger,
                 LogEvents.CategoryOperationFailed,
-                "Category color is not a valid color encoding from {categoryId}",
-                category.Id
+                new FormatException(
+                    $"Category color is not a valid color encoding from {category.Id}"
+                )
             );
-            throw new FormatException(
-                $"Category color is not a valid color encoding from {category.Id}"
-            );
-        }
         if (!await _collection.ExistCategories(category.Children))
-        {
-            _logger.LogWarning(
+            Logging.ThrowAndLogWarning(
+                _logger,
                 LogEvents.CategoryOperationFailed,
-                "Some children of {categoryId} do not exist: [{children}]",
-                category.Id,
-                string.Join(", ", category.Children)
+                new ArgumentException(
+                    $"Some children of {category.Id} do not exist: [{string.Join(", ", category.Children)}]",
+                    nameof(category)
+                )
             );
-            throw new ArgumentException(
-                $"Some children of {category.Id} do not exist: [{string.Join(", ", category.Children)}]",
-                nameof(category)
-            );
-        }
         if (!await _collection.HasAccess(category.UserId, category.Children))
-        {
-            _logger.LogWarning(
+            Logging.ThrowAndLogWarning(
+                _logger,
                 LogEvents.CategoryOperationFailed,
-                "User {id} does not have access on children: {children}",
-                category.UserId,
-                string.Join(", ", category.Children)
+                new AuthorizationException(
+                    $"User {category.UserId} does not have access on children: {string.Join(", ", category.Children)}"
+                )
             );
-            throw new AuthorizationException(
-                $"User {category.UserId} does not have access on children: {string.Join(", ", category.Children)}"
-            );
-        }
     }
 
     /// <summary>
@@ -130,29 +110,20 @@ public partial class CategoryService : ICategoryService
         _logger.LogDebug("Verify category {id}", categoryId);
         var category = await _collection.GetCategory(categoryId);
         if (category is null)
-        {
-            _logger.LogWarning(
+            Logging.ThrowAndLogWarning(
+                _logger,
                 LogEvents.CategoryOperationFailed,
-                "Category {categoryId} does not exist",
-                categoryId
+                new ArgumentException($"Category {categoryId} does not exist", nameof(categoryId))
             );
-            throw new ArgumentException(
-                $"Category {categoryId} does not exist",
-                nameof(categoryId)
-            );
-        }
         if (category.UserId != userId)
-        {
-            _logger.LogWarning(
+            Logging.ThrowAndLogWarning(
+                _logger,
                 LogEvents.CategoryOperationFailed,
-                "User {id} does not have access on children: {children}",
-                category.UserId,
-                string.Join(", ", category.Children)
+                new AuthorizationException(
+                    $"User {category.UserId} does not have access on children: {string.Join(", ", category.Children)}"
+                )
             );
-            throw new AuthorizationException(
-                $"User {category.UserId} does not have access on children: {string.Join(", ", category.Children)}"
-            );
-        }
+
         return category;
     }
 }

@@ -50,5 +50,17 @@ public interface ICategoryService
     /// </exception>
     public Task<Category> CreateSubCategory(Guid parent, Category child);
 
+    /// <summary>
+    /// This method returns all categories that corresponds to the user.
+    /// </summary>
+    /// <param name="userId">
+    /// The user id.
+    /// </param>
+    /// <returns>
+    /// All categories in a nested structure.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// If the user id is an empty Guid.
+    /// </exception>
     public Task<IEnumerable<CategoryNested>> GetCategories(Guid userId);
 }

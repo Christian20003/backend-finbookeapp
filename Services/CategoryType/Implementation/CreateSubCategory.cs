@@ -1,3 +1,4 @@
+using FinBookeAPI.AppConfig.Documentation;
 using FinBookeAPI.Models.CategoryType;
 using FinBookeAPI.Models.Configuration;
 
@@ -11,17 +12,14 @@ public partial class CategoryService : ICategoryService
         await VerifyCategory(child);
         var category = await VerifyCategory(parent, child.UserId);
         if (await HasCycles(parent, child.Children))
-        {
-            _logger.LogWarning(
+            Logging.ThrowAndLogWarning(
+                _logger,
                 LogEvents.CategoryOperationFailed,
-                "{category} cannot be added due to detected cycles",
-                child.ToString()
+                new ArgumentException(
+                    $"{child.ToString} produces a cycle in the category order",
+                    nameof(child)
+                )
             );
-            throw new ArgumentException(
-                $"{child.ToString} produces a cycle in the category order",
-                nameof(child)
-            );
-        }
 
         category.Children = category.Children.Append(child.Id);
         await _collection.CreateCategory(child);
