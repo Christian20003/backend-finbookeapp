@@ -14,24 +14,30 @@ public partial class CategoryService : ICategoryService
     /// <param name="category">
     /// The category that should be verifed.
     /// </param>
+    /// <returns>
+    /// The parent category if it is set, otherwise <c>null</c>.
+    /// </returns>
     /// <exception cref="ArgumentException">
     /// If the category name is null or empty.
     /// If the category color is null or empty.
     /// If a category child does not exist in the database.
+    /// If the category parent does not exist in the database.
     /// </exception>
     /// <exception cref="FormatException">
     /// If the category color is not a valid color format.
     /// </exception>
     /// <exception cref="AuthorizationException">
-    /// If a category child is not accessible by the provided user.
+    /// If a category child is not accessible by the user.
+    /// If the category parent is not accessible by the user.
     /// </exception>
     /// <exception cref="OperationCanceledException">
     /// If a reading operation has been canceled.
     /// </exception>
-    private async Task VerifyCategory(Category category)
+    private async Task<Category?> VerifyCategory(Category category)
     {
         _logger.LogDebug("Verify category {category}", category.ToString());
         var colorValidator = new ColorAttribute();
+        Category? parent = null;
         if (category.UserId == Guid.Empty)
             Logging.ThrowAndLogWarning(
                 _logger,
@@ -67,6 +73,27 @@ public partial class CategoryService : ICategoryService
                     $"Category color is not a valid color encoding from {category.Id}"
                 )
             );
+        if (category.Parent.HasValue)
+        {
+            parent = await _collection.GetCategory(category.Parent.Value);
+            if (parent is null)
+                Logging.ThrowAndLogWarning(
+                    _logger,
+                    LogEvents.CategoryOperationFailed,
+                    new ArgumentException(
+                        $"Upper category {parent} does not exist",
+                        nameof(category)
+                    )
+                );
+            if (parent.UserId != category.UserId)
+                Logging.ThrowAndLogWarning(
+                    _logger,
+                    LogEvents.CategoryOperationFailed,
+                    new AuthorizationException(
+                        $"User {category.UserId} does not have access on parent: {parent.Id}"
+                    )
+                );
+        }
         if (!await _collection.ExistCategories(category.Children))
             Logging.ThrowAndLogWarning(
                 _logger,
@@ -84,46 +111,7 @@ public partial class CategoryService : ICategoryService
                     $"User {category.UserId} does not have access on children: {string.Join(", ", category.Children)}"
                 )
             );
-    }
 
-    /// <summary>
-    /// This method verifies if the provided category exist and if
-    /// the user has access to modify this category.
-    /// </summary>
-    /// <param name="categoryId">
-    /// The id of the category that should be verified.
-    /// </param>
-    /// <param name="userId">
-    /// The id of the user who wants to access that category.
-    /// </param>
-    /// <returns>
-    /// The category that corresponds to the provided category id.
-    /// </returns>
-    /// <exception cref="ArgumentException">
-    /// If the category does not exist in the database.
-    /// </exception>
-    /// <exception cref="AuthorizationException">
-    /// If the user does not have access to this category.
-    /// </exception>
-    private async Task<Category> VerifyCategory(Guid categoryId, Guid userId)
-    {
-        _logger.LogDebug("Verify category {id}", categoryId);
-        var category = await _collection.GetCategory(categoryId);
-        if (category is null)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new ArgumentException($"Category {categoryId} does not exist", nameof(categoryId))
-            );
-        if (category.UserId != userId)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new AuthorizationException(
-                    $"User {category.UserId} does not have access on children: {string.Join(", ", category.Children)}"
-                )
-            );
-
-        return category;
+        return parent;
     }
 }

@@ -21,23 +21,27 @@ public class Category
     public string Name { get; set; } = "";
 
     /// <summary>
-    /// The ids of all subcategories
-    /// </summary>
-    public IEnumerable<Guid> Children { get; set; } = [];
-
-    /// <summary>
     /// The color of the category (in hex, rgb, cmyk or hsl encoding)
     /// </summary>
     public string Color { get; set; } = "";
 
     /// <summary>
-    /// The date where this category was created
+    /// The amount limit.
     /// </summary>
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public Limit? Limit { get; set; }
 
     /// <summary>
-    /// The date where this category was modified
+    /// The id of the main-category.
     /// </summary>
+    public Guid? Parent { get; set; }
+
+    /// <summary>
+    /// The ids of its sub-categories
+    /// </summary>
+    public IEnumerable<Guid> Children { get; set; } = [];
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
     public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
 
     public Category() { }
@@ -48,12 +52,15 @@ public class Category
         Name = category.Name;
         UserId = category.UserId;
         Color = category.Color;
+        Parent = category.Parent;
+        if (category.Limit is not null)
+            Limit = new Limit(category.Limit);
         CreatedAt = category.CreatedAt;
         ModifiedAt = category.ModifiedAt;
     }
 
     public override string ToString()
     {
-        return $"Category: {{ Id: {Id}, Name: {Name}, UserId: {UserId}, Children: [{string.Join(", ", Children)}], Color: {Color}, CreatedAt: {CreatedAt}, ModifiedAt: {ModifiedAt} }}";
+        return $"Category: {{ Id: {Id}, Name: {Name}, UserId: {UserId}, Limit: {Limit?.ToString()}, Parent: {Parent} Children: [{string.Join(", ", Children)}], Color: {Color}, CreatedAt: {CreatedAt}, ModifiedAt: {ModifiedAt} }}";
     }
 }
