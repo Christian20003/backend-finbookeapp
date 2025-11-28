@@ -49,4 +49,6 @@ public interface ICategoryService
     /// If the parent and child category have different userIds.
     /// </exception>
     public Task<Category> CreateSubCategory(Guid parent, Category child);
+
+    public Task<IEnumerable<CategoryNested>> GetCategories(Guid userId);
 }

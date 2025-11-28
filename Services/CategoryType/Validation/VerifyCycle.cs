@@ -26,22 +26,7 @@ public partial class CategoryService : ICategoryService
         var map = new HashSet<Guid> { first };
         foreach (var id in categoryIds)
         {
-            if (await DFS(id, map))
-                return true;
-        }
-        return false;
-    }
-
-    private async Task<bool> DFS(Guid current, HashSet<Guid> visited)
-    {
-        var category = await _collection.GetCategory(current);
-        if (category is null)
-            return false;
-        if (!visited.Add(current))
-            return true;
-        foreach (var child in category.Children)
-        {
-            if (await DFS(child, visited))
+            if (await CycleCheck(id, map))
                 return true;
         }
         return false;

@@ -35,6 +35,14 @@ public static class MockCategoryCollection
                 }
             );
         result
+            .Setup(obj => obj.GetCategories(It.IsAny<Guid>()))
+            .ReturnsAsync(
+                (Guid userId) =>
+                {
+                    return data.Where(elem => elem.UserId == userId);
+                }
+            );
+        result
             .Setup(obj => obj.GetCategories(It.IsAny<IEnumerable<Guid>>()))
             .ReturnsAsync(
                 (IEnumerable<Guid> ids) =>

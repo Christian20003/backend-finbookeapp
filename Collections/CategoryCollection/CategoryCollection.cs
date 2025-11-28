@@ -33,6 +33,13 @@ public class CategoryCollection(DataDbContext context) : ICategoryCollection
         );
     }
 
+    public async Task<IEnumerable<Category>> GetCategories(Guid userId)
+    {
+        return await _dbContext
+            .Categories.Where(category => category.UserId == userId)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<Category>> GetCategories(IEnumerable<Guid> categoryIds)
     {
         return await _dbContext

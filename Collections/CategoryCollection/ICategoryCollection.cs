@@ -75,6 +75,20 @@ public interface ICategoryCollection
     public Task<Category?> GetCategory(Guid categoryId);
 
     /// <summary>
+    /// This method returns all categories that correspond to the user.
+    /// </summary>
+    /// <param name="userId">
+    /// The id of the user who's categories should be returned.
+    /// </param>
+    /// <returns>
+    /// The requested categories.
+    /// </returns>
+    /// <exception cref="OperationCanceledException">
+    /// If the reading operation has been canceled.
+    /// </exception>
+    public Task<IEnumerable<Category>> GetCategories(Guid userId);
+
+    /// <summary>
     /// This method returns a list of categories with the provided ids from the database.
     /// </summary>
     /// <param name="categoryIds">

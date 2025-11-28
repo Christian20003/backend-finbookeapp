@@ -1,7 +1,8 @@
-using System.Text;
-
 namespace FinBookeAPI.Models.CategoryType;
 
+/// <summary>
+/// This class models a single category
+/// </summary>
 public class Category
 {
     /// <summary>
