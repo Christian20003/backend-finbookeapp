@@ -6,59 +6,54 @@ namespace FinBookeAPI.Collections.CategoryCollection;
 public interface ICategoryCollection
 {
     /// <summary>
-    /// This method creates a new category object in the database.
+    /// This method tracks the provided category for insertion.
+    /// It will not interact with the database
+    /// (call <see cref="SaveChanges"/>)
     /// </summary>
     /// <param name="category">
-    /// The category object that should be added to the database.
+    /// The category object that should be added.
     /// </param>
-    /// <exception cref="DbUpdateException">
-    /// If the category collection could not be updated.
-    /// </exception>
-    /// <exception cref="DbUpdateConcurrencyException">
-    /// If the category collection could not be updated due to concurrency issues.
-    /// </exception>
     /// <exception cref="OperationCanceledException">
     /// If the insertion operation has been canceled.
     /// </exception>
     public Task CreateCategory(Category category);
 
     /// <summary>
-    /// This method updates an existing category in the database. Ensure
-    /// that the updated entity is stored in the database, otherwise
-    /// an exception is thrown.
+    /// This method tracks the provided category for updating.
+    /// It will not interact with the database
+    /// (call <see cref="SaveChanges"/>)
     /// </summary>
     /// <param name="category">
-    /// The category from the database with updated properties.
+    /// The category that should be updated.
     /// </param>
-    /// <exception cref="DbUpdateException">
-    /// If the category collection could not be updated.
-    /// </exception>
-    /// <exception cref="DbUpdateConcurrencyException">
-    /// If the category collection could not be updated due to concurrency issues.
-    /// </exception>
     /// <exception cref="OperationCanceledException">
     /// If the update operation has been canceled.
     /// </exception>
-    public Task UpdateCategory(Category category);
+    public void UpdateCategory(Category category);
 
     /// <summary>
-    /// This method deletes an category from the database. Ensure
-    /// that the entity is stored in the database, otherwise
-    /// an exception is thrown.
+    /// This method tracks the provided category for deletion.
+    /// It will not interact with the database
+    /// (call <see cref="SaveChanges"/>)
     /// </summary>
     /// <param name="category">
-    /// The category from the database that should be deleted.
+    /// The category that should be deleted.
     /// </param>
+    /// <exception cref="OperationCanceledException">
+    /// If the delete operation has been canceled.
+    /// </exception>
+    public void DeleteCategory(Category category);
+
+    /// <summary>
+    /// This method transfers all changes to the database
+    /// </summary>
     /// <exception cref="DbUpdateException">
     /// If the category collection could not be updated.
     /// </exception>
     /// <exception cref="DbUpdateConcurrencyException">
     /// If the category collection could not be updated due to concurrency issues.
     /// </exception>
-    /// <exception cref="OperationCanceledException">
-    /// If the delete operation has been canceled.
-    /// </exception>
-    public Task DeleteCategory(Category category);
+    public Task SaveChanges();
 
     /// <summary>
     /// This method returns the category with the provided id from the database.
@@ -167,4 +162,24 @@ public interface ICategoryCollection
     /// If the reading operation has been canceled.
     /// </exception>
     public Task<bool> HasAccess(Guid userId, IEnumerable<Guid> categoryIds);
+
+    /// <summary>
+    /// This method returns the parent category of a child category.
+    /// If the category does not have a parent, this method will
+    /// return <c>null</c>.
+    /// </summary>
+    /// <param name="categoryId">
+    /// The id of the category that should be checked for its parent.
+    /// </param>
+    /// <param name="userId">
+    /// The user id.
+    /// </param>
+    /// <returns>
+    /// The parent category if the category has one,
+    /// otherwise <c>null</c>.
+    /// </returns>
+    /// <exception cref="OperationCanceledException">
+    /// If the reading operation has been canceled.
+    /// </exception>
+    public Task<Category?> HasParent(Guid categoryId, Guid userId);
 }

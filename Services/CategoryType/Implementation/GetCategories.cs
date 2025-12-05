@@ -13,7 +13,7 @@ public partial class CategoryService : ICategoryService
         if (userId == Guid.Empty)
             Logging.ThrowAndLogWarning(
                 _logger,
-                LogEvents.CategoryOperationFailed,
+                LogEvents.CategoryReadFailed,
                 new ArgumentException("UserId is an empty Guid", nameof(userId))
             );
 
@@ -28,6 +28,12 @@ public partial class CategoryService : ICategoryService
         {
             result.Add(TransformCategory(category, subCategories));
         }
+
+        _logger.LogInformation(
+            LogEvents.CategoryReadSuccess,
+            "{user} has read his categories",
+            userId
+        );
 
         return result;
     }

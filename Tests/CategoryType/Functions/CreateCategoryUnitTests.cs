@@ -37,10 +37,65 @@ public partial class CategoryServiceUnitTests
     }
 
     [Fact]
+    public async Task Should_FailCreatingCategory_WhenLimitAmountIsNegativ()
+    {
+        _category.Limit!.Amount = -30M;
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateCategory(_category));
+    }
+
+    [Fact]
+    public async Task Should_FailCreatingCategory_WhenLimitAmountIsZero()
+    {
+        _category.Limit!.Amount = 0M;
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateCategory(_category));
+    }
+
+    [Fact]
+    public async Task Should_FailCreatingCategory_WhenLimitPeriodIsNegativ()
+    {
+        _category.Limit!.PeriodDays = -3;
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateCategory(_category));
+    }
+
+    [Fact]
+    public async Task Should_FailCreatingCategory_WhenLimitPeriodIsZero()
+    {
+        _category.Limit!.PeriodDays = 0;
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateCategory(_category));
+    }
+
+    [Fact]
+    public async Task Should_FailCreatingCategory_WhenLimitAmountIsLargerThanFromParent()
+    {
+        var parent = _database.First();
+        _category.Limit!.Amount = 500M;
+        parent.Limit!.Amount = 44M;
+        parent.Children = [_category.Id];
+        parent.UserId = _category.UserId;
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateCategory(_category));
+    }
+
+    [Fact]
+    public async Task Should_FailCreatingCategory_WhenLimitAmountIsSmallerThanFromChildren()
+    {
+        var child = _database.First();
+        child.Limit!.Amount = 500M;
+        child.UserId = _category.UserId;
+        _category.Limit!.Amount = 44M;
+        _category.Children = [child.Id];
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateCategory(_category));
+    }
+
+    [Fact]
     public async Task Should_FailCreatingCategory_WhenChildDoesNotExist()
     {
-        _category.UserId = _database.Last().UserId;
-        _category.Children = [_database.Last().Id, Guid.NewGuid()];
+        _category.Children = [Guid.NewGuid()];
 
         await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateCategory(_category));
     }
@@ -48,68 +103,27 @@ public partial class CategoryServiceUnitTests
     [Fact]
     public async Task Should_FailCreatingCategory_WhenChildIsNotOwned()
     {
-        _category.Children = [_database.Last().Id];
+        var child = _database.First();
+        _category.Children = [child.Id];
 
         await Assert.ThrowsAsync<AuthorizationException>(() => _service.CreateCategory(_category));
     }
 
     [Fact]
-    public async Task Should_FailCreatingCategory_WhenParentDoesNotExist()
+    public async Task Should_AddCategoryToDatabase()
     {
-        _category.Parent = Guid.NewGuid();
-
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateCategory(_category));
-    }
-
-    [Fact]
-    public async Task Should_FailCreatingCategory_WhenParentIsNotAccessible()
-    {
-        _category.Parent = _database.First().Id;
-
-        await Assert.ThrowsAsync<AuthorizationException>(() => _service.CreateCategory(_category));
-    }
-
-    [Fact]
-    public async Task Should_FailCreatingCategory_WhenCyclicDependeciesDetected()
-    {
-        _category.Children = [_database[1].Id];
-        _category.Parent = _database[2].Id;
-
-        await Assert.ThrowsAsync<AuthorizationException>(() => _service.CreateCategory(_category));
-    }
-
-    [Fact]
-    public async Task Should_AddCategoryToDatabase_WhenSubCategory()
-    {
-        var first = _database.First();
-        _category.UserId = first.UserId;
-        _category.Parent = first.Id;
+        var parent = _database.First();
+        parent.Children = [_category.Id];
+        parent.UserId = _category.UserId;
+        parent.Limit!.Amount = 600M;
+        _category.Limit!.Amount = 20M;
         await _service.CreateCategory(_category);
 
         Assert.Contains(_database, elem => elem.Id == _category.Id);
     }
 
     [Fact]
-    public async Task Should_AddCategoryToDatabase_WhenMainCategory()
-    {
-        await _service.CreateCategory(_category);
-
-        Assert.Contains(_database, elem => elem.Id == _category.Id);
-    }
-
-    [Fact]
-    public async Task Should_UpdateParentCategory_WhenNewSubcategoryIsAdded()
-    {
-        var first = _database.First();
-        _category.UserId = first.UserId;
-        _category.Parent = first.Id;
-        await _service.CreateCategory(_category);
-
-        Assert.Contains(first.Children, id => id == _category.Id);
-    }
-
-    [Fact]
-    public async Task Should_ReturnCreatedMainCategory()
+    public async Task Should_ReturnInsertedCategory()
     {
         var result = await _service.CreateCategory(_category);
 
@@ -117,5 +131,7 @@ public partial class CategoryServiceUnitTests
         Assert.Equal(_category.Name, result.Name);
         Assert.Equal(_category.UserId, result.UserId);
         Assert.Equal(_category.Color, result.Color);
+        Assert.Equal(_category.Limit!.Amount, result.Limit!.Amount);
+        Assert.Equal(_category.Limit!.PeriodDays, result.Limit!.PeriodDays);
     }
 }

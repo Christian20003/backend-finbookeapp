@@ -9,28 +9,15 @@ public partial class CategoryService : ICategoryService
     public async Task<Category> CreateCategory(Category category)
     {
         _logger.LogDebug("Add new category {category}", category.ToString());
-        var parent = await VerifyCategory(category);
-        if (parent is not null)
-        {
-            if (await HasCycles(parent.Id, category.Children))
-                Logging.ThrowAndLogWarning(
-                    _logger,
-                    LogEvents.CategoryOperationFailed,
-                    new ArgumentException(
-                        $"{category} produces a cycle in the category order",
-                        nameof(category)
-                    )
-                );
-            parent.Children = parent.Children.Append(category.Id);
-            await _collection.UpdateCategory(parent);
-        }
+        await VerifyCategory(category);
         await _collection.CreateCategory(category);
+        await _collection.SaveChanges();
 
         _logger.LogInformation(
-            LogEvents.CategoryOperationSuccess,
+            LogEvents.CategoryInsertSuccess,
             "{category} is added",
             category.ToString()
         );
-        return category;
+        return new Category(category);
     }
 }

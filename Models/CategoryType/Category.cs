@@ -31,11 +31,6 @@ public class Category
     public Limit? Limit { get; set; }
 
     /// <summary>
-    /// The id of the main-category.
-    /// </summary>
-    public Guid? Parent { get; set; }
-
-    /// <summary>
     /// The ids of its sub-categories
     /// </summary>
     public IEnumerable<Guid> Children { get; set; } = [];
@@ -52,7 +47,6 @@ public class Category
         Name = category.Name;
         UserId = category.UserId;
         Color = category.Color;
-        Parent = category.Parent;
         if (category.Limit is not null)
             Limit = new Limit(category.Limit);
         CreatedAt = category.CreatedAt;
@@ -61,6 +55,6 @@ public class Category
 
     public override string ToString()
     {
-        return $"Category: {{ Id: {Id}, Name: {Name}, UserId: {UserId}, Limit: {Limit?.ToString()}, Parent: {Parent} Children: [{string.Join(", ", Children)}], Color: {Color}, CreatedAt: {CreatedAt}, ModifiedAt: {ModifiedAt} }}";
+        return $"Category: {{ Id: {Id}, Name: {Name}, UserId: {UserId}, Limit: {Limit?.ToString()}, Children: [{string.Join(", ", Children)}], Color: {Color}, CreatedAt: {CreatedAt}, ModifiedAt: {ModifiedAt} }}";
     }
 }

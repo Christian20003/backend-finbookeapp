@@ -88,6 +88,15 @@ public static class MockCategoryCollection
                     );
                 }
             );
+        result
+            .Setup(obj => obj.HasParent(It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .ReturnsAsync(
+                (Guid categoryId, Guid userId) =>
+                {
+                    return data.Where(elem => elem.UserId == userId)
+                        .FirstOrDefault(elem => elem.Children.Contains(categoryId));
+                }
+            );
         return result;
     }
 }

@@ -15,15 +15,23 @@ public interface ICategoryService
     /// The category that has been added to the database.
     /// </returns>
     /// <exception cref="ArgumentException">
-    /// If the provided category name or color is null or empty.
-    /// If the provided category userId is an empty Guid.
-    /// If the provided category color is not a valid color encoding.
-    /// If the provided category children do not exist in the database.
-    /// If the provided category parent does not exist in the database.
+    /// If the category name or color is null or empty.
+    /// If the category userId is an empty Guid.
+    /// If the category color is not a valid color encoding.
+    /// If the category limit amount is smaller or equal to zero.
+    /// If the category limit amount is larger than that of its potential parent.
+    /// If the category limit amount is smaller than the sum of its potential children.
+    /// If the category limit period is smaller or equal to zero.
+    /// If the category children do not exist in the database.
+    /// </exception>
+    /// <exception cref="AuthorizationException">
+    /// If the category color is not a valid color format.
     /// </exception>
     /// <exception cref="AuthorizationException">
     /// If the userId of a child category is different.
-    /// If the userId of the parent category is different.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    /// If tracking operations have been canceled.
     /// </exception>
     public Task<Category> CreateCategory(Category category);
 

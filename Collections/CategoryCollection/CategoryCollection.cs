@@ -11,18 +11,20 @@ public class CategoryCollection(DataDbContext context) : ICategoryCollection
     public async Task CreateCategory(Category category)
     {
         await _dbContext.Categories.AddAsync(category);
-        await _dbContext.SaveChangesAsync();
     }
 
-    public async Task UpdateCategory(Category category)
+    public void UpdateCategory(Category category)
     {
         _dbContext.Categories.Update(category);
-        await _dbContext.SaveChangesAsync();
     }
 
-    public async Task DeleteCategory(Category category)
+    public void DeleteCategory(Category category)
     {
         _dbContext.Categories.Remove(category);
+    }
+
+    public async Task SaveChanges()
+    {
         await _dbContext.SaveChangesAsync();
     }
 
@@ -81,5 +83,11 @@ public class CategoryCollection(DataDbContext context) : ICategoryCollection
             .Select(category => category.Id)
             .ToListAsync();
         return categoryIds.All(list.Contains);
+    }
+
+    public async Task<Category?> HasParent(Guid categoryId, Guid userId)
+    {
+        var list = await GetCategories(userId);
+        return list.FirstOrDefault(elem => elem.Children.Contains(categoryId));
     }
 }

@@ -16,6 +16,7 @@ public class CategoryNested : Category
         Name = category.Name;
         UserId = category.UserId;
         Color = category.Color;
+        Limit = category.Limit;
         CreatedAt = category.CreatedAt;
         ModifiedAt = category.ModifiedAt;
     }
