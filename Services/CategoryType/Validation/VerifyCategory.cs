@@ -40,36 +40,25 @@ public partial class CategoryService : ICategoryService
             Logging.ThrowAndLogWarning(
                 _logger,
                 LogEvents.CategoryOperationFailed,
-                new ArgumentException(
-                    "UserId of category is not valid",
-                    nameof(category)
-                )
+                new ArgumentException("UserId of category is not valid", nameof(category))
             );
         if (string.IsNullOrWhiteSpace(category.Name))
             Logging.ThrowAndLogWarning(
                 _logger,
                 LogEvents.CategoryOperationFailed,
-                new ArgumentException(
-                    "Category name is null or empty",
-                    nameof(category)
-                )
+                new ArgumentException("Category name is null or empty", nameof(category))
             );
         if (string.IsNullOrWhiteSpace(category.Color))
             Logging.ThrowAndLogWarning(
                 _logger,
                 LogEvents.CategoryOperationFailed,
-                new ArgumentException(
-                    "Category color is null or empty",
-                    nameof(category)
-                )
+                new ArgumentException("Category color is null or empty", nameof(category))
             );
         if (!colorValidator.IsValid(category.Color))
             Logging.ThrowAndLogWarning(
                 _logger,
                 LogEvents.CategoryOperationFailed,
-                new FormatException(
-                    "Category color is not a valid color encoding"
-                )
+                new FormatException("Category color is not a valid color encoding")
             );
         var parent = await _collection.HasParent(category.Id, category.UserId);
         var children = await _collection.GetCategories(category.Children);
@@ -77,39 +66,43 @@ public partial class CategoryService : ICategoryService
             Logging.ThrowAndLogWarning(
                 _logger,
                 LogEvents.CategoryOperationFailed,
-                new ArgumentException(
-                    "Category children does not exist",
-                    nameof(category)
-                )
+                new ArgumentException("Category children does not exist", nameof(category))
             );
         if (!children.All(child => child.UserId == category.UserId))
             Logging.ThrowAndLogWarning(
                 _logger,
                 LogEvents.CategoryOperationFailed,
-                new AuthorizationException(
-                    "Category children is not accessible"
-                )
+                new AuthorizationException("Category children is not accessible")
             );
         if (category.Limit is not null)
         {
-            var sum = children.Aggregate<Category, decimal>(0, (sum, cat) => sum += cat.Limit?.Amount ?? 0);
-            if (category.Limit.Amount <= 0)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new ArgumentException("Limit amount must be larger than zero", nameof(category))
+            var sum = children.Aggregate<Category, decimal>(
+                0,
+                (sum, cat) => sum += cat.Limit?.Amount ?? 0
             );
+            if (category.Limit.Amount <= 0)
+                Logging.ThrowAndLogWarning(
+                    _logger,
+                    LogEvents.CategoryOperationFailed,
+                    new ArgumentException("Limit amount must be larger than zero", nameof(category))
+                );
             if (parent is not null && parent.Limit!.Amount < category.Limit.Amount)
                 Logging.ThrowAndLogWarning(
                     _logger,
                     LogEvents.CategoryOperationFailed,
-                    new ArgumentException("Limit amount must be smaller than the amount of the parent", nameof(category))
+                    new ArgumentException(
+                        "Limit amount must be smaller than the amount of the parent",
+                        nameof(category)
+                    )
                 );
             if (sum != 0 && category.Limit.Amount < sum)
                 Logging.ThrowAndLogWarning(
                     _logger,
                     LogEvents.CategoryOperationFailed,
-                    new ArgumentException("Limit amount must be larger than the amount of its children", nameof(category))
+                    new ArgumentException(
+                        "Limit amount must be larger than the amount of its children",
+                        nameof(category)
+                    )
                 );
             if (category.Limit.PeriodDays <= 0)
                 Logging.ThrowAndLogWarning(

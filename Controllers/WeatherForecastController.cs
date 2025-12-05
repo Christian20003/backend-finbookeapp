@@ -28,7 +28,7 @@ public class WeatherForecastController : ControllerBase
     }
 
     [HttpGet(Name = "GetWeatherForecast")]
-    public async Task<IEnumerable<WeatherForecast>> Get()
+    public IEnumerable<WeatherForecast> Get()
     {
         return Enumerable
             .Range(1, 5)

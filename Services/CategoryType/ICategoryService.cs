@@ -1,5 +1,6 @@
 using FinBookeAPI.Models.CategoryType;
 using FinBookeAPI.Models.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinBookeAPI.Services.CategoryType;
 
@@ -17,21 +18,26 @@ public interface ICategoryService
     /// <exception cref="ArgumentException">
     /// If the category name or color is null or empty.
     /// If the category userId is an empty Guid.
-    /// If the category color is not a valid color encoding.
     /// If the category limit amount is smaller or equal to zero.
     /// If the category limit amount is larger than that of its potential parent.
     /// If the category limit amount is smaller than the sum of its potential children.
     /// If the category limit period is smaller or equal to zero.
     /// If the category children do not exist in the database.
     /// </exception>
-    /// <exception cref="AuthorizationException">
+    /// <exception cref="FormatException">
     /// If the category color is not a valid color format.
     /// </exception>
     /// <exception cref="AuthorizationException">
-    /// If the userId of a child category is different.
+    /// If the user id of a child category is different.
     /// </exception>
     /// <exception cref="OperationCanceledException">
     /// If tracking operations have been canceled.
+    /// </exception>
+    /// <exception cref="DbUpdateException">
+    /// If the category collection could not be updated.
+    /// </exception>
+    /// <exception cref="DbUpdateConcurrencyException">
+    /// If the category collection could not be updated due to concurrency issues.
     /// </exception>
     public Task<Category> CreateCategory(Category category);
 
@@ -48,4 +54,44 @@ public interface ICategoryService
     /// If the user id is an empty Guid.
     /// </exception>
     public Task<IEnumerable<CategoryNested>> GetCategories(Guid userId);
+
+    /// <summary>
+    /// This method updates an category. If this category update
+    /// includes children that are already assigned to different
+    /// categories, the old parent categories are updated as well.
+    /// </summary>
+    /// <param name="category">
+    /// The category that should be updated.
+    /// </param>
+    /// <returns>
+    /// A collection of updated categories.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// If the category does not exist in the database.
+    /// If the category name or color is null or empty.
+    /// If the category userId is an empty Guid.
+    /// If the category limit amount is smaller or equal to zero.
+    /// If the category limit amount is larger than that of its potential parent.
+    /// If the category limit amount is smaller than the sum of its potential children.
+    /// If the category limit period is smaller or equal to zero.
+    /// If the category children do not exist in the database.
+    /// If a cyclic dependency exists with the updated children.
+    /// </exception>
+    /// <exception cref="FormatException">
+    /// If the category color is not a valid color format.
+    /// </exception>
+    /// <exception cref="AuthorizationException">
+    /// If a child has a different user id.
+    /// If the category in the database has a different user id.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    /// If tracking operations have been canceled.
+    /// </exception>
+    /// <exception cref="DbUpdateException">
+    /// If the category collection could not be updated.
+    /// </exception>
+    /// <exception cref="DbUpdateConcurrencyException">
+    /// If the category collection could not be updated due to concurrency issues.
+    /// </exception>
+    public Task<IEnumerable<Category>> UpdateCategory(Category category);
 }

@@ -16,9 +16,7 @@ public static class MockCategoryCollection
             {
                 var idx = data.FindIndex(elem => elem.Id == input.Id);
                 if (idx != -1)
-                {
                     data[idx] = input;
-                }
             });
         result
             .Setup(obj => obj.DeleteCategory(It.IsAny<Category>()))
