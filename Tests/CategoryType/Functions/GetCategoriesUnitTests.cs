@@ -1,3 +1,5 @@
+using FinBookeAPI.Models.Exceptions;
+
 namespace FinBookeAPI.Tests.CategoryType;
 
 public partial class CategoryServiceUnitTests
@@ -9,12 +11,57 @@ public partial class CategoryServiceUnitTests
     }
 
     [Fact]
-    public async Task Should_ReturnNestedCategories()
+    public async Task Should_ReturnCategories()
     {
-        var result = await _service.GetCategories(_database[1].UserId);
+        var entity = _database.FirstOrDefault(elem => elem.Children.Any());
+        var entities = _database.Where(elem => elem.UserId == entity!.UserId);
+        var result = await _service.GetCategories(entity!.UserId);
 
-        Assert.Single(result);
-        Assert.Contains(result.First().Children, child => child.Id == _database[2].Id);
-        Assert.Contains(result.First().Children, child => child.Id == _database[3].Id);
+        Assert.All(result, elem => entities.Contains(elem));
+    }
+
+    [Fact]
+    public async Task Should_FailReadingCategory_WhenCategoryIdIsEmpty()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => _service.GetCategory(Guid.Empty, Guid.NewGuid())
+        );
+    }
+
+    [Fact]
+    public async Task Should_FailReadingCategory_WhenUserIdIsEmpty()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => _service.GetCategory(Guid.NewGuid(), Guid.Empty)
+        );
+    }
+
+    [Fact]
+    public async Task Should_FailReadingCategory_WhenCategoryDoesNotExist()
+    {
+        await Assert.ThrowsAsync<EntityNotFoundException>(
+            () => _service.GetCategory(Guid.NewGuid(), Guid.NewGuid())
+        );
+    }
+
+    [Fact]
+    public async Task Should_FailReadingCategory_WhenCategoryIsNotOwned()
+    {
+        await Assert.ThrowsAsync<AuthorizationException>(
+            () => _service.GetCategory(_database.First().Id, Guid.NewGuid())
+        );
+    }
+
+    [Fact]
+    public async Task Should_ReturnRequestedCategory()
+    {
+        var entity = _database.First();
+        var result = await _service.GetCategory(entity.Id, entity.UserId);
+
+        Assert.Equal(entity.Name, result.Name);
+        Assert.Equal(entity.Color, result.Color);
+        Assert.Equal(entity.Limit!.Amount, result.Limit!.Amount);
+        Assert.Equal(entity.Limit!.PeriodDays, result.Limit!.PeriodDays);
+        Assert.Equal(entity.Children, result.Children);
     }
 }

@@ -48,12 +48,39 @@ public interface ICategoryService
     /// The user id.
     /// </param>
     /// <returns>
-    /// All categories in a nested structure.
+    /// All categories from a user.
     /// </returns>
     /// <exception cref="ArgumentException">
     /// If the user id is an empty Guid.
     /// </exception>
-    public Task<IEnumerable<CategoryNested>> GetCategories(Guid userId);
+    public Task<IEnumerable<Category>> GetCategories(Guid userId);
+
+    /// <summary>
+    /// This method returns a category.
+    /// </summary>
+    /// <param name="categoryId">
+    /// The id of the requested category.
+    /// </param>
+    /// <param name="userId">
+    /// The id of the user who wants access.
+    /// </param>
+    /// <returns>
+    /// The category from the database.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// If the category id is an empty Guid.
+    /// If the user id is an empty Guid.
+    /// </exception>
+    /// <exception cref="EntityNotFoundException">
+    /// If the category does not exist in the database.
+    /// </exception>
+    /// <exception cref="AuthorizationException">
+    /// If the category in the database has a different user id.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    /// If tracking operations have been canceled.
+    /// </exception>
+    public Task<Category> GetCategory(Guid categoryId, Guid userId);
 
     /// <summary>
     /// This method updates an category. If this category update
@@ -122,4 +149,16 @@ public interface ICategoryService
     /// If the category collection could not be updated due to concurrency issues.
     /// </exception>
     public Task<Category> DeleteCategory(Category category);
+
+    /// <summary>
+    /// This method transforms a simple category list into a list of nested
+    /// categories.
+    /// </summary>
+    /// <param name="categories">
+    /// The list of categories that should be nested.
+    /// </param>
+    /// <returns>
+    /// All categories in a nested structure.
+    /// </returns>
+    public IEnumerable<CategoryNested> NestCategories(IEnumerable<Category> categories);
 }

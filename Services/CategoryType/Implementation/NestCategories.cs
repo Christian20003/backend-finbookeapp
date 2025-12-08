@@ -4,6 +4,23 @@ namespace FinBookeAPI.Services.CategoryType;
 
 public partial class CategoryService : ICategoryService
 {
+    public IEnumerable<CategoryNested> NestCategories(IEnumerable<Category> categories)
+    {
+        var result = new List<CategoryNested>();
+        var childIds = categories.SelectMany(elem => elem.Children);
+        var mainCategories = categories.Where(elem => !childIds.Contains(elem.Id));
+        var subCategories = categories
+            .Where(elem => childIds.Contains(elem.Id))
+            .ToDictionary(elem => elem.Id);
+
+        foreach (var category in mainCategories)
+        {
+            result.Add(TransformCategory(category, subCategories));
+        }
+
+        return result;
+    }
+
     /// <summary>
     /// This method transforms a <see cref="Category"/> into a
     /// <see cref="CategoryNested"/> object recursively.
