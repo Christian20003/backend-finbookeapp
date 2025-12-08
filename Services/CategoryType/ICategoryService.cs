@@ -127,8 +127,11 @@ public interface ICategoryService
     /// <summary>
     /// This method removes a category from the database.
     /// </summary>
-    /// <param name="category">
-    /// The category that should be removed.
+    /// <param name="categoryId">
+    /// The id of the category that should be removed.
+    /// </param>
+    /// <param name="userId">
+    /// The id of the user.
     /// </param>
     /// <returns>
     /// The removed category.
@@ -148,7 +151,7 @@ public interface ICategoryService
     /// <exception cref="DbUpdateConcurrencyException">
     /// If the category collection could not be updated due to concurrency issues.
     /// </exception>
-    public Task<Category> DeleteCategory(Category category);
+    public Task<Category> DeleteCategory(Guid categoryId, Guid userId);
 
     /// <summary>
     /// This method transforms a simple category list into a list of nested

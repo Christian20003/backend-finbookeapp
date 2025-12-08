@@ -6,18 +6,37 @@ namespace FinBookeAPI.Tests.CategoryType;
 public partial class CategoryServiceUnitTests
 {
     [Fact]
+    public async Task Should_FailRemovingCategory_WhenCategoryIdIsEmpty()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => _service.DeleteCategory(Guid.Empty, Guid.NewGuid())
+        );
+    }
+
+    [Fact]
+    public async Task Should_FailRemovingCategory_WhenUserIdIsEmpty()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => _service.DeleteCategory(Guid.NewGuid(), Guid.Empty)
+        );
+    }
+
+    [Fact]
     public async Task Should_FailRemovingCategory_WhenCategoryDoesNotExist()
     {
-        await Assert.ThrowsAsync<EntityNotFoundException>(() => _service.DeleteCategory(_category));
+        await Assert.ThrowsAsync<EntityNotFoundException>(
+            () => _service.DeleteCategory(_category.Id, _category.UserId)
+        );
     }
 
     [Fact]
     public async Task Should_Fail_RemovingCategory_WhenCategoryIsNotOwned()
     {
         _database.Add(_category);
-        var input = new Category(_category) { UserId = Guid.NewGuid() };
 
-        await Assert.ThrowsAsync<AuthorizationException>(() => _service.DeleteCategory(input));
+        await Assert.ThrowsAsync<AuthorizationException>(
+            () => _service.DeleteCategory(_category.Id, Guid.NewGuid())
+        );
     }
 
     [Fact]
@@ -25,7 +44,7 @@ public partial class CategoryServiceUnitTests
     {
         _database.Add(_category);
 
-        await _service.DeleteCategory(_category);
+        await _service.DeleteCategory(_category.Id, _category.UserId);
 
         Assert.DoesNotContain(_database, elem => elem.Id == _category.Id);
     }
@@ -38,7 +57,7 @@ public partial class CategoryServiceUnitTests
         parent.Children = [_category.Id];
         _database.Add(_category);
 
-        await _service.DeleteCategory(_category);
+        await _service.DeleteCategory(_category.Id, _category.UserId);
 
         Assert.DoesNotContain(parent.Children, id => id == _category.Id);
     }
@@ -48,7 +67,7 @@ public partial class CategoryServiceUnitTests
     {
         _database.Add(_category);
 
-        var result = await _service.DeleteCategory(_category);
+        var result = await _service.DeleteCategory(_category.Id, _category.UserId);
 
         Assert.Equal(_category.Name, result.Name);
         Assert.Equal(_category.Color, result.Color);
