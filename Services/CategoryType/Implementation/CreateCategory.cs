@@ -1,4 +1,3 @@
-using FinBookeAPI.AppConfig.Documentation;
 using FinBookeAPI.Models.CategoryType;
 using FinBookeAPI.Models.Configuration;
 

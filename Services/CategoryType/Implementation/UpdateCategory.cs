@@ -17,7 +17,7 @@ public partial class CategoryService : ICategoryService
             Logging.ThrowAndLogWarning(
                 _logger,
                 LogEvents.CategoryUpdateFailed,
-                new ArgumentException($"Category does not exist in database", nameof(category))
+                new EntityNotFoundException($"Category does not exist in database")
             );
         if (dbCategory.UserId != category.UserId)
             Logging.ThrowAndLogWarning(

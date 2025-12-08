@@ -8,7 +8,7 @@ public partial class CategoryServiceUnitTests
     [Fact]
     public async Task Should_FailUpdateCategory_WhenCategoryDoesNotExist()
     {
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(_category));
+        await Assert.ThrowsAsync<EntityNotFoundException>(() => _service.UpdateCategory(_category));
     }
 
     [Fact]

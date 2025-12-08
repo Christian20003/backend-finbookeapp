@@ -67,7 +67,6 @@ public interface ICategoryService
     /// A collection of updated categories.
     /// </returns>
     /// <exception cref="ArgumentException">
-    /// If the category does not exist in the database.
     /// If the category name or color is null or empty.
     /// If the category userId is an empty Guid.
     /// If the category limit amount is smaller or equal to zero.
@@ -79,6 +78,9 @@ public interface ICategoryService
     /// </exception>
     /// <exception cref="FormatException">
     /// If the category color is not a valid color format.
+    /// </exception>
+    /// <exception cref="EntityNotFoundException">
+    /// If the category does not exist in the database.
     /// </exception>
     /// <exception cref="AuthorizationException">
     /// If a child has a different user id.
@@ -94,4 +96,30 @@ public interface ICategoryService
     /// If the category collection could not be updated due to concurrency issues.
     /// </exception>
     public Task<IEnumerable<Category>> UpdateCategory(Category category);
+
+    /// <summary>
+    /// This method removes a category from the database.
+    /// </summary>
+    /// <param name="category">
+    /// The category that should be removed.
+    /// </param>
+    /// <returns>
+    /// The removed category.
+    /// </returns>
+    /// <exception cref="EntityNotFoundException">
+    /// If the category does not exist in the database.
+    /// </exception>
+    /// <exception cref="AuthorizationException">
+    /// If the category in the database has a different user id.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    /// If tracking operations have been canceled.
+    /// </exception>
+    /// <exception cref="DbUpdateException">
+    /// If the category collection could not be updated.
+    /// </exception>
+    /// <exception cref="DbUpdateConcurrencyException">
+    /// If the category collection could not be updated due to concurrency issues.
+    /// </exception>
+    public Task<Category> DeleteCategory(Category category);
 }
