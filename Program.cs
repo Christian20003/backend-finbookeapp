@@ -50,6 +50,10 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddTransient<ExceptionHandling>();
 builder.Services.AddTransient<BadRequestHandling>();
 
+// Import test data into database
+await builder.Services.ImportUsers();
+await builder.Services.ImportData();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

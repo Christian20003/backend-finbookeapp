@@ -34,6 +34,9 @@ public static class SettingsExtension
 
         // Add SMTP-Server settings
         services.Configure<SmtpServer>(configuration.GetSection(SmtpServer.SectionName));
+
+        // Add data import settings
+        services.Configure<DataImport>(configuration.GetSection(DataImport.SectionName));
         return services;
     }
 }
