@@ -44,7 +44,10 @@ public class ColorAttribute : ValidationAttribute
     /// This function proofs if the provided color is a supported encoding.
     /// </summary>
     /// <param name="value">The object that should be analyzed.</param>
-    /// <returns>True, if the object is a valid color, otherwise false</returns>
+    /// <returns>
+    /// True, if the object is a valid color, otherwise false.
+    /// If the value itself is <c>null</c> this function returns <c>true</c>.
+    /// </returns>
     public override bool IsValid(object? value)
     {
         if (value is null)

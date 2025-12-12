@@ -47,6 +47,7 @@ public class Category
         Name = category.Name;
         UserId = category.UserId;
         Color = category.Color;
+        Children = category.Children;
         if (category.Limit is not null)
             Limit = new Limit(category.Limit);
         CreatedAt = category.CreatedAt;

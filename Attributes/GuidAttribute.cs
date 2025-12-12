@@ -18,12 +18,15 @@ public class GuidAttribute : ValidationAttribute
     /// <c>IEnumerable</c> structure that contains valid GUIDs.
     /// </summary>
     /// <param name="value">The object that should be analyzed.</param>
-    /// <returns>True, if the object is a valid GUID or contains valid GUIDs, otherwise false</returns>
+    /// <returns>
+    /// True, if the object is a valid GUID or contains valid GUIDs, otherwise false.
+    /// If the value itself is <c>null</c> this function returns <c>true</c>.
+    /// </returns>
     public override bool IsValid(object? value)
     {
         if (value is null)
         {
-            return false;
+            return true;
         }
         // Check if object is iterable (Check each item)
         if (value is IEnumerable<object> list)

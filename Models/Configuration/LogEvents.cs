@@ -6,6 +6,7 @@ namespace FinBookeAPI.Models.Configuration;
 public static class LogEvents
 {
     public const int AuthenticationRequest = 4000;
+    public const int CategoryRequest = 4010;
 
     public const int OperationIgnored = 5000;
 

@@ -42,6 +42,14 @@ public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
                 body.Status = (int)HttpStatusCode.Forbidden;
                 break;
             }
+            case EntityNotFoundException:
+            {
+                body.Type = "EntityNotFoundException";
+                body.Title = "Requested entity not found";
+                body.Detail = "The requested resource could not be found in the database";
+                body.Status = (int)HttpStatusCode.NotFound;
+                break;
+            }
             case ResourceLockedException:
             {
                 body.Type = "AuthenticationException";
@@ -106,6 +114,7 @@ public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
                 body.Status = (int)HttpStatusCode.BadRequest;
                 break;
             }
+            case FormatException:
             case ArgumentException:
             {
                 body.Type = "ArgumentException";
