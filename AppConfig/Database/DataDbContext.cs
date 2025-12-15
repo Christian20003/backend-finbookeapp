@@ -1,3 +1,4 @@
+using FinBookeAPI.Models.AmountManagement;
 using FinBookeAPI.Models.CategoryType;
 using FinBookeAPI.Models.Configuration;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,8 @@ public class DataDbContext(
 ) : DbContext(options)
 {
     public DbSet<Category> Categories { get; init; }
+
+    public DbSet<Amount> Amounts { get; init; }
 
     /// <summary>
     /// This function configures the database storing financial data by reading all specified configurations
@@ -48,5 +51,6 @@ public class DataDbContext(
     {
         base.OnModelCreating(builder);
         builder.Entity<Category>().ToCollection("categories");
+        builder.Entity<Amount>().ToCollection("amounts");
     }
 }
