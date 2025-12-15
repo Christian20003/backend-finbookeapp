@@ -20,7 +20,8 @@ public static class ImportDataExtension
     }
 
     /// <summary>
-    /// This function imports all users defined in a Users.json file
+    /// This function imports all users defined in a Users.json file.
+    /// If the database contains already a user the import will be skipped.
     /// </summary>
     public async static Task<IServiceCollection> ImportUsers(this IServiceCollection services)
     {
@@ -32,7 +33,7 @@ public static class ImportDataExtension
         var logger = factory.CreateLogger("ImportUsers");
 
         var path = options.Value.Path + "Users.json";
-        if (!options.Value.Import)
+        if (!options.Value.Import || await manager.GetUsersAsync().CountAsync() != 0)
             return services;
         if (!File.Exists(path))
         {
@@ -81,7 +82,8 @@ public static class ImportDataExtension
     /// This function reads the data from the given file and
     /// deserialize them to instances of class <c>T</c>.
     /// All identified objects will be tracked for storage
-    /// into the database.
+    /// into the database. Only if the corresponding collection
+    /// cotains elements the tracking will be skipped.
     /// </summary>
     /// <typeparam name="T">
     /// The type of the objects that will be stored in the database.
@@ -106,6 +108,8 @@ public static class ImportDataExtension
     )
         where T : class
     {
+        if (collection.Any())
+            return;
         var file = Path.Combine(path, fileName);
         if (!File.Exists(file))
         {
