@@ -4,10 +4,12 @@ using FinBookeAPI.AppConfig.Database;
 using FinBookeAPI.AppConfig.Documentation;
 using FinBookeAPI.AppConfig.Mapping;
 using FinBookeAPI.AppConfig.Redaction;
+using FinBookeAPI.Collections.AmountCollection;
 using FinBookeAPI.Collections.CategoryCollection;
 using FinBookeAPI.Collections.TokenCollection;
 using FinBookeAPI.Middleware;
 using FinBookeAPI.Models.Wrapper;
+using FinBookeAPI.Services.AmountManagementService;
 using FinBookeAPI.Services.Authentication;
 using FinBookeAPI.Services.CategoryType;
 using FinBookeAPI.Services.Email;
@@ -38,6 +40,7 @@ builder.Services.AddScoped<IAccountManager, AccountManager>();
 // Collections
 builder.Services.AddScoped<ITokenCollection, TokenCollection>();
 builder.Services.AddScoped<ICategoryCollection, CategoryCollection>();
+builder.Services.AddScoped<IAmountCollection, AmountCollection>();
 
 // Services that provides additional functionality
 builder.Services.AddScoped<ISecurityUtilityService, SecurityUtilityService>();
@@ -47,6 +50,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 // Services that provides key functionality
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IAmountManagementService, AmountManagementService>();
 builder.Services.AddTransient<ExceptionHandling>();
 builder.Services.AddTransient<BadRequestHandling>();
 

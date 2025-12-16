@@ -26,6 +26,7 @@ public static class LogEvents
     public const int CategoryInsertFailed = 8017;
     public const int CategoryReadFailed = 8018;
     public const int CategoryDeleteFailed = 8019;
+    public const int AmountManagementOperationFailed = 8020;
 
     public const int ConfigurationError = 9000;
 }

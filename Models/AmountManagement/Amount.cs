@@ -16,9 +16,9 @@ public class Amount
 
     public string Comment { get; set; } = "";
 
-    public string ReceiptPath { get; set; } = "";
+    public string ReceiptFile { get; set; } = "";
 
-    public string BankStatementPath { get; set; } = "";
+    public string BankStatementFile { get; set; } = "";
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
