@@ -1,6 +1,7 @@
 using FinBookeAPI.Models.AmountManagement;
 using FinBookeAPI.Models.CategoryType;
 using FinBookeAPI.Models.Configuration;
+using FinBookeAPI.Models.Payment;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -25,6 +26,8 @@ public class DataDbContext(
     public DbSet<Category> Categories { get; init; }
 
     public DbSet<Amount> Amounts { get; init; }
+
+    public DbSet<PaymentMethod> PaymentMethods { get; init; }
 
     /// <summary>
     /// This function configures the database storing financial data by reading all specified configurations
@@ -52,5 +55,6 @@ public class DataDbContext(
         base.OnModelCreating(builder);
         builder.Entity<Category>().ToCollection("categories");
         builder.Entity<Amount>().ToCollection("amounts");
+        builder.Entity<PaymentMethod>().ToCollection("payment");
     }
 }
