@@ -6,7 +6,7 @@ public class PaymentMethod
 
     public Guid UserId { get; set; } = Guid.NewGuid();
 
-    public string Name { get; set; } = "";
+    public string Type { get; set; } = "";
 
     public IEnumerable<PaymentInstance> Instances { get; set; } = [];
 
@@ -19,7 +19,7 @@ public class PaymentMethod
     public PaymentMethod(PaymentMethod other)
     {
         Id = other.Id;
-        Name = other.Name;
+        Type = other.Type;
         UserId = other.UserId;
         CreatedAt = other.CreatedAt;
         ModifiedAt = other.ModifiedAt;
@@ -31,6 +31,6 @@ public class PaymentMethod
 
     public override string ToString()
     {
-        return $"PaymentMethod: {{ Id: {Id}, UserId: {UserId}, Name: {Name}, Instances: [{string.Join(", ", Instances)}], CreatedAt: {CreatedAt}, ModifiedAt: {ModifiedAt} }}";
+        return $"PaymentMethod: {{ Id: {Id}, UserId: {UserId}, Type: {Type}, Instances: [{string.Join(", ", Instances)}], CreatedAt: {CreatedAt}, ModifiedAt: {ModifiedAt} }}";
     }
 }

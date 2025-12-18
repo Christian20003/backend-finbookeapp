@@ -8,7 +8,7 @@ namespace FinBookeAPI.Services.PaymentMethodService;
 public partial class PaymentMethodService : IPaymentMethodService
 {
     /// <summary>
-    /// This method verifies that the payment method is valid.
+    /// This method verifies that an existing payment method is valid.
     /// </summary>
     /// <param name="method">
     /// The payment method to verify.
@@ -17,22 +17,63 @@ public partial class PaymentMethodService : IPaymentMethodService
     /// The payment method from the database, or <c>null</c> if it does not exist.
     /// </returns>
     /// <exception cref="ArgumentException">
-    /// If the payment method id is not a valid GUID.
-    /// If the payment method name is empty.
+    /// If the payment method id is an empty GUID.
+    /// If the user id is an empty GUID.
+    /// If the payment method type is empty.
     /// </exception>
     /// <exception cref="AuthorizationException">
     /// If the payment method is not accessible by the user.
     /// </exception>
-    private async Task<PaymentMethod?> VerifyPaymentMethod(PaymentMethod method)
+    /// <exception cref="EntityNotFoundException">
+    /// If the payment method does not exist.
+    /// </exception>
+    private async Task<PaymentMethod> VerifyExistingPaymentMethod(PaymentMethod method)
     {
-        _logger.LogDebug("Verify payment method {method}", method.ToString());
+        _logger.LogDebug("Verify existing payment method {method}", method.ToString());
         var entity = await VerifyPaymentMethodAccess(method.Id, method.UserId);
-        VerifyPaymentMethodName(method.Name);
+        VerifyPaymentMethodType(method.Type);
         foreach (var instance in method.Instances)
         {
             VerifyPaymentInstance(instance);
         }
         return entity;
+    }
+
+    /// <summary>
+    /// This method verifies that a new payment method is valid.
+    /// </summary>
+    /// <param name="method">
+    /// The payment method to verify.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// If the payment method id is an empty GUID.
+    /// If the user id is an empty GUID.
+    /// If the payment method type is empty.
+    /// </exception>
+    /// <exception cref="DuplicateEntityException">
+    /// If the payment method id does already exist.
+    /// </exception>
+    private async Task VerifyNewPaymentMethod(PaymentMethod method)
+    {
+        _logger.LogDebug("Verify new payment method {method}", method.ToString());
+        var entity = await VerifyPaymentMethodId(method.Id);
+        if (Guid.Empty == method.UserId)
+            Logging.ThrowAndLogWarning(
+                _logger,
+                LogEvents.PaymentMethodOperationFailed,
+                new ArgumentException("User id is not a valid GUID", nameof(method))
+            );
+        if (entity is not null)
+            Logging.ThrowAndLogWarning(
+                _logger,
+                LogEvents.PaymentMethodInsertFailed,
+                new DuplicateEntityException("Payment method does already exist")
+            );
+        VerifyPaymentMethodType(method.Type);
+        foreach (var instance in method.Instances)
+        {
+            VerifyPaymentInstance(instance);
+        }
     }
 
     /// <summary>
@@ -45,7 +86,7 @@ public partial class PaymentMethodService : IPaymentMethodService
     /// The payment method from the database, or <c>null</c> if it does not exist.
     /// </returns>
     /// <exception cref="ArgumentException">
-    /// If the payment method id is not a valid GUID.
+    /// If the payment method id is an empty GUID.
     /// </exception>
     private async Task<PaymentMethod?> VerifyPaymentMethodId(Guid methodId)
     {
@@ -69,16 +110,19 @@ public partial class PaymentMethodService : IPaymentMethodService
     /// The id of the user who owns the payment method.
     /// </param>
     /// <returns>
-    /// The payment method from the database, or <c>null</c> if it does not exist.
+    /// The payment method from the database.
     /// </returns>
     /// <exception cref="ArgumentException">
-    /// If the payment method id is not a valid GUID.
-    /// If the user id is not a valid GUID.
+    /// If the payment method id is an emtpy GUID.
+    /// If the user id is an emtpy GUID.
     /// </exception>
     /// <exception cref="AuthorizationException">
     /// If the payment method is not accessible by the user.
     /// </exception>
-    private async Task<PaymentMethod?> VerifyPaymentMethodAccess(Guid methodId, Guid userId)
+    /// <exception cref="EntityNotFoundException">
+    /// If the payment method does not exist.
+    /// </exception>
+    private async Task<PaymentMethod> VerifyPaymentMethodAccess(Guid methodId, Guid userId)
     {
         _logger.LogDebug(
             "Verify payment method access for id {id} and user {userId}",
@@ -93,7 +137,11 @@ public partial class PaymentMethodService : IPaymentMethodService
                 new ArgumentException("User id is not a valid GUID", nameof(userId))
             );
         if (entity is null)
-            return null;
+            Logging.ThrowAndLogWarning(
+                _logger,
+                LogEvents.PaymentMethodOperationFailed,
+                new EntityNotFoundException("Payment method does not exist")
+            );
         if (entity.UserId != userId)
             Logging.ThrowAndLogWarning(
                 _logger,
@@ -106,20 +154,20 @@ public partial class PaymentMethodService : IPaymentMethodService
     /// <summary>
     /// This method verifies that the payment method name is valid.
     /// </summary>
-    /// <param name="name">
+    /// <param name="type">
     /// The name of the payment method to verify.
     /// </param>
     /// <exception cref="ArgumentException">
     /// If the payment method name is empty.
     /// </exception>
-    private void VerifyPaymentMethodName(string name)
+    private void VerifyPaymentMethodType(string type)
     {
-        _logger.LogDebug("Verify payment method name {name}", name);
-        if (string.IsNullOrWhiteSpace(name))
+        _logger.LogDebug("Verify payment method type {type}", type);
+        if (string.IsNullOrWhiteSpace(type))
             Logging.ThrowAndLogWarning(
                 _logger,
                 LogEvents.PaymentMethodOperationFailed,
-                new ArgumentException("Payment method name is empty", nameof(name))
+                new ArgumentException("Payment method type is empty", nameof(type))
             );
     }
 }

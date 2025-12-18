@@ -13,8 +13,8 @@ public partial class PaymentMethodService : IPaymentMethodService
     /// The payment instance to verify.
     /// </param>
     /// <exception cref="ArgumentException">
-    /// If the payment instance id is not a valid GUID.
-    /// If the payment instance name is empty.
+    /// If the payment instance id is an empty GUID.
+    /// If the payment instance details are empty.
     /// </exception>
     private void VerifyPaymentInstance(PaymentInstance instance)
     {
@@ -25,11 +25,11 @@ public partial class PaymentMethodService : IPaymentMethodService
                 LogEvents.PaymentMethodOperationFailed,
                 new ArgumentException("Payment instance id is not a valid GUID", nameof(instance))
             );
-        if (string.IsNullOrWhiteSpace(instance.Name))
+        if (string.IsNullOrWhiteSpace(instance.Details))
             Logging.ThrowAndLogWarning(
                 _logger,
                 LogEvents.PaymentMethodOperationFailed,
-                new ArgumentException("Payment instance name is empty", nameof(instance))
+                new ArgumentException("Payment instance details are empty", nameof(instance))
             );
     }
 }

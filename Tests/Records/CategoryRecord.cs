@@ -1,4 +1,3 @@
-using Castle.Components.DictionaryAdapter.Xml;
 using FinBookeAPI.Models.CategoryType;
 
 namespace FinBookeAPI.Tests.Records;

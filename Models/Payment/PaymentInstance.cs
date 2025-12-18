@@ -4,18 +4,18 @@ public class PaymentInstance
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    public string Name { get; set; } = "";
+    public string Details { get; set; } = "";
 
     public PaymentInstance() { }
 
     public PaymentInstance(PaymentInstance other)
     {
         Id = other.Id;
-        Name = other.Name;
+        Details = other.Details;
     }
 
     public override string ToString()
     {
-        return $"PaymentInstance: {{ Id: {Id}, Name: {Name} }}";
+        return $"PaymentInstance: {{ Id: {Id}, Details: {Details} }}";
     }
 }

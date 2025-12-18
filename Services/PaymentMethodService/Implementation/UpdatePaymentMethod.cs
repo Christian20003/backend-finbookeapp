@@ -10,15 +10,9 @@ public partial class PaymentMethodService : IPaymentMethodService
     public async Task<PaymentMethod> UpdatePaymentMethod(PaymentMethod method)
     {
         _logger.LogDebug("Update existing payment method {method}", method.ToString());
-        var entity = await VerifyPaymentMethod(method);
-        if (entity is null)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.PaymentMethodUpdateFailed,
-                new EntityNotFoundException("Payment method does not exist")
-            );
-        if (entity.Name != method.Name)
-            entity.Name = method.Name;
+        var entity = await VerifyExistingPaymentMethod(method);
+        if (entity.Type != method.Type)
+            entity.Type = method.Type;
 
         var toAdd = method
             .Instances.Where(elem => !entity.Instances.Contains(elem))

@@ -11,12 +11,6 @@ public partial class PaymentMethodService : IPaymentMethodService
     {
         _logger.LogDebug("Get payment method {id}", methodId);
         var entity = await VerifyPaymentMethodAccess(methodId, userId);
-        if (entity is null)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.PaymentMethodReadFailed,
-                new EntityNotFoundException("Payment method does not exist")
-            );
         _logger.LogInformation(
             LogEvents.PaymentMethodReadSuccess,
             "Payment method has been read successfully"
