@@ -11,7 +11,7 @@ public class PaymentInstance
     public PaymentInstance(PaymentInstance other)
     {
         Id = other.Id;
-        Details = other.Details;
+        Details = new string(other.Details);
     }
 
     public override string ToString()

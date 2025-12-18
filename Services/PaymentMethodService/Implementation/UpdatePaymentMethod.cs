@@ -1,6 +1,4 @@
-using FinBookeAPI.AppConfig.Documentation;
 using FinBookeAPI.Models.Configuration;
-using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Models.Payment;
 
 namespace FinBookeAPI.Services.PaymentMethodService;
@@ -12,7 +10,7 @@ public partial class PaymentMethodService : IPaymentMethodService
         _logger.LogDebug("Update existing payment method {method}", method.ToString());
         var entity = await VerifyExistingPaymentMethod(method);
         if (entity.Type != method.Type)
-            entity.Type = method.Type;
+            entity.Type = new string(method.Type);
 
         var toAdd = method
             .Instances.Where(elem => !entity.Instances.Contains(elem))

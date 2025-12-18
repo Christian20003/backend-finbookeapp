@@ -18,7 +18,15 @@ public partial class PaymentMethodServiceUnitTests
 
         foreach (var entity in result)
         {
-            Assert.NotSame(_database.Find(elem => elem.Id == entity.Id), entity);
+            var dbpm = _database.Find(elem => elem.Id == entity.Id);
+            Assert.NotSame(dbpm, entity);
+            Assert.NotSame(dbpm!.Type, entity.Type);
+            foreach (var instance in entity.Instances)
+            {
+                var dbpi = dbpm.Instances.First(elem => elem.Id == instance.Id);
+                Assert.NotSame(dbpi, instance);
+                Assert.NotSame(dbpi.Details, instance.Details);
+            }
         }
     }
 

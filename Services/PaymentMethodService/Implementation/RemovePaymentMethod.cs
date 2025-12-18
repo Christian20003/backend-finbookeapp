@@ -1,6 +1,4 @@
-using FinBookeAPI.AppConfig.Documentation;
 using FinBookeAPI.Models.Configuration;
-using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Models.Payment;
 
 namespace FinBookeAPI.Services.PaymentMethodService;

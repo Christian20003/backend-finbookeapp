@@ -19,7 +19,7 @@ public class PaymentMethod
     public PaymentMethod(PaymentMethod other)
     {
         Id = other.Id;
-        Type = other.Type;
+        Type = new string(other.Type);
         UserId = other.UserId;
         CreatedAt = other.CreatedAt;
         ModifiedAt = other.ModifiedAt;

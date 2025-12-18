@@ -79,6 +79,13 @@ public partial class PaymentMethodServiceUnitTests
         var stored = _database.First(pm => pm.Id == result.Id);
 
         Assert.NotSame(stored, result);
+        Assert.NotSame(stored.Type, result.Type);
+        foreach (var instance in result.Instances)
+        {
+            var pi = stored.Instances.First(elem => elem.Id == instance.Id);
+            Assert.NotSame(pi, instance);
+            Assert.NotSame(pi.Details, instance.Details);
+        }
     }
 
     [Fact]

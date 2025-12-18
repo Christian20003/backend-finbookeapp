@@ -49,6 +49,13 @@ public partial class PaymentMethodServiceUnitTests
         var result = await _paymentMethodService.GetPaymentMethod(pm.Id, pm.UserId);
 
         Assert.NotSame(pm, result);
+        Assert.NotSame(pm.Type, result.Type);
+        foreach (var instance in result.Instances)
+        {
+            var pi = pm.Instances.First(elem => elem.Id == instance.Id);
+            Assert.NotSame(pi, instance);
+            Assert.NotSame(pi.Details, instance.Details);
+        }
     }
 
     [Fact]
