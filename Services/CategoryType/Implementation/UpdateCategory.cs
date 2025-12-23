@@ -11,62 +11,55 @@ public partial class CategoryService : ICategoryService
     {
         _logger.LogDebug("Update category: {catgeory}", category.ToString());
 
-        // Check if database store category
-        var dbCategory = await _collection.GetCategory(category.Id);
-        if (dbCategory is null)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryUpdateFailed,
-                new EntityNotFoundException($"Category does not exist in database")
-            );
-        if (dbCategory.UserId != category.UserId)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryUpdateFailed,
-                new AuthorizationException($"Category is not accessible")
-            );
-        var result = new List<Category> { category };
-        // Check if properties are valid
-        await VerifyCategory(category);
+        var entity = await VerifyExistingCategory(category);
+        var result = new List<Category> { new(category) };
 
         // Set new properties if they have changed
-        if (dbCategory.Name != category.Name)
-            dbCategory.Name = category.Name;
-        if (dbCategory.Color != category.Color)
-            dbCategory.Color = category.Color;
-        if (dbCategory.Limit != category.Limit)
+        if (entity.Name != category.Name)
+            entity.Name = category.Name;
+        if (entity.Color != category.Color)
+            entity.Color = category.Color;
+        if (entity.Limit != category.Limit)
         {
             if (category.Limit is null)
-                dbCategory.Limit = null;
-            else if (dbCategory.Limit is null)
-                dbCategory.Limit = category.Limit;
+                entity.Limit = null;
+            else if (entity.Limit is null)
+                entity.Limit = category.Limit;
             else
             {
-                dbCategory.Limit.Amount = category.Limit.Amount;
-                dbCategory.Limit.PeriodDays = category.Limit.PeriodDays;
-                dbCategory.ModifiedAt = DateTime.UtcNow;
+                entity.Limit.Amount = category.Limit.Amount;
+                entity.Limit.PeriodDays = category.Limit.PeriodDays;
+                entity.ModifiedAt = DateTime.UtcNow;
             }
         }
 
-        if (!dbCategory.Children.Equals(category.Children))
+        if (!entity.Children.Equals(category.Children))
         {
             // Update old parents of new childs
             var addedChilds = category.Children.Where(childId =>
-                !dbCategory.Children.Contains(childId)
+                !entity.Children.Contains(childId)
             );
             foreach (var child in addedChilds)
             {
                 // Remove their id from children list of old parent
-                var parent = await _collection.HasParent(child, category.UserId);
+                var parent = await _collection.GetCategory(category =>
+                    category.Children.Contains(child)
+                );
                 if (parent is null)
                     continue;
+                if (parent.UserId != category.UserId)
+                    Logging.ThrowAndLogWarning(
+                        _logger,
+                        LogEvents.CategoryOperationFailed,
+                        new AuthorizationException("Category parent is not accessible")
+                    );
                 parent.Children = [.. parent.Children.Where(childId => childId != child)];
                 parent.ModifiedAt = DateTime.UtcNow;
                 if (result.Any(elem => elem.Id == parent.Id))
                     result = [.. result.Where(elem => elem.Id != parent.Id)];
                 result.Add(new Category(parent));
             }
-            dbCategory.Children = category.Children;
+            entity.Children = category.Children;
 
             if (await VerifyAfterCycle(category.Id, category.Children))
                 Logging.ThrowAndLogWarning(
@@ -79,16 +72,16 @@ public partial class CategoryService : ICategoryService
                 );
         }
 
-        if (!category.Equals(dbCategory))
-            dbCategory.ModifiedAt = category.ModifiedAt;
+        if (!category.Equals(entity))
+            entity.ModifiedAt = category.ModifiedAt;
 
-        _collection.UpdateCategory(dbCategory);
+        _collection.UpdateCategory(entity);
         await _collection.SaveChanges();
 
         _logger.LogInformation(
             LogEvents.CategoryUpdateSuccess,
             "{category} has been updated successfully",
-            dbCategory.ToString()
+            entity.ToString()
         );
 
         return result;

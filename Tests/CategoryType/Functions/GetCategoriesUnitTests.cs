@@ -5,19 +5,33 @@ namespace FinBookeAPI.Tests.CategoryType;
 public partial class CategoryServiceUnitTests
 {
     [Fact]
-    public async Task Should_ThrowArgumentException_WhenUserIdIsEmpty()
+    public async Task Should_FailReadingCategories_WhenUserIdIsEmpty()
     {
         await Assert.ThrowsAsync<ArgumentException>(() => _service.GetCategories(Guid.Empty));
     }
 
     [Fact]
-    public async Task Should_ReturnCategories()
+    public async Task Should_ReturnRequestedCategories()
     {
         var entity = _database.FirstOrDefault(elem => elem.Children.Any());
         var entities = _database.Where(elem => elem.UserId == entity!.UserId);
         var result = await _service.GetCategories(entity!.UserId);
 
         Assert.All(result, elem => entities.Contains(elem));
+    }
+
+    [Fact]
+    public async Task Should_ReturnCopyOfRequestedCategories()
+    {
+        var entity = _database.FirstOrDefault(elem => elem.Children.Any());
+        var entities = _database.Where(elem => elem.UserId == entity!.UserId);
+        var result = await _service.GetCategories(entity!.UserId);
+
+        foreach (var category in result)
+        {
+            var fromDatabase = _database.First(elem => elem.Id == category.Id);
+            Assert.NotSame(fromDatabase, category);
+        }
     }
 
     [Fact]
@@ -63,5 +77,14 @@ public partial class CategoryServiceUnitTests
         Assert.Equal(entity.Limit!.Amount, result.Limit!.Amount);
         Assert.Equal(entity.Limit!.PeriodDays, result.Limit!.PeriodDays);
         Assert.Equal(entity.Children, result.Children);
+    }
+
+    [Fact]
+    public async Task Should_ReturnCopyOfRequestedCategory()
+    {
+        var entity = _database.First();
+        var result = await _service.GetCategory(entity.Id, entity.UserId);
+
+        Assert.NotSame(entity, result);
     }
 }

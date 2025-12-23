@@ -47,7 +47,7 @@ public partial class CategoryService : ICategoryService
     /// </returns>
     private async Task<bool> SearchCycle(Guid current, HashSet<Guid> visited)
     {
-        var category = await _collection.GetCategory(current);
+        var category = await _collection.GetCategory(category => category.Id == current);
         if (category is null)
             return false;
         if (!visited.Add(current))

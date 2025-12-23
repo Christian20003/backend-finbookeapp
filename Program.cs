@@ -1,4 +1,3 @@
-using FinBookeAPI.AppConfig;
 using FinBookeAPI.AppConfig.Authentication;
 using FinBookeAPI.AppConfig.Database;
 using FinBookeAPI.AppConfig.Documentation;

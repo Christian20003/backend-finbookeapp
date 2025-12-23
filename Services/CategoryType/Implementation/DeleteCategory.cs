@@ -11,49 +11,31 @@ public partial class CategoryService : ICategoryService
     {
         _logger.LogDebug("Delete category: {category}", categoryId);
 
-        if (categoryId == Guid.Empty)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryReadFailed,
-                new ArgumentException("CategoryId is an empty Guid", nameof(categoryId))
-            );
-        if (userId == Guid.Empty)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryReadFailed,
-                new ArgumentException("UserId is an empty Guid", nameof(userId))
-            );
-
-        var dbCategory = await _collection.GetCategory(categoryId);
-        if (dbCategory is null)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryDeleteFailed,
-                new EntityNotFoundException("Category does not exist")
-            );
-        if (dbCategory.UserId != userId)
-            Logging.ThrowAndLogError(
-                _logger,
-                LogEvents.CategoryDeleteFailed,
-                new AuthorizationException("Category is not accessible")
-            );
-        var categories = await _collection.GetCategories(userId);
-        var parent = categories.FirstOrDefault(elem => elem.Children.Contains(categoryId));
+        var entity = await VerifyCategoryAccess(categoryId, userId);
+        var parent = await _collection.GetCategory(category =>
+            category.Children.Contains(categoryId)
+        );
         if (parent is not null)
         {
+            if (parent.UserId != userId)
+                Logging.ThrowAndLogWarning(
+                    _logger,
+                    LogEvents.CategoryOperationFailed,
+                    new AuthorizationException("Category parent is not accessible")
+                );
             parent.Children = parent.Children.Where(childId => childId != categoryId);
             _collection.UpdateCategory(parent);
         }
 
-        _collection.DeleteCategory(dbCategory);
+        _collection.DeleteCategory(entity);
         await _collection.SaveChanges();
 
         _logger.LogInformation(
             LogEvents.CategoryDeleteSuccess,
             "Category {category} has been deleted",
-            dbCategory.ToString()
+            entity.ToString()
         );
 
-        return new Category(dbCategory);
+        return new Category(entity);
     }
 }

@@ -18,10 +18,8 @@ public partial class CategoryService : ICategoryService
                 new ArgumentException("UserId is an empty Guid", nameof(userId))
             );
 
-        var categories = await _collection.GetCategories(userId);
-        var result = new List<Category>();
-        foreach (var category in categories)
-            result.Add(new Category(category));
+        var categories = await _collection.GetCategories(category => category.UserId == userId);
+        var result = categories.Select(category => new Category(category));
 
         _logger.LogInformation(
             LogEvents.CategoryReadSuccess,
@@ -36,39 +34,14 @@ public partial class CategoryService : ICategoryService
     {
         _logger.LogDebug("Read category {category}", categoryId);
 
-        if (categoryId == Guid.Empty)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryReadFailed,
-                new ArgumentException("CategoryId is an empty Guid", nameof(categoryId))
-            );
-        if (userId == Guid.Empty)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryReadFailed,
-                new ArgumentException("UserId is an empty Guid", nameof(userId))
-            );
-
-        var category = await _collection.GetCategory(categoryId);
-        if (category is null)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryReadFailed,
-                new EntityNotFoundException("Category does not exist")
-            );
-        if (category.UserId != userId)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryReadFailed,
-                new AuthorizationException("Category is not accessible")
-            );
+        var entity = await VerifyCategoryAccess(categoryId, userId);
 
         _logger.LogInformation(
             LogEvents.CategoryReadSuccess,
             "Successfully read {category}",
-            category.ToString()
+            entity.ToString()
         );
 
-        return new Category(category);
+        return new Category(entity);
     }
 }

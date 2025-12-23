@@ -30,12 +30,23 @@ public partial class CategoryServiceUnitTests
     }
 
     [Fact]
-    public async Task Should_Fail_RemovingCategory_WhenCategoryIsNotOwned()
+    public async Task Should_FailRemovingCategory_WhenCategoryIsNotOwned()
     {
         _database.Add(_category);
 
         await Assert.ThrowsAsync<AuthorizationException>(
             () => _service.DeleteCategory(_category.Id, Guid.NewGuid())
+        );
+    }
+
+    [Fact]
+    public async Task Should_FailRemovingCategory_WhenParentIsNotOwned()
+    {
+        _database.First().Children = [.. _database.First().Children, _category.Id];
+        _database.Add(_category);
+
+        await Assert.ThrowsAsync<AuthorizationException>(
+            () => _service.DeleteCategory(_category.Id, _category.UserId)
         );
     }
 

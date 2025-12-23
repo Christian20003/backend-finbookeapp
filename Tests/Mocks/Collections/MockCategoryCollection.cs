@@ -25,74 +25,19 @@ public static class MockCategoryCollection
                 data.Remove(input);
             });
         result
-            .Setup(obj => obj.GetCategory(It.IsAny<Guid>()))
+            .Setup(obj => obj.GetCategory(It.IsAny<Func<Category, bool>>()))
             .ReturnsAsync(
-                (Guid id) =>
+                (Func<Category, bool> condition) =>
                 {
-                    return data.FirstOrDefault(elem => elem.Id == id);
+                    return data.FirstOrDefault(elem => condition(elem));
                 }
             );
         result
-            .Setup(obj => obj.GetCategories(It.IsAny<Guid>()))
+            .Setup(obj => obj.GetCategories(It.IsAny<Func<Category, bool>>()))
             .ReturnsAsync(
-                (Guid userId) =>
+                (Func<Category, bool> condition) =>
                 {
-                    return data.Where(elem => elem.UserId == userId);
-                }
-            );
-        result
-            .Setup(obj => obj.GetCategories(It.IsAny<IEnumerable<Guid>>()))
-            .ReturnsAsync(
-                (IEnumerable<Guid> ids) =>
-                {
-                    return data.Where(elem => ids.Contains(elem.Id));
-                }
-            );
-        result
-            .Setup(obj => obj.ExistCategory(It.IsAny<Guid>()))
-            .ReturnsAsync(
-                (Guid id) =>
-                {
-                    return data.Any(elem => elem.Id == id);
-                }
-            );
-        result
-            .Setup(obj => obj.ExistCategories(It.IsAny<IEnumerable<Guid>>()))
-            .ReturnsAsync(
-                (IEnumerable<Guid> ids) =>
-                {
-                    return ids.All(id => data.Any(elem => elem.Id == id));
-                }
-            );
-        result
-            .Setup(obj => obj.HasAccess(It.IsAny<Guid>(), It.IsAny<Guid>()))
-            .ReturnsAsync(
-                (Guid userId, Guid id) =>
-                {
-                    return data.Any(elem =>
-                        elem.Id == id && (elem.UserId == userId || elem.UserId == Guid.Empty)
-                    );
-                }
-            );
-        result
-            .Setup(obj => obj.HasAccess(It.IsAny<Guid>(), It.IsAny<IEnumerable<Guid>>()))
-            .ReturnsAsync(
-                (Guid userId, IEnumerable<Guid> ids) =>
-                {
-                    return ids.All(id =>
-                        data.Any(elem =>
-                            elem.Id == id && (elem.UserId == userId || elem.UserId == Guid.Empty)
-                        )
-                    );
-                }
-            );
-        result
-            .Setup(obj => obj.HasParent(It.IsAny<Guid>(), It.IsAny<Guid>()))
-            .ReturnsAsync(
-                (Guid categoryId, Guid userId) =>
-                {
-                    return data.Where(elem => elem.UserId == userId)
-                        .FirstOrDefault(elem => elem.Children.Contains(categoryId));
+                    return data.Where(elem => condition(elem));
                 }
             );
         return result;

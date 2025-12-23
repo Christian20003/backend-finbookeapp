@@ -17,12 +17,15 @@ public interface ICategoryService
     /// </returns>
     /// <exception cref="ArgumentException">
     /// If the category name or color is null or empty.
-    /// If the category userId is an empty Guid.
+    /// If the category id is an empty GUID
+    /// If the category userId is an empty GUID.
     /// If the category limit amount is smaller or equal to zero.
     /// If the category limit amount is larger than that of its potential parent.
     /// If the category limit amount is smaller than the sum of its potential children.
     /// If the category limit period is smaller or equal to zero.
-    /// If the category children do not exist in the database.
+    /// </exception>
+    /// <exception cref="EntityNotFoundException">
+    /// If a category children does not exist in the database.
     /// </exception>
     /// <exception cref="FormatException">
     /// If the category color is not a valid color format.
@@ -51,7 +54,7 @@ public interface ICategoryService
     /// All categories from a user.
     /// </returns>
     /// <exception cref="ArgumentException">
-    /// If the user id is an empty Guid.
+    /// If the user id is an empty GUID.
     /// </exception>
     public Task<IEnumerable<Category>> GetCategories(Guid userId);
 
@@ -68,8 +71,8 @@ public interface ICategoryService
     /// The category from the database.
     /// </returns>
     /// <exception cref="ArgumentException">
-    /// If the category id is an empty Guid.
-    /// If the user id is an empty Guid.
+    /// If the category id is an empty GUID.
+    /// If the user id is an empty GUID.
     /// </exception>
     /// <exception cref="EntityNotFoundException">
     /// If the category does not exist in the database.
@@ -83,7 +86,7 @@ public interface ICategoryService
     public Task<Category> GetCategory(Guid categoryId, Guid userId);
 
     /// <summary>
-    /// This method updates an category. If this category update
+    /// This method updates a category. If this category update
     /// includes children that are already assigned to different
     /// categories, the old parent categories are updated as well.
     /// </summary>
@@ -95,12 +98,12 @@ public interface ICategoryService
     /// </returns>
     /// <exception cref="ArgumentException">
     /// If the category name or color is null or empty.
-    /// If the category userId is an empty Guid.
+    /// If the category id is an empty GUID.
+    /// If the category userId is an empty GUID.
     /// If the category limit amount is smaller or equal to zero.
     /// If the category limit amount is larger than that of its potential parent.
     /// If the category limit amount is smaller than the sum of its potential children.
     /// If the category limit period is smaller or equal to zero.
-    /// If the category children do not exist in the database.
     /// If a cyclic dependency exists with the updated children.
     /// </exception>
     /// <exception cref="FormatException">
@@ -108,6 +111,7 @@ public interface ICategoryService
     /// </exception>
     /// <exception cref="EntityNotFoundException">
     /// If the category does not exist in the database.
+    /// If a category children does not exist in the database.
     /// </exception>
     /// <exception cref="AuthorizationException">
     /// If a child has a different user id.
@@ -136,11 +140,16 @@ public interface ICategoryService
     /// <returns>
     /// The removed category.
     /// </returns>
+    /// <exception cref="ArgumentException">
+    /// If the category id is an empty GUID.
+    /// If the user id is an empty GUID.
+    /// </exception>
     /// <exception cref="EntityNotFoundException">
     /// If the category does not exist in the database.
     /// </exception>
     /// <exception cref="AuthorizationException">
     /// If the category in the database has a different user id.
+    /// If a potential parent category has a different user id.
     /// </exception>
     /// <exception cref="OperationCanceledException">
     /// If tracking operations have been canceled.

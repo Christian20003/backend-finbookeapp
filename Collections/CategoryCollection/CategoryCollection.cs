@@ -4,13 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinBookeAPI.Collections.CategoryCollection;
 
-public class CategoryCollection(DataDbContext context) : ICategoryCollection
+public class CategoryCollection(DataDbContext context)
+    : DataCollection(context),
+        ICategoryCollection
 {
     private readonly DataDbContext _dbContext = context;
 
-    public async Task CreateCategory(Category category)
+    public void CreateCategory(Category category)
     {
-        await _dbContext.Categories.AddAsync(category);
+        _dbContext.Categories.Add(category);
     }
 
     public void UpdateCategory(Category category)
@@ -23,71 +25,19 @@ public class CategoryCollection(DataDbContext context) : ICategoryCollection
         _dbContext.Categories.Remove(category);
     }
 
-    public async Task SaveChanges()
+    public async Task<Category?> GetCategory(Func<Category, bool> condition)
     {
-        await _dbContext.SaveChangesAsync();
+        return await _dbContext.Categories.FirstOrDefaultAsync(category => condition(category));
     }
 
-    public async Task<Category?> GetCategory(Guid categoryId)
+    public async Task<IEnumerable<Category>> GetCategories(Func<Category, bool> condition)
     {
-        return await _dbContext.Categories.FirstOrDefaultAsync(category =>
-            category.Id == categoryId
-        );
+        return await _dbContext.Categories.Where(category => condition(category)).ToListAsync();
     }
 
-    public async Task<IEnumerable<Category>> GetCategories(Guid userId)
-    {
-        return await _dbContext
-            .Categories.Where(category => category.UserId == userId)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<Category>> GetCategories(IEnumerable<Guid> categoryIds)
-    {
-        return await _dbContext
-            .Categories.Where(category => categoryIds.Contains(category.Id))
-            .ToListAsync();
-    }
-
-    public async Task<bool> ExistCategory(Guid categoryId)
-    {
-        return await _dbContext.Categories.AnyAsync(category => category.Id == categoryId);
-    }
-
-    public async Task<bool> ExistCategories(IEnumerable<Guid> categoryIds)
-    {
-        if (!categoryIds.Any())
-            return true;
-        var list = await _dbContext
-            .Categories.Where(category => categoryIds.Contains(category.Id))
-            .Select(category => category.Id)
-            .ToListAsync();
-        return categoryIds.All(list.Contains);
-    }
-
-    public async Task<bool> HasAccess(Guid userId, Guid categoryId)
-    {
-        return await _dbContext.Categories.AnyAsync(category =>
-            category.Id == categoryId && category.UserId == userId
-        );
-    }
-
-    public async Task<bool> HasAccess(Guid userId, IEnumerable<Guid> categoryIds)
-    {
-        if (!categoryIds.Any())
-            return true;
-        var list = await _dbContext
-            .Categories.Where(category =>
-                categoryIds.Contains(category.Id) && category.UserId == userId
-            )
-            .Select(category => category.Id)
-            .ToListAsync();
-        return categoryIds.All(list.Contains);
-    }
-
-    public async Task<Category?> HasParent(Guid categoryId, Guid userId)
+    /* public async Task<Category?> HasParent(Guid categoryId, Guid userId)
     {
         var list = await GetCategories(userId);
         return list.FirstOrDefault(elem => elem.Children.Contains(categoryId));
-    }
+    } */
 }

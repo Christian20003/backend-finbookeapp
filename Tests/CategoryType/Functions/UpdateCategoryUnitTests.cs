@@ -12,84 +12,96 @@ public partial class CategoryServiceUnitTests
     }
 
     [Fact]
-    public async Task Should_Fail_UpdateCategory_WhenCategoryIsNotOwned()
+    public async Task Should_FailUpdateCategory_WhenCategoryIsNotOwned()
     {
         _database.Add(_category);
-        var input = new Category(_category) { UserId = Guid.NewGuid() };
+        var update = new Category(_category) { UserId = Guid.NewGuid() };
 
-        await Assert.ThrowsAsync<AuthorizationException>(() => _service.UpdateCategory(input));
+        await Assert.ThrowsAsync<AuthorizationException>(() => _service.UpdateCategory(update));
     }
 
     [Fact]
     public async Task Should_FailUpdatingCategory_WhenNameIsEmpty()
     {
         _database.Add(_category);
-        _category.Name = "";
+        var update = new Category(_category) { Name = "" };
 
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(_category));
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(update));
     }
 
     [Fact]
     public async Task Should_FailUpdateCategory_WhenUserIdIsEmpty()
     {
         _database.Add(_category);
-        _category.UserId = Guid.Empty;
+        var update = new Category(_category) { UserId = Guid.Empty };
 
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(_category));
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(update));
     }
 
     [Fact]
     public async Task Should_FailUpdateCategory_WhenColorIsEmpty()
     {
         _database.Add(_category);
-        _category.Color = "";
+        var update = new Category(_category) { Color = "" };
 
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(_category));
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(update));
     }
 
     [Fact]
     public async Task Should_FailUpdateCategory_WhenColorHasInvalidFormat()
     {
         _database.Add(_category);
-        _category.Color = "abcde";
+        var update = new Category(_category) { Color = "red" };
 
-        await Assert.ThrowsAsync<FormatException>(() => _service.UpdateCategory(_category));
+        await Assert.ThrowsAsync<FormatException>(() => _service.UpdateCategory(update));
     }
 
     [Fact]
     public async Task Should_FailUpdateCategory_WhenLimitAmountIsNegativ()
     {
         _database.Add(_category);
-        _category.Limit!.Amount = -30M;
+        var update = new Category(_category)
+        {
+            Limit = new Limit(_category.Limit!) { Amount = -30M },
+        };
 
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(_category));
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(update));
     }
 
     [Fact]
     public async Task Should_FailUpdateCategory_WhenLimitAmountIsZero()
     {
         _database.Add(_category);
-        _category.Limit!.Amount = 0M;
+        var update = new Category(_category)
+        {
+            Limit = new Limit(_category.Limit!) { Amount = 0M },
+        };
 
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(_category));
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(update));
     }
 
     [Fact]
     public async Task Should_FailUpdateCategory_WhenLimitPeriodIsNegativ()
     {
         _database.Add(_category);
-        _category.Limit!.PeriodDays = -3;
+        var update = new Category(_category)
+        {
+            Limit = new Limit(_category.Limit!) { PeriodDays = -3 },
+        };
 
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(_category));
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(update));
     }
 
     [Fact]
     public async Task Should_FailUpdateCategory_WhenLimitPeriodIsZero()
     {
         _database.Add(_category);
-        _category.Limit!.PeriodDays = 0;
+        var update = new Category(_category)
+        {
+            Limit = new Limit(_category.Limit!) { PeriodDays = 0 },
+        };
 
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(_category));
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(update));
     }
 
     [Fact]
@@ -97,12 +109,15 @@ public partial class CategoryServiceUnitTests
     {
         _database.Add(_category);
         var parent = _database.First();
-        _category.Limit!.Amount = 500M;
         parent.Limit!.Amount = 44M;
         parent.Children = [_category.Id];
         parent.UserId = _category.UserId;
+        var update = new Category(_category)
+        {
+            Limit = new Limit(_category.Limit!) { Amount = 500M },
+        };
 
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(_category));
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(update));
     }
 
     [Fact]
@@ -112,19 +127,22 @@ public partial class CategoryServiceUnitTests
         var child = _database.First();
         child.Limit!.Amount = 500M;
         child.UserId = _category.UserId;
-        _category.Limit!.Amount = 44M;
-        _category.Children = [child.Id];
+        var update = new Category(_category)
+        {
+            Children = [child.Id],
+            Limit = new Limit(_category.Limit!) { Amount = 44M },
+        };
 
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(_category));
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(update));
     }
 
     [Fact]
     public async Task Should_FailUpdateCategory_WhenChildDoesNotExist()
     {
         _database.Add(_category);
-        _category.Children = [Guid.NewGuid()];
+        var update = new Category(_category) { Children = [Guid.NewGuid()] };
 
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.UpdateCategory(_category));
+        await Assert.ThrowsAsync<EntityNotFoundException>(() => _service.UpdateCategory(update));
     }
 
     [Fact]
@@ -132,9 +150,22 @@ public partial class CategoryServiceUnitTests
     {
         _database.Add(_category);
         var child = _database.First();
-        _category.Children = [child.Id];
+        var update = new Category(_category) { Children = [child.Id] };
 
-        await Assert.ThrowsAsync<AuthorizationException>(() => _service.UpdateCategory(_category));
+        await Assert.ThrowsAsync<AuthorizationException>(() => _service.UpdateCategory(update));
+    }
+
+    [Fact]
+    public async Task Should_FailUpdateCategory_WhenOldParentIsNotOwned()
+    {
+        _database.Add(_category);
+        var oldParent = _database.First(elem => elem.Children.Any());
+        var child = _database.First(elem => elem.Id == oldParent.Children.First());
+        oldParent.UserId = Guid.NewGuid();
+        child.UserId = _category.UserId;
+        var update = new Category(_category) { Children = [child.Id], Limit = null };
+
+        await Assert.ThrowsAsync<AuthorizationException>(() => _service.UpdateCategory(update));
     }
 
     [Fact]
@@ -166,13 +197,13 @@ public partial class CategoryServiceUnitTests
     public async Task Should_ChangeDatabaseState_WhenUpdateIsNotEqualToOriginal()
     {
         _database.Add(_category);
-        var input = new Category(_category) { Name = "New Name", Color = "rgb(88,88,88)" };
+        var update = new Category(_category) { Name = "New Name", Color = "rgb(88,88,88)" };
 
-        var result = await _service.UpdateCategory(input);
+        var result = await _service.UpdateCategory(update);
 
-        Assert.Equal(input.Name, _category.Name);
-        Assert.Equal(input.Color, _category.Color);
-        Assert.Equal(input.ModifiedAt, _category.ModifiedAt);
+        Assert.Equal(update.Name, _category.Name);
+        Assert.Equal(update.Color, _category.Color);
+        Assert.Equal(update.ModifiedAt, _category.ModifiedAt);
     }
 
     [Fact]
@@ -181,13 +212,13 @@ public partial class CategoryServiceUnitTests
         var parent = _database.Find(elem => elem.Children.Any());
         _category.UserId = parent!.UserId;
         _database.Add(_category);
-        var input = new Category(_category)
+        var update = new Category(_category)
         {
             Children = parent!.Children,
             Limit = new Limit { Amount = 600M, PeriodDays = 30 },
         };
 
-        var result = await _service.UpdateCategory(input);
+        var result = await _service.UpdateCategory(update);
 
         Assert.Empty(parent.Children);
     }
@@ -198,13 +229,13 @@ public partial class CategoryServiceUnitTests
         var parent = _database.Find(elem => elem.Children.Any());
         _category.UserId = parent!.UserId;
         _database.Add(_category);
-        var input = new Category(_category)
+        var update = new Category(_category)
         {
             Children = parent!.Children,
             Limit = new Limit { Amount = 600M, PeriodDays = 30 },
         };
 
-        var result = await _service.UpdateCategory(input);
+        var result = await _service.UpdateCategory(update);
 
         Assert.Equal(2, result.Count());
     }
@@ -217,6 +248,7 @@ public partial class CategoryServiceUnitTests
 
         var result = await _service.UpdateCategory(input);
 
+        Assert.Equal(input.Id, result.First().Id);
         Assert.Equal(input.Name, result.First().Name);
     }
 }

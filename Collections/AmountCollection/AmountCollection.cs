@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinBookeAPI.Collections.AmountCollection;
 
-public class AmountCollection(DataDbContext context) : IAmountCollection
+public class AmountCollection(DataDbContext context) : DataCollection(context), IAmountCollection
 {
     private readonly DataDbContext _context = context;
 
@@ -21,11 +21,6 @@ public class AmountCollection(DataDbContext context) : IAmountCollection
     public void RemoveAmount(Amount amount)
     {
         _context.Amounts.Remove(amount);
-    }
-
-    public async Task SaveChanges()
-    {
-        await _context.SaveChangesAsync();
     }
 
     public async Task<Amount?> GetAmount(Func<Amount, bool> condition)

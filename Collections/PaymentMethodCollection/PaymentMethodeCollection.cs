@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinBookeAPI.Collections.PaymentMethodCollection;
 
-public class PaymentMethodCollection(DataDbContext context) : IPaymentMethodCollection
+public class PaymentMethodCollection(DataDbContext context)
+    : DataCollection(context),
+        IPaymentMethodCollection
 {
     private readonly DataDbContext _context = context;
 
@@ -21,11 +23,6 @@ public class PaymentMethodCollection(DataDbContext context) : IPaymentMethodColl
     public void RemovePaymentMethod(PaymentMethod method)
     {
         _context.PaymentMethods.Remove(method);
-    }
-
-    public async Task SaveChanges()
-    {
-        await _context.SaveChangesAsync();
     }
 
     public async Task<PaymentMethod?> GetPaymentMethod(Func<PaymentMethod, bool> condition)

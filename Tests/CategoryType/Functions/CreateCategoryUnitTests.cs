@@ -5,17 +5,35 @@ namespace FinBookeAPI.Tests.CategoryType;
 public partial class CategoryServiceUnitTests
 {
     [Fact]
-    public async Task Should_FailCreatingCategory_WhenNameIsEmpty()
+    public async Task Should_FailCreatingCategory_WhenIdIsEmpty()
     {
-        _category.Name = "";
+        _category.Id = Guid.Empty;
 
         await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateCategory(_category));
+    }
+
+    [Fact]
+    public async Task Should_FailCreatingCategory_WhenIdAlreadyExist()
+    {
+        _category.Id = _database.First().Id;
+
+        await Assert.ThrowsAsync<DuplicateEntityException>(
+            () => _service.CreateCategory(_category)
+        );
     }
 
     [Fact]
     public async Task Should_FailCreatingCategory_WhenUserIdIsEmpty()
     {
         _category.UserId = Guid.Empty;
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateCategory(_category));
+    }
+
+    [Fact]
+    public async Task Should_FailCreatingCategory_WhenNameIsEmpty()
+    {
+        _category.Name = "";
 
         await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateCategory(_category));
     }
@@ -93,11 +111,19 @@ public partial class CategoryServiceUnitTests
     }
 
     [Fact]
+    public async Task Should_FailCreatingCategory_WhenChildIdIsEmpty()
+    {
+        _category.Children = [Guid.Empty];
+
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateCategory(_category));
+    }
+
+    [Fact]
     public async Task Should_FailCreatingCategory_WhenChildDoesNotExist()
     {
         _category.Children = [Guid.NewGuid()];
 
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateCategory(_category));
+        await Assert.ThrowsAsync<EntityNotFoundException>(() => _service.CreateCategory(_category));
     }
 
     [Fact]
@@ -133,5 +159,24 @@ public partial class CategoryServiceUnitTests
         Assert.Equal(_category.Color, result.Color);
         Assert.Equal(_category.Limit!.Amount, result.Limit!.Amount);
         Assert.Equal(_category.Limit!.PeriodDays, result.Limit!.PeriodDays);
+    }
+
+    [Fact]
+    public async Task Should_ReturnCopyOfInsertedCategory()
+    {
+        var result = await _service.CreateCategory(_category);
+        var entity = _database.First(elem => elem.Id == result.Id);
+
+        Assert.NotSame(result, entity);
+    }
+
+    [Fact]
+    public async Task Should_AddCategory_WhenLimitIsNull()
+    {
+        _category.Limit = null;
+
+        var result = await _service.CreateCategory(_category);
+
+        Assert.Contains(_database, elem => elem.Id == _category.Id);
     }
 }
