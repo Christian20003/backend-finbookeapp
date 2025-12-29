@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Models.Payment;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,7 @@ public interface IPaymentMethodService
     /// <exception cref="DuplicateEntityException">
     /// If the payment method id already exists.
     /// </exception>
-    /// <exception cref="ArgumentException">
+    /// <exception cref="ValidationException">
     /// If the payment method is invalid.
     /// </exception>
     /// <exception cref="OperationCanceledException">
@@ -45,7 +46,7 @@ public interface IPaymentMethodService
     /// <exception cref="EntityNotFoundException">
     /// If the payment method does not exist.
     /// </exception>
-    /// <exception cref="ArgumentException">
+    /// <exception cref="ValidationException">
     /// If the payment method is invalid.
     /// </exception>
     /// <exception cref="AuthorizationException">
@@ -78,10 +79,6 @@ public interface IPaymentMethodService
     /// <exception cref="EntityNotFoundException">
     /// If the payment method does not exist.
     /// </exception>
-    /// <exception cref="ArgumentException">
-    /// If the payment method id is empty.
-    /// If the user id is empty.
-    /// </exception>
     /// <exception cref="AuthorizationException">
     /// If the payment method is not accessible.
     /// </exception>
@@ -112,10 +109,6 @@ public interface IPaymentMethodService
     /// <exception cref="EntityNotFoundException">
     /// If the payment method does not exist.
     /// </exception>
-    /// <exception cref="ArgumentException">
-    /// If the payment method id is empty.
-    /// If the user id is empty.
-    /// </exception>
     /// <exception cref="AuthorizationException">
     /// If the payment method is not accessible.
     /// </exception>
@@ -130,8 +123,5 @@ public interface IPaymentMethodService
     /// <returns>
     /// The requested payment methods.
     /// </returns>
-    /// <exception cref="ArgumentException">
-    /// If the user id is empty.
-    /// </exception>
     public Task<IEnumerable<PaymentMethod>> GetPaymentMethods(Guid userId);
 }

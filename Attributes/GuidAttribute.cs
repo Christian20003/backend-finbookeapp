@@ -25,18 +25,14 @@ public class GuidAttribute : ValidationAttribute
     public override bool IsValid(object? value)
     {
         if (value is null)
-        {
             return true;
-        }
         // Check if object is iterable (Check each item)
         if (value is IEnumerable<object> list)
         {
             foreach (var item in list)
             {
                 if (!IsValid(item))
-                {
                     return false;
-                }
             }
             return true;
         }

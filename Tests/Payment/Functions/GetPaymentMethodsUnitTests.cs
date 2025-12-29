@@ -3,14 +3,6 @@ namespace FinBookeAPI.Tests.Payment;
 public partial class PaymentMethodServiceUnitTests
 {
     [Fact]
-    public async Task Should_FailGettingPaymentMethods_WhenUserIdIsEmpty()
-    {
-        await Assert.ThrowsAsync<ArgumentException>(
-            () => _paymentMethodService.GetPaymentMethods(Guid.Empty)
-        );
-    }
-
-    [Fact]
     public async Task Should_ReturnCopiesOfRequestedPaymentMethods()
     {
         var pm = _database.First();
@@ -25,7 +17,9 @@ public partial class PaymentMethodServiceUnitTests
             {
                 var dbpi = dbpm.Instances.First(elem => elem.Id == instance.Id);
                 Assert.NotSame(dbpi, instance);
-                Assert.NotSame(dbpi.Details, instance.Details);
+                Assert.NotSame(dbpi.Name, instance.Name);
+                if (dbpi.Description is not null)
+                    Assert.NotSame(dbpi.Description, instance.Description);
             }
         }
     }

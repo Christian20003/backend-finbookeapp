@@ -1,21 +1,45 @@
+using System.ComponentModel.DataAnnotations;
+using FinBookeAPI.Attributes;
+
 namespace FinBookeAPI.Models.Payment;
 
 public class PaymentInstance
 {
+    [NonEmptyGuid(ErrorMessage = "Payment instance id is invalid")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    public string Details { get; set; } = "";
+    [StringLength(
+        100,
+        MinimumLength = 3,
+        ErrorMessage = "Payment instance name must be between {2} and {1} characters long"
+    )]
+    public string Name { get; set; } = string.Empty;
 
-    public PaymentInstance() { }
+    [StringLength(
+        1000,
+        MinimumLength = 0,
+        ErrorMessage = "Payment instance description must be between {2} and {1} characters long"
+    )]
+    public string? Description { get; set; }
 
-    public PaymentInstance(PaymentInstance other)
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
+
+    public PaymentInstance Copy()
     {
-        Id = other.Id;
-        Details = new string(other.Details);
+        return new PaymentInstance
+        {
+            Id = Id,
+            Name = new string(Name),
+            Description = Description is null ? null : new string(Description),
+            CreatedAt = CreatedAt,
+            ModifiedAt = ModifiedAt,
+        };
     }
 
     public override string ToString()
     {
-        return $"PaymentInstance: {{ Id: {Id}, Details: {Details} }}";
+        return $"PaymentInstance: {{ Id: {Id}, Name: {Name}, Description: {Description}, CreatedAt: {CreatedAt}, ModifiedAt: {ModifiedAt} }}";
     }
 }

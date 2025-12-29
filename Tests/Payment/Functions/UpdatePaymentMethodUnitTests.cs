@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Models.Payment;
 
@@ -8,9 +9,10 @@ public partial class PaymentMethodServiceUnitTests
     [Fact]
     public async Task Should_FailUpdatingPaymentMethod_WhenIdIsEmpty()
     {
-        var pm = new PaymentMethod(_database.First()) { Id = Guid.Empty };
+        var pm = _database.First().Copy();
+        pm.Id = Guid.Empty;
 
-        await Assert.ThrowsAsync<ArgumentException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _paymentMethodService.UpdatePaymentMethod(pm)
         );
     }
@@ -26,19 +28,32 @@ public partial class PaymentMethodServiceUnitTests
     [Fact]
     public async Task Should_FailUpdatingPaymentMethod_WhenUserIdIsEmpty()
     {
-        var pm = new PaymentMethod(_database.First()) { UserId = Guid.Empty };
+        var pm = _database.First().Copy();
+        pm.UserId = Guid.Empty;
 
-        await Assert.ThrowsAsync<ArgumentException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _paymentMethodService.UpdatePaymentMethod(pm)
         );
     }
 
     [Fact]
-    public async Task Should_FailUpdatingPaymentMethod_WhenTypeIsInvalid()
+    public async Task Should_FailUpdatingPaymentMethod_WhenTypeHasLessThan3Chars()
     {
-        var pm = new PaymentMethod(_database.First()) { Type = "" };
+        var pm = _database.First().Copy();
+        pm.Type = "g";
 
-        await Assert.ThrowsAsync<ArgumentException>(
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _paymentMethodService.UpdatePaymentMethod(pm)
+        );
+    }
+
+    [Fact]
+    public async Task Should_FailUpdatingPaymentMethod_WhenTypeHasMoreThan100Chars()
+    {
+        var pm = _database.First().Copy();
+        pm.Type = string.Concat(Enumerable.Repeat("x", 101));
+
+        await Assert.ThrowsAsync<ValidationException>(
             () => _paymentMethodService.UpdatePaymentMethod(pm)
         );
     }
@@ -46,22 +61,47 @@ public partial class PaymentMethodServiceUnitTests
     [Fact]
     public async Task Should_FailUpdatingPaymentMethod_WhenPaymentInstanceIdIsEmpty()
     {
-        var pm = new PaymentMethod(_database.First())
-        {
-            Instances = [new PaymentInstance { Id = Guid.Empty }],
-        };
+        var pm = _database.First().Copy();
+        pm.Instances = _paymentMethod.Instances;
+        pm.Instances.First().Id = Guid.Empty;
 
-        await Assert.ThrowsAsync<ArgumentException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _paymentMethodService.UpdatePaymentMethod(pm)
         );
     }
 
     [Fact]
-    public async Task Should_FailUpdatingPaymentMethod_WhenPaymentInstanceDetailsAreInvalid()
+    public async Task Should_FailUpdatingPaymentMethod_WhenPaymentInstanceNameHasLessThan3Chars()
     {
-        var pm = new PaymentMethod(_database.First()) { Instances = [new PaymentInstance()] };
+        var pm = _database.First().Copy();
+        pm.Instances = _paymentMethod.Instances;
+        pm.Instances.First().Name = "g";
 
-        await Assert.ThrowsAsync<ArgumentException>(
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _paymentMethodService.UpdatePaymentMethod(pm)
+        );
+    }
+
+    [Fact]
+    public async Task Should_FailUpdatingPaymentMethod_WhenPaymentInstanceNameHasMoreThan100Chars()
+    {
+        var pm = _database.First().Copy();
+        pm.Instances = _paymentMethod.Instances;
+        pm.Instances.First().Name = string.Concat(Enumerable.Repeat("x", 101));
+
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _paymentMethodService.UpdatePaymentMethod(pm)
+        );
+    }
+
+    [Fact]
+    public async Task Should_FailUpdatingPaymentMethod_WhenPaymentInstanceDescriptionHasMoreThan1000Chars()
+    {
+        var pm = _database.First().Copy();
+        pm.Instances = _paymentMethod.Instances;
+        pm.Instances.First().Name = string.Concat(Enumerable.Repeat("x", 1001));
+
+        await Assert.ThrowsAsync<ValidationException>(
             () => _paymentMethodService.UpdatePaymentMethod(pm)
         );
     }
@@ -69,46 +109,42 @@ public partial class PaymentMethodServiceUnitTests
     [Fact]
     public async Task Should_StoreUpdateOnDatabase_WhenPaymentMethodDataIsValid()
     {
-        var pm = new PaymentMethod(_database.First())
-        {
-            Type = "Hello World",
-            Instances = [new PaymentInstance { Details = "Hello World" }],
-        };
+        var pm = _database.First().Copy();
+        pm.Type = "Hello World";
+        pm.Instances = _paymentMethod.Instances;
 
         var result = await _paymentMethodService.UpdatePaymentMethod(pm);
         var updatedpm = _database.First();
 
         Assert.Equal(pm.Type, updatedpm.Type);
-        Assert.Equal(pm.Instances.Count(), updatedpm.Instances.Count());
+        Assert.Equal(pm.Instances.Count, updatedpm.Instances.Count);
         Assert.Equal(pm.Instances.First().Id, updatedpm.Instances.First().Id);
-        Assert.Equal(pm.Instances.First().Details, updatedpm.Instances.First().Details);
+        Assert.Equal(pm.Instances.First().Name, updatedpm.Instances.First().Name);
+        Assert.Equal(pm.Instances.First().Description, updatedpm.Instances.First().Description);
     }
 
     [Fact]
     public async Task Should_ReturnUpdatedPaymentMethod_WhenPaymentMethodDataIsValid()
     {
-        var pm = new PaymentMethod(_database.First())
-        {
-            Type = "Hello World",
-            Instances = [new PaymentInstance { Details = "Hello World" }],
-        };
+        var pm = _database.First().Copy();
+        pm.Type = "Hello World";
+        pm.Instances = _paymentMethod.Instances;
 
         var result = await _paymentMethodService.UpdatePaymentMethod(pm);
 
         Assert.Equal(pm.Type, result.Type);
-        Assert.Equal(pm.Instances.Count(), result.Instances.Count());
+        Assert.Equal(pm.Instances.Count, result.Instances.Count);
         Assert.Equal(pm.Instances.First().Id, result.Instances.First().Id);
-        Assert.Equal(pm.Instances.First().Details, result.Instances.First().Details);
+        Assert.Equal(pm.Instances.First().Name, result.Instances.First().Name);
+        Assert.Equal(pm.Instances.First().Description, result.Instances.First().Description);
     }
 
     [Fact]
     public async Task Should_StoreCopyOfUpdatedPaymentMethod_WhenPaymentMethodDataIsValid()
     {
-        var pm = new PaymentMethod(_database.First())
-        {
-            Type = "Hello World",
-            Instances = [new PaymentInstance { Details = "Hello World" }],
-        };
+        var pm = _database.First().Copy();
+        pm.Type = "Hello World";
+        pm.Instances = _paymentMethod.Instances;
 
         var result = await _paymentMethodService.UpdatePaymentMethod(pm);
         var updatedpm = _database.First();
@@ -116,11 +152,16 @@ public partial class PaymentMethodServiceUnitTests
         Assert.NotSame(pm, updatedpm);
         Assert.NotSame(pm.Type, updatedpm.Type);
         Assert.NotSame(pm.Instances.First(), updatedpm.Instances.First());
-        Assert.NotSame(pm.Instances.First().Details, updatedpm.Instances.First().Details);
+        Assert.NotSame(pm.Instances.First().Name, updatedpm.Instances.First().Name);
+        Assert.NotSame(pm.Instances.First().Description, updatedpm.Instances.First().Description);
 
         Assert.NotSame(result, updatedpm);
         Assert.NotSame(result.Type, updatedpm.Type);
         Assert.NotSame(result.Instances.First(), updatedpm.Instances.First());
-        Assert.NotSame(result.Instances.First().Details, updatedpm.Instances.First().Details);
+        Assert.NotSame(result.Instances.First().Name, updatedpm.Instances.First().Name);
+        Assert.NotSame(
+            result.Instances.First().Description,
+            updatedpm.Instances.First().Description
+        );
     }
 }

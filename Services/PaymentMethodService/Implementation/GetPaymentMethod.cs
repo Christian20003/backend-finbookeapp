@@ -13,6 +13,6 @@ public partial class PaymentMethodService : IPaymentMethodService
             LogEvents.PaymentMethodReadSuccess,
             "Payment method has been read successfully"
         );
-        return new PaymentMethod(entity);
+        return entity.Copy();
     }
 }

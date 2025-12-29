@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using FinBookeAPI.Models.Exceptions;
 
 namespace FinBookeAPI.Tests.Payment;
@@ -9,7 +10,7 @@ public partial class PaymentMethodServiceUnitTests
     {
         _paymentMethod.Id = Guid.Empty;
 
-        await Assert.ThrowsAsync<ArgumentException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _paymentMethodService.CreatePaymentMethod(_paymentMethod)
         );
     }
@@ -29,17 +30,27 @@ public partial class PaymentMethodServiceUnitTests
     {
         _paymentMethod.UserId = Guid.Empty;
 
-        await Assert.ThrowsAsync<ArgumentException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _paymentMethodService.CreatePaymentMethod(_paymentMethod)
         );
     }
 
     [Fact]
-    public async Task Should_FailCreatingPaymentMethod_WhenTypeIsInvalid()
+    public async Task Should_FailCreatingPaymentMethod_WhenTypeHasLessThan3Chars()
     {
-        _paymentMethod.Type = string.Empty;
+        _paymentMethod.Type = "g";
 
-        await Assert.ThrowsAsync<ArgumentException>(
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _paymentMethodService.CreatePaymentMethod(_paymentMethod)
+        );
+    }
+
+    [Fact]
+    public async Task Should_FailCreatingPaymentMethod_WhenTypeHasMoreThan100Chars()
+    {
+        _paymentMethod.Type = string.Concat(Enumerable.Repeat("x", 101));
+
+        await Assert.ThrowsAsync<ValidationException>(
             () => _paymentMethodService.CreatePaymentMethod(_paymentMethod)
         );
     }
@@ -49,17 +60,37 @@ public partial class PaymentMethodServiceUnitTests
     {
         _paymentMethod.Instances.First().Id = Guid.Empty;
 
-        await Assert.ThrowsAsync<ArgumentException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _paymentMethodService.CreatePaymentMethod(_paymentMethod)
         );
     }
 
     [Fact]
-    public async Task Should_FailCreatingPaymentMethod_WhenPaymentInstanceDetailsAreInvalid()
+    public async Task Should_FailCreatingPaymentMethod_WhenPaymentInstanceNameHasLessThan3Chars()
     {
-        _paymentMethod.Instances.First().Details = string.Empty;
+        _paymentMethod.Instances.First().Name = "g";
 
-        await Assert.ThrowsAsync<ArgumentException>(
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _paymentMethodService.CreatePaymentMethod(_paymentMethod)
+        );
+    }
+
+    [Fact]
+    public async Task Should_FailCreatingPaymentMethod_WhenPaymentInstanceNameHasMoreThan100Chars()
+    {
+        _paymentMethod.Instances.First().Name = string.Concat(Enumerable.Repeat("x", 101));
+
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _paymentMethodService.CreatePaymentMethod(_paymentMethod)
+        );
+    }
+
+    [Fact]
+    public async Task Should_FailCreatingPaymentMethod_WhenPaymentInstanceDescriptionHasMoreThan1000Chars()
+    {
+        _paymentMethod.Instances.First().Description = string.Concat(Enumerable.Repeat("x", 1001));
+
+        await Assert.ThrowsAsync<ValidationException>(
             () => _paymentMethodService.CreatePaymentMethod(_paymentMethod)
         );
     }
@@ -84,7 +115,8 @@ public partial class PaymentMethodServiceUnitTests
         {
             var pi = stored.Instances.First(elem => elem.Id == instance.Id);
             Assert.NotSame(pi, instance);
-            Assert.NotSame(pi.Details, instance.Details);
+            Assert.NotSame(pi.Name, instance.Name);
+            Assert.NotSame(pi.Description, instance.Description);
         }
     }
 

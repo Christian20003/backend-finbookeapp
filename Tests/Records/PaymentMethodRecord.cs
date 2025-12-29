@@ -11,7 +11,15 @@ public static class PaymentMethodRecord
             Id = Guid.NewGuid(),
             UserId = Guid.NewGuid(),
             Type = "Visa",
-            Instances = [new PaymentInstance { Id = Guid.NewGuid(), Details = "Debit Card" }],
+            Instances =
+            [
+                new PaymentInstance
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Debit Card",
+                    Description = "Data: 12345",
+                },
+            ],
         };
     }
 
@@ -25,7 +33,7 @@ public static class PaymentMethodRecord
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 Type = "Mastercard",
-                Instances = [new PaymentInstance { Id = Guid.NewGuid(), Details = "Credit Card" }],
+                Instances = [new PaymentInstance { Id = Guid.NewGuid(), Name = "Credit Card" }],
             },
             new PaymentMethod
             {

@@ -15,6 +15,6 @@ public partial class PaymentMethodService : IPaymentMethodService
             LogEvents.PaymentMethodDeleteSuccess,
             "Payment method has been removed successfully"
         );
-        return new PaymentMethod(entity);
+        return entity.Copy();
     }
 }

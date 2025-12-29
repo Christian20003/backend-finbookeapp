@@ -1,14 +1,24 @@
+using System.ComponentModel.DataAnnotations;
+using FinBookeAPI.Attributes;
+
 namespace FinBookeAPI.Models.Payment;
 
 public class PaymentMethod
 {
+    [NonEmptyGuid(ErrorMessage = "Payment method id is not valid")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
+    [NonEmptyGuid(ErrorMessage = "Payment method user id is not valid")]
     public Guid UserId { get; set; } = Guid.NewGuid();
 
-    public string Type { get; set; } = "";
+    [StringLength(
+        100,
+        MinimumLength = 3,
+        ErrorMessage = "Payment method type must be between {2} and {1} characters long"
+    )]
+    public string Type { get; set; } = string.Empty;
 
-    public IEnumerable<PaymentInstance> Instances { get; set; } = [];
+    public List<PaymentInstance> Instances { get; set; } = [];
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -16,17 +26,15 @@ public class PaymentMethod
 
     public PaymentMethod() { }
 
-    public PaymentMethod(PaymentMethod other)
+    public PaymentMethod Copy()
     {
-        Id = other.Id;
-        Type = new string(other.Type);
-        UserId = other.UserId;
-        CreatedAt = other.CreatedAt;
-        ModifiedAt = other.ModifiedAt;
-        foreach (var instance in other.Instances)
+        return new PaymentMethod
         {
-            Instances = [.. Instances, new PaymentInstance(instance)];
-        }
+            Id = Id,
+            UserId = UserId,
+            Type = new string(Type),
+            Instances = [.. Instances.Select(instance => instance.Copy())],
+        };
     }
 
     public override string ToString()

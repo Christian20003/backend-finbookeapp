@@ -5,32 +5,12 @@ namespace FinBookeAPI.Tests.Payment;
 public partial class PaymentMethodServiceUnitTests
 {
     [Fact]
-    public async Task Should_FailRemovingPaymentMethod_WhenIdIsEmpty()
-    {
-        var pm = _database.First();
-
-        await Assert.ThrowsAsync<ArgumentException>(
-            () => _paymentMethodService.RemovePaymentMethod(Guid.Empty, pm.UserId)
-        );
-    }
-
-    [Fact]
     public async Task Should_FailRemovingPaymentMethod_WhenPaymentMethodDoesNotExist()
     {
         var pm = _database.First();
 
         await Assert.ThrowsAsync<EntityNotFoundException>(
             () => _paymentMethodService.RemovePaymentMethod(_paymentMethod.Id, pm.UserId)
-        );
-    }
-
-    [Fact]
-    public async Task Should_FailRemovingPaymentMethod_WhenUserIdIsEmpty()
-    {
-        var pm = _database.First();
-
-        await Assert.ThrowsAsync<ArgumentException>(
-            () => _paymentMethodService.RemovePaymentMethod(pm.Id, Guid.Empty)
         );
     }
 
@@ -63,12 +43,13 @@ public partial class PaymentMethodServiceUnitTests
 
         Assert.Equal(pm.Id, result.Id);
         Assert.Equal(pm.Type, result.Type);
-        Assert.Equal(pm.Instances.Count(), result.Instances.Count());
+        Assert.Equal(pm.Instances.Count, result.Instances.Count);
         foreach (var instance in result.Instances)
         {
             var dbpi = pm.Instances.First(elem => elem.Id == instance.Id);
             Assert.Equal(dbpi.Id, instance.Id);
-            Assert.Equal(dbpi.Details, instance.Details);
+            Assert.Equal(dbpi.Name, instance.Name);
+            Assert.Equal(dbpi.Description, instance.Description);
         }
     }
 }

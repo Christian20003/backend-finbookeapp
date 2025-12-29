@@ -5,26 +5,6 @@ namespace FinBookeAPI.Tests.Payment;
 public partial class PaymentMethodServiceUnitTests
 {
     [Fact]
-    public async Task Should_FailGettingPaymentMethod_WhenIdIsEmpty()
-    {
-        var pm = _database.First();
-
-        await Assert.ThrowsAsync<ArgumentException>(
-            () => _paymentMethodService.GetPaymentMethod(Guid.Empty, pm.UserId)
-        );
-    }
-
-    [Fact]
-    public async Task Should_FailGettingPaymentMethod_WhenUserIdIsEmpty()
-    {
-        var pm = _database.First();
-
-        await Assert.ThrowsAsync<ArgumentException>(
-            () => _paymentMethodService.GetPaymentMethod(pm.Id, Guid.Empty)
-        );
-    }
-
-    [Fact]
     public async Task Should_FailGettingPaymentMethod_WhenMethodIsNotAccessible()
     {
         var pm = _database.First();
@@ -54,7 +34,9 @@ public partial class PaymentMethodServiceUnitTests
         {
             var pi = pm.Instances.First(elem => elem.Id == instance.Id);
             Assert.NotSame(pi, instance);
-            Assert.NotSame(pi.Details, instance.Details);
+            Assert.NotSame(pi.Name, instance.Name);
+            if (pi.Description is not null)
+                Assert.NotSame(pi.Description, instance.Description);
         }
     }
 
