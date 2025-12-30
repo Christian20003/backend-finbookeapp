@@ -124,4 +124,27 @@ public interface IPaymentMethodService
     /// The requested payment methods.
     /// </returns>
     public Task<IEnumerable<PaymentMethod>> GetPaymentMethods(Guid userId);
+
+    /// <summary>
+    /// This method returns the payment method with the corresponding id
+    /// or the payment method that includes a payment instance with the
+    /// provided id.
+    /// </summary>
+    /// <param name="id">
+    /// The id of the payment method or instance.
+    /// </param>
+    /// <param name="userId">
+    /// The id of the user who wants to access to the payment method.
+    /// </param>
+    /// <returns>
+    /// The payment method with the corresponding id or payment instance
+    /// id.
+    /// </returns>
+    /// <exception cref="EntityNotFoundException">
+    /// If the payment method or instances does not exist.
+    /// </exception>
+    /// <exception cref="AuthorizationException">
+    /// If the payment method is not accessible.
+    /// </exception>
+    public Task<PaymentMethod> GetPaymentMethodById(Guid id, Guid userId);
 }
