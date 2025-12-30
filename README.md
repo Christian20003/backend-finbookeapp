@@ -9,7 +9,7 @@ This application was designed to help individual users manage their finances. By
 # Instructions to run the backend 
 
 1. Make sure you have installed the following tools:
-    - dotnet (version 8)
+    - dotnet (version 10)
     - docker
 2. Clone this repository and and change to the directory:
     ```console
