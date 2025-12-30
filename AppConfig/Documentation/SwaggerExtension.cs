@@ -1,5 +1,5 @@
 using System.Reflection;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 namespace FinBookeAPI.AppConfig.Documentation;
 
@@ -16,41 +16,33 @@ public static class SwaggerExtension
     {
         services.AddSwaggerGen(options =>
         {
+            options.SwaggerDoc(
+                "v1",
+                new OpenApiInfo { Title = "FinBooKe Web-API", Version = "v1" }
+            );
             // Define a security scheme
             options.AddSecurityDefinition(
                 "Bearer",
                 new OpenApiSecurityScheme
                 {
                     Description =
-                        "JWT Authorization. This will add a JWT token (Bearer scheme) to the header. Example: 'Authorization: Bearer [TOKEN]'",
+                        "JWT Authorization. This will add a JWT token (Bearer scheme) to the header. Example: 'Bearer [TOKEN]'",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
+                    Type = SecuritySchemeType.Http,
                     Scheme = "Bearer",
+                    BearerFormat = "JWT",
                 }
             );
             // Define which scheme is required for accessing operations
-            options.AddSecurityRequirement(
-                new OpenApiSecurityRequirement
-                {
-                    {
-                        // Scheme that should be used
-                        new OpenApiSecurityScheme
-                        {
-                            // Get a reference to an existing scheme
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer",
-                            },
-                        },
-                        Array.Empty<string>()
-                    },
-                }
-            );
+            options.AddSecurityRequirement(doc => new OpenApiSecurityRequirement
+            {
+                [new OpenApiSecuritySchemeReference("Bearer", doc)] = [],
+            });
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             options.IncludeXmlComments(xmlPath);
+            options.OperationFilter<AuthorizeCheckOperationFilter>();
         });
         return services;
     }
@@ -65,7 +57,7 @@ public static class SwaggerExtension
         app.UseSwagger();
         app.UseSwaggerUI(options =>
         {
-            options.SwaggerEndpoint("/swagger/v1/swagger.json", "FinBooKe Web-API V1");
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Your API V1");
         });
         return app;
     }
