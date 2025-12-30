@@ -31,8 +31,8 @@ public class PaymentInstance
         return new PaymentInstance
         {
             Id = Id,
-            Name = new string(Name),
-            Description = Description is null ? null : new string(Description),
+            Name = Name,
+            Description = Description,
             CreatedAt = CreatedAt,
             ModifiedAt = ModifiedAt,
         };

@@ -8,19 +8,17 @@ public partial class PaymentMethodServiceUnitTests
         var pm = _database.First();
         var result = await _paymentMethodService.GetPaymentMethods(pm.UserId);
 
-        foreach (var entity in result)
+        var storedPms = _database.Where(elem => elem.UserId == pm.UserId);
+        var storedPis = storedPms.SelectMany(elem => elem.Instances);
+
+        foreach (var method in result)
         {
-            var dbpm = _database.Find(elem => elem.Id == entity.Id);
-            Assert.NotSame(dbpm, entity);
-            Assert.NotSame(dbpm!.Type, entity.Type);
-            foreach (var instance in entity.Instances)
-            {
-                var dbpi = dbpm.Instances.First(elem => elem.Id == instance.Id);
-                Assert.NotSame(dbpi, instance);
-                Assert.NotSame(dbpi.Name, instance.Name);
-                if (dbpi.Description is not null)
-                    Assert.NotSame(dbpi.Description, instance.Description);
-            }
+            Assert.NotSame(method, storedPms.First(elem => elem.Id == method.Id));
+        }
+
+        foreach (var instance in result.SelectMany(elem => elem.Instances))
+        {
+            Assert.NotSame(instance, storedPis.First(elem => elem.Id == instance.Id));
         }
     }
 

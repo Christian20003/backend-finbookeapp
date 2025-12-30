@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using FinBookeAPI.Models.Exceptions;
+using Newtonsoft.Json;
 
 namespace FinBookeAPI.Tests.Payment;
 
@@ -110,13 +111,10 @@ public partial class PaymentMethodServiceUnitTests
         var stored = _database.First(pm => pm.Id == result.Id);
 
         Assert.NotSame(stored, result);
-        Assert.NotSame(stored.Type, result.Type);
         foreach (var instance in result.Instances)
         {
             var pi = stored.Instances.First(elem => elem.Id == instance.Id);
             Assert.NotSame(pi, instance);
-            Assert.NotSame(pi.Name, instance.Name);
-            Assert.NotSame(pi.Description, instance.Description);
         }
     }
 
@@ -125,9 +123,9 @@ public partial class PaymentMethodServiceUnitTests
     {
         var result = await _paymentMethodService.CreatePaymentMethod(_paymentMethod);
 
-        Assert.Equal(_paymentMethod.Id, result.Id);
-        Assert.Equal(_paymentMethod.UserId, result.UserId);
-        Assert.Equal(_paymentMethod.Type, result.Type);
-        Assert.Equal(_paymentMethod.Instances.Count(), result.Instances.Count());
+        var expected = JsonConvert.SerializeObject(_paymentMethod);
+        var actual = JsonConvert.SerializeObject(result);
+
+        Assert.Equal(expected, actual);
     }
 }

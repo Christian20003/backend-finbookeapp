@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Models.Payment;
+using Newtonsoft.Json;
 
 namespace FinBookeAPI.Tests.Payment;
 
@@ -116,11 +117,10 @@ public partial class PaymentMethodServiceUnitTests
         var result = await _paymentMethodService.UpdatePaymentMethod(pm);
         var updatedpm = _database.First();
 
-        Assert.Equal(pm.Type, updatedpm.Type);
-        Assert.Equal(pm.Instances.Count, updatedpm.Instances.Count);
-        Assert.Equal(pm.Instances.First().Id, updatedpm.Instances.First().Id);
-        Assert.Equal(pm.Instances.First().Name, updatedpm.Instances.First().Name);
-        Assert.Equal(pm.Instances.First().Description, updatedpm.Instances.First().Description);
+        var expected = JsonConvert.SerializeObject(pm);
+        var actual = JsonConvert.SerializeObject(updatedpm);
+
+        Assert.Equal(expected, actual);
     }
 
     [Fact]
@@ -132,11 +132,10 @@ public partial class PaymentMethodServiceUnitTests
 
         var result = await _paymentMethodService.UpdatePaymentMethod(pm);
 
-        Assert.Equal(pm.Type, result.Type);
-        Assert.Equal(pm.Instances.Count, result.Instances.Count);
-        Assert.Equal(pm.Instances.First().Id, result.Instances.First().Id);
-        Assert.Equal(pm.Instances.First().Name, result.Instances.First().Name);
-        Assert.Equal(pm.Instances.First().Description, result.Instances.First().Description);
+        var expected = JsonConvert.SerializeObject(pm);
+        var actual = JsonConvert.SerializeObject(result);
+
+        Assert.Equal(expected, actual);
     }
 
     [Fact]
@@ -150,18 +149,9 @@ public partial class PaymentMethodServiceUnitTests
         var updatedpm = _database.First();
 
         Assert.NotSame(pm, updatedpm);
-        Assert.NotSame(pm.Type, updatedpm.Type);
         Assert.NotSame(pm.Instances.First(), updatedpm.Instances.First());
-        Assert.NotSame(pm.Instances.First().Name, updatedpm.Instances.First().Name);
-        Assert.NotSame(pm.Instances.First().Description, updatedpm.Instances.First().Description);
 
         Assert.NotSame(result, updatedpm);
-        Assert.NotSame(result.Type, updatedpm.Type);
         Assert.NotSame(result.Instances.First(), updatedpm.Instances.First());
-        Assert.NotSame(result.Instances.First().Name, updatedpm.Instances.First().Name);
-        Assert.NotSame(
-            result.Instances.First().Description,
-            updatedpm.Instances.First().Description
-        );
     }
 }

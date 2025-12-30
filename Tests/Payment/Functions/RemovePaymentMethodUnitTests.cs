@@ -1,4 +1,5 @@
 using FinBookeAPI.Models.Exceptions;
+using Newtonsoft.Json;
 
 namespace FinBookeAPI.Tests.Payment;
 
@@ -41,15 +42,9 @@ public partial class PaymentMethodServiceUnitTests
 
         var result = await _paymentMethodService.RemovePaymentMethod(pm.Id, pm.UserId);
 
-        Assert.Equal(pm.Id, result.Id);
-        Assert.Equal(pm.Type, result.Type);
-        Assert.Equal(pm.Instances.Count, result.Instances.Count);
-        foreach (var instance in result.Instances)
-        {
-            var dbpi = pm.Instances.First(elem => elem.Id == instance.Id);
-            Assert.Equal(dbpi.Id, instance.Id);
-            Assert.Equal(dbpi.Name, instance.Name);
-            Assert.Equal(dbpi.Description, instance.Description);
-        }
+        var expected = JsonConvert.SerializeObject(pm);
+        var actual = JsonConvert.SerializeObject(result);
+
+        Assert.Equal(expected, actual);
     }
 }

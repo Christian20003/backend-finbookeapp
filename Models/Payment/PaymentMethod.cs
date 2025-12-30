@@ -32,8 +32,10 @@ public class PaymentMethod
         {
             Id = Id,
             UserId = UserId,
-            Type = new string(Type),
+            Type = Type,
             Instances = [.. Instances.Select(instance => instance.Copy())],
+            CreatedAt = CreatedAt,
+            ModifiedAt = ModifiedAt,
         };
     }
 
