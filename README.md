@@ -1,10 +1,10 @@
 # FinBooKeApp - Backend
-This repository includes the backend of the financial-book-keeping application. The frontend is under the following link: https://github.com/Christian20003/financial-book-keeping-app. 
+This repository includes the backend of the financial-book-keeping application. The frontend is under the following link: https://github.com/Christian20003/FinBooKeApp_Frontend. 
 
 <big>IMPORTANT:</big> This application is still in development and not ready for production.
 
 # Goal
-This application was designed to help individual users manage their finances. By recording income and expenditure and assigning them to different categories and payment methods, the aim is to make it as easy as possible for users to manage their household finances.
+This application was designed to help individual users manage their finances. By recording income and expenditure and assigning them to different categories and payment methods, the aim is to make it as easy as possible for users to manage their household finances. Furthermore this is a student project.
 
 # Instructions to run the backend 
 
